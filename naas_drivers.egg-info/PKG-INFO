@@ -1,0 +1,25 @@
+Metadata-Version: 2.1
+Name: naas-drivers
+Version: 0.0.1
+Summary: drivers made to easy connect to any services
+Home-page: https://github.com/jupyter-naas/drivers
+Author: Martin Donadieu
+Author-email: martindonadieu@gmail.com
+License: UNKNOWN
+Description: # Drivers
+        🏎simple formulas to build highly efficient scripts
+        
+        
+        ## deploy
+        
+        `python3 setup.py sdist`
+        
+        ## publish
+        
+        `python3 -m twine upload dist/* -u YOUR_USERNAME`
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.6
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
