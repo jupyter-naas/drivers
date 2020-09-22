@@ -38,7 +38,11 @@ class EmailConnector:
         self.smtp_type = smtp_type
 
     def send(
-        self, email_to: str, subject: str, msg: str = "", attachments: Dict[str, Any] = None,
+        self,
+        email_to: str,
+        subject: str,
+        msg: str = "",
+        attachments: Dict[str, Any] = None,
     ) -> None:
         """
         Method which sends an email.

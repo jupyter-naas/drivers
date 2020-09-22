@@ -43,15 +43,26 @@ class GeoLocator:
                 "Please set the map service using either `use_google` or `use_osm` method"
             )
         if df.shape[0] > self.limit:
-            raise ValueError(f"Dataset number of rows is more than the set limit of {self.limit}")
+            raise ValueError(
+                f"Dataset number of rows is more than the set limit of {self.limit}"
+            )
         df["_location"] = df[column].apply(self.client)
-        df["LATITUDE"] = df["_location"].apply(lambda loc: loc.latitude if loc else None)
-        df["LONGITUDE"] = df["_location"].apply(lambda loc: loc.longitude if loc else None)
+        df["LATITUDE"] = df["_location"].apply(
+            lambda loc: loc.latitude if loc else None
+        )
+        df["LONGITUDE"] = df["_location"].apply(
+            lambda loc: loc.longitude if loc else None
+        )
         df = df.drop(columns=["_location"])
         return df
 
     def help(self):
-        print(f'=== {type(self).__name__} === \n')
-        print(f'.use_google(api_key, domain: str = "maps.googleapis.com", min_delay_seconds: int = 1, **kwargs) => get file from ftp path\n')
-        print(f'.geoloc(df, column) => get file from ftp path\n')
-        print(f'.use_osm(user_agent, min_delay_seconds, kwargs) => do ls in ftp in path\n')
+        print(f"=== {type(self).__name__} === \n")
+        print(
+            '.use_google(api_key, domain: str = "maps.googleapis.com", min_delay_seconds: int = 1, **kwargs)\
+                => get file from ftp path\n'
+        )
+        print(".geoloc(df, column) => get file from ftp path\n")
+        print(
+            ".use_osm(user_agent, min_delay_seconds, kwargs) => do ls in ftp in path\n"
+        )

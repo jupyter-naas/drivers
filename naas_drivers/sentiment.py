@@ -5,7 +5,9 @@ from typing import Union
 
 
 class SentimentAnalysis:
-    def __sanitize_dataset(self, dataset: Union[pd.DataFrame, pd.Series], column_name: str) -> pd.DataFrame:
+    def __sanitize_dataset(
+        self, dataset: Union[pd.DataFrame, pd.Series], column_name: str
+    ) -> pd.DataFrame:
         if isinstance(dataset, pd.Series):
             df = dataset.to_frame().reset_index()
         elif isinstance(dataset, pd.DataFrame):
@@ -18,7 +20,9 @@ class SentimentAnalysis:
         return df
 
     @staticmethod
-    def __calculate_sentiment(df: pd.DataFrame, column_name: str, details: bool) -> pd.DataFrame:
+    def __calculate_sentiment(
+        df: pd.DataFrame, column_name: str, details: bool
+    ) -> pd.DataFrame:
         analyzer = SentimentIntensityAnalyzer()
         df["senti_score"] = df[column_name].map(analyzer.polarity_scores)
         senti_df = json_normalize(df["senti_score"])
@@ -32,7 +36,14 @@ class SentimentAnalysis:
                 return "Neutral"
 
         senti_df["Sentiment"] = senti_df["compound"].map(categorize_sentiment)
-        senti_df = senti_df.rename(columns={"compound": "Score", "pos": "Positive", "neg": "Negative", "neu": "Neutral"})
+        senti_df = senti_df.rename(
+            columns={
+                "compound": "Score",
+                "pos": "Positive",
+                "neg": "Negative",
+                "neu": "Neutral",
+            }
+        )
         df = pd.concat([df, senti_df], axis=1)
         cols = [column_name, "Sentiment", "Score"]
         if details:
@@ -41,7 +52,12 @@ class SentimentAnalysis:
 
         return df
 
-    def calculate(self, dataset: Union[pd.DataFrame, pd.Series], column_name: str, details: bool = False) -> pd.DataFrame:
+    def calculate(
+        self,
+        dataset: Union[pd.DataFrame, pd.Series],
+        column_name: str,
+        details: bool = False,
+    ) -> pd.DataFrame:
         """
         Calculates the sentiment of the text in each row in the dataset &
         returns it along with the input as a single dataframe in the output.

@@ -1,18 +1,26 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='naas-drivers',
-    version='0.0.5',
+    name="naas-drivers",
+    version="0.0.5",
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
     description="drivers made to easy connect to any services",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jupyter-naas/drivers",
-    packages=['naas_drivers'],
+    packages=["naas_drivers"],
+    tests_require=[
+        "pytest==5.2",
+        "pytest-sanic==1.6.1",
+        "requests-mock==1.8.0",
+        "twine==3.2.0",
+        "flake8==3.1.1",
+        "black==20.8b1",
+    ],
     install_requires=[
         "vaderSentiment==3.2.1",
         "chardet==3.0.4",
@@ -28,8 +36,7 @@ setup(
         "python-dateutil==2.8.1",
         "python-dotenv==0.12.0",
         "pytz==2020.1",
-        "plotly==4.10.0"
-        "Quandl==3.5.0",
+        "plotly==4.10.0" "Quandl==3.5.0",
         "requests==2.23.0",
         "scikit-learn==0.22.2",
         "scipy==1.4.1",
@@ -53,7 +60,7 @@ setup(
         "cson==0.8",
         "opencv-python==4.2.0.34",
         "pytesseract==0.3.4",
-        ],
+    ],
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License",

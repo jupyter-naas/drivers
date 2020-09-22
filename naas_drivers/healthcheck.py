@@ -6,38 +6,37 @@ import os
 class HealthCheck:
     healthUrl = None
 
-    def __init__(self, mode='prod', healthUrl=None):
+    def __init__(self, mode="prod", healthUrl=None):
         """ Create health driver mode='prod', healthUrl=None"""
-        print('HealthCheck init in ' + mode + ' mode')
-        self.healthUrl = healthUrl if healthUrl else os.environ.get(
-            'HC_API', healthUrl)
+        print("HealthCheck init in " + mode + " mode")
+        self.healthUrl = healthUrl if healthUrl else os.environ.get("HC_API", healthUrl)
         self.mode = mode
 
     def start(self, healthkey):
         """ send start to healthcheck (healthkey)"""
-        if self.mode == 'prod':
+        if self.mode == "prod":
             try:
-                requests.get(f'{self.healthUrl}{healthkey}/start')
+                requests.get(f"{self.healthUrl}{healthkey}/start")
                 return f"Start ==> send to {self.healthUrl}{healthkey}, {date.today()}"
-            except:
+            except requests.exceptions.RequestException:
                 return f"Error ==> cannot get health server {self.healthUrl}{healthkey}, {date.today()}"
 
     def done(self, healthkey):
         """ send done to healthcheck (healthkey)"""
-        if self.mode == 'prod':
+        if self.mode == "prod":
             try:
-                requests.get(f'{self.healthUrl}{healthkey}')
+                requests.get(f"{self.healthUrl}{healthkey}")
                 return f"Done ==> send to {self.healthUrl}{healthkey}, {date.today()}"
-            except:
+            except requests.exceptions.RequestException:
                 return f"Error ==> cannot get health server {self.healthUrl}{healthkey}, {date.today()}"
 
     def fail(self, healthkey):
         """ send fail to healthcheck (healthkey)"""
-        if self.mode == 'prod':
+        if self.mode == "prod":
             try:
-                requests.get(f'{self.healthUrl}{healthkey}/fail')
+                requests.get(f"{self.healthUrl}{healthkey}/fail")
                 return f"Fail ==> send to {self.healthUrl}{healthkey}, {date.today()}"
-            except:
+            except requests.exceptions.RequestException:
                 return f"Error ==> cannot get health server {self.healthUrl}{healthkey}, {date.today()}"
 
     def checkUp(self, url, healthkey, auth=None, verify=True):
@@ -51,6 +50,5 @@ class HealthCheck:
             else:
                 self.fail(healthkey)
                 return f"===>Fail {url} send to {self.healthUrl}{healthkey}, {date.today()}"
-        except:
+        except requests.exceptions.RequestException:
             return f"Error ==> cannot get health server {self.healthUrl}{healthkey}, {date.today()}"
-
