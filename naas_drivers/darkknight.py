@@ -148,7 +148,7 @@ class SmartTable(CRUD):
 
 class DarkKnight:
     """BOB lib"""
-    base_public_url = os.environ.get('PUBLIC_DK_API', '')
+    base_public_url = None
     smart_tables = []
     __auth = None
     req_headers = {
@@ -156,14 +156,14 @@ class DarkKnight:
         'Content-Type': 'application/json'
     }
 
-    def __init__(self, api_key=None, user=None, PUBLIC_PROXY_API=None):
+    def __init__(self, api_key=None, user=None, PUBLIC_DK_API=None):
         """
             Description: This class connect you to a darknight instance
         """
         self.user = user if user else os.environ.get('JUPYTERHUB_USER', user)
         self.api_key = api_key if api_key else secret.get('DK_API_KEY', api_key)
-        self.base_public_url = PUBLIC_PROXY_API if PUBLIC_PROXY_API else os.environ.get(
-            'PUBLIC_PROXY_API', PUBLIC_PROXY_API)
+        self.base_public_url = PUBLIC_DK_API if PUBLIC_DK_API else os.environ.get(
+            'PUBLIC_DK_API', PUBLIC_DK_API)
 
         self.__auth = HTTPBasicAuth(self.user, self.api_key)
         self.users = CRUD(self.base_public_url, 'users', self.__auth)

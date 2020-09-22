@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 setup(
     name='naas-drivers',
-    version='0.0.2',
+    version='0.0.5',
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
     description="drivers made to easy connect to any services",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jupyter-naas/drivers",
-    packages=find_packages(exclude=["tests"]),
+    packages=['naas_drivers'],
     install_requires=[
         "vaderSentiment==3.2.1",
         "chardet==3.0.4",
