@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class Utils:
+class PandasExtra:
     def dict_to_df(self, dict_arr):
         df = pd.DataFrame.from_dict(dict_arr)
         return df
@@ -13,11 +13,3 @@ class Utils:
         print(f"=== {type(self).__name__} === \n")
         print(".dict_to_df(dict_arr) => convert dict in df\n")
         print(".list_to_df(list_arr) => convert list in df\n")
-
-
-class Dotdict(dict):
-    """dot.notation access to dictionary attributes"""
-
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__

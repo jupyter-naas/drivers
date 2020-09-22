@@ -7,7 +7,7 @@ from email import encoders
 from typing import Any, Dict, cast
 
 
-class EmailConnector:
+class Email:
     """
     Connector for sending email from an authenticated email service over SMTP.
 

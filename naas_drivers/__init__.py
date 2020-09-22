@@ -1,5 +1,39 @@
+from .darkknight import Darkknight
+from .ftp import Ftp
+from .ftps import Ftps
+from .geolocator import GeoLocator
+from .git import Git
+from .google_spreadsheet import GoogleSpreadsheet
+from .healthCheck import HealthCheck
+from .email import Email
+from .mongo import Mongo
+from .pdf import Pdf
+from .plot import Plot
+from .prediction import Prediction
+from .sentiment_analysis import SentimentAnalysis
+from .toucan import Toucan
+from .pandas_extra import PandasExtra
+
+
+darkknight = Darkknight
+ftp = Ftp
+git = Git
+ftps = Ftps
+geoLocator = GeoLocator
+google_spreadsheet = GoogleSpreadsheet
+healthCheck = HealthCheck
+mail = Email
+mongo = Mongo
+pdf = Pdf
+plot = Plot
+prediction = Prediction
+sentiment_analysis = SentimentAnalysis
+toucan = Toucan
+pandas_extra = PandasExtra
+
+
 def help():
-    print("=== Drivers who need init === \n")
+    print("=== Drivers === \n")
     print("drivers.darkknight() => Init the driver to connect to our backend \n")
     print("drivers.ftp() => Init the driver to connect to ftp\n")
     print("drivers.ftps() => Init the driver to connect to ftps\n")
