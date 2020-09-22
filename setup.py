@@ -28,6 +28,7 @@ setup(
         "python-dateutil==2.8.1",
         "python-dotenv==0.12.0",
         "pytz==2020.1",
+        "plotly==4.10.0"
         "Quandl==3.5.0",
         "requests==2.23.0",
         "scikit-learn==0.22.2",
