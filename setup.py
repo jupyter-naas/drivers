@@ -20,6 +20,7 @@ setup(
         "twine==3.2.0",
         "flake8==3.1.1",
         "black==20.8b1",
+        "commitizen==2.4.0",
     ],
     install_requires=[
         "vaderSentiment==3.2.1",
