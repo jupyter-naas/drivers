@@ -4,12 +4,11 @@ import sys
 import time
 
 filter_system = {"name": {"$regex": r"^(?!system\.)"}}
+__client = None
 
 
 class Mongo:
     """Mongo lib"""
-
-    client = None
 
     def __init__(self):
         return
@@ -25,25 +24,26 @@ class Mongo:
     def connect(
         self, mongo_host, mongo_port=None, mongo_username=None, mongo_password=None
     ):
+        global __client
         if mongo_port and mongo_username and mongo_password:
-            self.client = MongoClient(
+            __client = MongoClient(
                 mongo_host,
                 mongo_port,
                 username=mongo_username,
                 password=mongo_password,
             )
         else:
-            self.client = MongoClient(mongo_host)
+            __client = MongoClient(mongo_host)
 
         try:
-            self.client.server_info()
+            __client.server_info()
             print("Successfully connected to MongoDB")
         except Exception as e:
-            self.client = None
+            __client = None
             print("Error connecting to MongoDB. Please check configuration")
             print(e.__doc__)
             print(str(e))
-        return self.client
+        return __client
 
     # SAVE DF IN MONGODB
     # - Function name : save_df
@@ -56,14 +56,14 @@ class Mongo:
     def save_df(self, df, collection_name, db_name, replace=False):
         start_time = time.time()
         # Control
-        if self.client is None:
+        if __client is None:
             print(
-                "Error connecting to MongoDB. Please connect first to mongo with bob.mongo.connect"
+                "Error connecting to MongoDB. Please connect first to mongo with naas_drivers.mongo().connect"
             )
             return
 
         # Init collection
-        mongo_db = self.client[db_name]
+        mongo_db = __client[db_name]
         df_collection = mongo_db[collection_name]
 
         try:
@@ -108,14 +108,14 @@ class Mongo:
 
     def read_df(self, collection_name, db_name, filters={}):
         # Control
-        if self.client is None:
+        if __client is None:
             print(
-                "Error connecting to MongoDB. Please connect first to mongo with bob.mongo.connect"
+                "Error connecting to MongoDB. Please connect first to mongo with naas_drivers.mongo().connect"
             )
             return
 
         # Init collection
-        mongo_db = self.client[db_name]
+        mongo_db = __client[db_name]
         df_collection = mongo_db[collection_name]
 
         try:

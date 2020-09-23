@@ -202,8 +202,7 @@ class DarkKnight:
             if PUBLIC_DK_API
             else os.environ.get("PUBLIC_DK_API", PUBLIC_DK_API)
         )
-
-        self.__auth = HTTPBasicAuth(self.user, self.api_key)
+        self.__auth = HTTPBasicAuth(self.user, api_key)
         self.users = CRUD(self.base_public_url, "users", self.__auth)
         self.workspaces = CRUD(self.base_public_url, "workspaces", self.__auth)
         self.me = Me(self.base_public_url, self.__auth)

@@ -4,7 +4,7 @@ from .ftps import Ftps
 from .geolocator import GeoLocator
 from .git import Git
 from .google_spreadsheet import GoogleSpreadsheet
-from .healthCheck import HealthCheck
+from .healthcheck import HealthCheck
 from .email import Email
 from .mongo import Mongo
 from .pdf import Pdf
