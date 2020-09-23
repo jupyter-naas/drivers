@@ -1,4 +1,4 @@
-from .darkknight import Darkknight
+from .darkknight import DarkKnight
 from .ftp import Ftp
 from .ftps import Ftps
 from .geolocator import GeoLocator
@@ -15,7 +15,7 @@ from .toucan import Toucan
 from .pandas_extra import PandasExtra
 
 
-darkknight = Darkknight
+darkknight = DarkKnight
 ftp = Ftp
 git = Git
 ftps = Ftps
