@@ -1,6 +1,5 @@
 from requests.auth import HTTPBasicAuth
 from escapism import escape
-from .secret import Secret
 import requests
 import string
 import base64
@@ -9,7 +8,6 @@ import os
 
 _docker_safe_chars = set(string.ascii_letters + string.digits)
 _docker_escape_char = "-"
-secret = Secret()
 
 
 def _escape(s):
@@ -199,7 +197,6 @@ class DarkKnight:
         Description: This class connect you to a darknight instance
         """
         self.user = user if user else os.environ.get("JUPYTERHUB_USER", user)
-        self.api_key = api_key if api_key else secret.get("DK_API_KEY", api_key)
         self.base_public_url = (
             PUBLIC_DK_API
             if PUBLIC_DK_API
