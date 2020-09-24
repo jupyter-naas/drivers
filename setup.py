@@ -23,6 +23,7 @@ setup(
         "commitizen==2.4.0",
     ],
     install_requires=[
+        "pysftp==0.2.9",
         "vaderSentiment==3.2.1",
         "chardet==3.0.4",
         "Cython==0.29.15",
