@@ -89,3 +89,4 @@ class Email:
             server.sendmail(self.email_from, email_to, message)
         finally:
             server.quit()
+            print("email send")
