@@ -1,4 +1,0 @@
-[tool.commitizen]
-name = "cz_conventional_commits"
-version = "0.0.18"
-tag_format = "$version"

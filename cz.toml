@@ -1,0 +1,9 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.0.18"
+tag_format = "$version"
+version_files = [
+    "naas_drivers/__init__.py",
+    "Dockerfile",
+    "setup.py:version"
+    ]
