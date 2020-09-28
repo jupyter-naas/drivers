@@ -1,16 +1,15 @@
 # Drivers
-🏎simple formulas to build highly efficient scripts
+🏎 Simple formulas to build highly efficient scripts
 
-## check lint
+## Check lint
 
 `python3 -m black naas` format better
 `python3 -m flake8 naas` check if any left error
 
-## publish
+## Publish
 
-bump version
-`cz bump --changelog`
-create release
-`python3 setup.py sdist`
-upload release
-`python3 -m twine upload dist/* -u YOUR_USERNAME`
+Allow easy deploy by setting password in keyring
+`python3 -m keyring set https://upload.pypi.org/legacy/ bobapp`
+
+Then publish
+`publish.sh`
