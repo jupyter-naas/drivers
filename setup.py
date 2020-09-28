@@ -5,10 +5,11 @@ with open("README.md", "r") as fh:
 
 setup(
     name="naas-drivers",
-    version="0.0.16",
+    version="0.0.17",
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
-    description="drivers made to easy connect to any services",
+    license="BSD",
+    description="Drivers made to easy connect to any services",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jupyter-naas/drivers",
@@ -65,8 +66,9 @@ setup(
         "pytesseract>=0,<1",
     ],
     classifiers=[
-        "Programming Language :: Python :: 3.6",
-        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.8",
+        "License :: OSI Approved :: BSD License",
+        "Framework :: Jupyter",
         "Operating System :: OS Independent",
     ],
 )
