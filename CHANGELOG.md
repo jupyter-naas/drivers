@@ -1,3 +1,9 @@
+## 0.0.25 (2020-09-29)
+
+### Fix
+
+- ci typo in dockerhub config
+
 ## 0.0.24 (2020-09-29)
 
 ### Fix
