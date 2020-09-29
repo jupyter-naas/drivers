@@ -1,3 +1,9 @@
+## 0.0.26 (2020-09-29)
+
+### Fix
+
+- :bug: ci fix typo docker image name
+
 ## 0.0.25 (2020-09-29)
 
 ### Fix
