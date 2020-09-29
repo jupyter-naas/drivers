@@ -29,8 +29,8 @@ jobs:
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
-        python3 -m black naas
-        python3 -m flake8 naas
+        python3 -m black naas_drivers
+        python3 -m flake8 naas_drivers
         pytest --cov=./ --cov-report=xml 
     - name: Upload coverage to Codecov
       if: runner.os == 'Linux'
