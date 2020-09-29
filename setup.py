@@ -14,15 +14,17 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/jupyter-naas/drivers",
     packages=["naas_drivers"],
-    tests_require=[
-        "pytest>=5,<6",
-        "pytest-sanic>=1,<2",
-        "requests-mock>=1,<2",
-        "twine>=3,<4",
-        "flake8>=3,<4",
-        "black>=20,<21",
-        "commitizen>=2,<3",
-    ],
+    extras_require={
+        "dev": [
+            "pytest>=5,<6",
+            "pytest-sanic>=1,<2",
+            "requests-mock>=1,<2",
+            "twine>=3,<4",
+            "flake8>=3,<4",
+            "black",
+            "commitizen>=2,<3",
+        ]
+    },
     install_requires=[
         "pysftp>=0,<1",
         "vaderSentiment>=3,<4",
