@@ -14,5 +14,5 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.version=$VERSION \
     org.label-schema.schema-version="1.0"
 
-RUN python3 -m pip install --use-feature=2020-resolver --no-cache --upgrade naas-drivers==0.0.27
+RUN python3 -m pip install --use-feature=2020-resolver --no-cache --upgrade naas-drivers==0.0.28
 
