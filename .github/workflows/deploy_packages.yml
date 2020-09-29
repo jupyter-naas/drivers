@@ -46,7 +46,7 @@ jobs:
         id: prepare
         uses: Surgo/docker-smart-tag-action@v1
         with:
-          docker_image: jupyternaas/naas
+          docker_image: jupyternaas/naas-drivers
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
