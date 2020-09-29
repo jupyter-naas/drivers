@@ -1,3 +1,9 @@
+## 0.0.23 (2020-09-29)
+
+### Fix
+
+- :construction_worker: use new pip syntaxt to install
+
 ## 0.0.22 (2020-09-29)
 
 ### Fix
