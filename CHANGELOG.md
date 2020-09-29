@@ -1,3 +1,9 @@
+## 0.0.22 (2020-09-29)
+
+### Fix
+
+- :bug: add missing dependency for test
+
 ## 0.0.21 (2020-09-29)
 
 ### Fix
