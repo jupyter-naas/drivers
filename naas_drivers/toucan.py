@@ -422,7 +422,11 @@ class Toucan:
         data = {
             "allowedHosts": allowedHosts,
             "expirationDate": None,
-            "path": f"slides[?id==`{slide}`]",
+            "layout": {
+                "type": "single",
+                "content": {"path": f"slides[?id==`{slide}`]", "variables": {}},
+            },
+            "paths": [f"slides[?id==`{slide}`]"],
             "public": False,
             "smallApp": small_app,
             "uid": uid,
