@@ -14,7 +14,7 @@ from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
 from .pandas_extra import PandasExtra
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 darkknight = DarkKnight
 ftp = Ftp
