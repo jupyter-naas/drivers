@@ -37,6 +37,7 @@ setup(
         "joblib>=0,<1",
         "more-itertools>=8,<9",
         "numpy>=1,<2",
+        "ipython>=7,<8",
         "pandas>=1,<2",
         "patsy>=0,<1",
         "pmdarima>=1,<2",

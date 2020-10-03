@@ -1,12 +1,16 @@
 import requests
 import shutil
-import datetime
 import os
 import io
 import json
 import time
 import pandas as pd
 import cson
+from datetime import datetime, timedelta
+from typing import Any, Dict, List
+import jwt
+import uuid
+from IPython.core.display import display, HTML
 
 
 class Toucan:
@@ -16,8 +20,10 @@ class Toucan:
     __url_screenshot_api = os.environ.get(
         "TC_API_SCREENSHOT", "http://toucan-screenshot:3000/screenshot"
     )
+    __TOUCAN_EMBED_ENCRYPTION_KEY = os.environ.get("TOUCAN_EMBED_ENCRYPTION_KEY", None)
     __url_config = "config"
     __url_load = "load"
+    __url_embed = "emded"
     __url_release = "release"
     __url_reports = "reports"
     __url_data = "data"
@@ -32,7 +38,7 @@ class Toucan:
     __token = None
     __url_name = None
     # Public vars
-    urlBase = None
+    url_base = None
     url_api = None
     login = {}
     user = {}
@@ -41,7 +47,7 @@ class Toucan:
     small_apps = []
 
     def __init__(self, url, login, mode="prod"):
-        self.urlBase = url
+        self.url_base = url
         host = url.partition("://")[2]
         self.__url_name = host.partition(".")[0]
         self.login = login
@@ -84,7 +90,7 @@ class Toucan:
         return req.json()
 
     def __request_tc_params(self):
-        req = requests.get(f"{self.urlBase}/{self.__url_tc_params}")
+        req = requests.get(f"{self.url_base}/{self.__url_tc_params}")
         req.raise_for_status()
         res = (
             req.text.replace(self.__replace_tc_params, "")
@@ -94,6 +100,30 @@ class Toucan:
         )
         jsonConf = json.loads(res)
         return jsonConf
+
+    def craft_toucan_embed_token(
+        self,
+        username: str,
+        small_apps_access: Dict[str, str],
+        groups: List[str] = None,
+        extra_infos: Dict[str, Any] = None,
+        expires_in: timedelta = timedelta(hours=1),
+    ) -> str:
+        user_payload = {
+            "username": username,
+            "roles": ["USER"],
+            "privileges": {"smallApp": small_apps_access},
+            "groups": groups,
+            "attributes": extra_infos,
+        }
+        payload = {
+            **user_payload,
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow() + expires_in,
+        }
+        return jwt.encode(
+            payload, self.__TOUCAN_EMBED_ENCRYPTION_KEY, algorithm="HS256"
+        ).decode("utf8")
 
     def __request_user(self):
         req = requests.post(f"{self.url_api}/{self.__url_login}", json=self.login)
@@ -126,7 +156,7 @@ class Toucan:
         if home is not None and "skipToReport" in home:
             arr.append(
                 {
-                    "url": f"{self.urlBase}/{app_name}",
+                    "url": f"{self.url_base}/{app_name}",
                     "selector": self.dashboardSelector(),
                     "name": "dashboard",
                 }
@@ -136,7 +166,7 @@ class Toucan:
         else:
             arr.append(
                 {
-                    "url": f"{self.urlBase}/{app_name}",
+                    "url": f"{self.url_base}/{app_name}",
                     "selector": ".report-execsum",
                     "name": "dashboard",
                 }
@@ -155,7 +185,7 @@ class Toucan:
                             print("Generate url for", name)
                         arr.append(
                             {
-                                "url": f"{self.urlBase}/{app_name}?report={rId}&dashboard={rId}&slide={slide.get('id')}",
+                                "url": f"{self.url_base}/{app_name}?report={rId}&dashboard={rId}&slide={slide.get('id')}",
                                 "selector": ".tc-slide__content, .tc-story",
                                 "name": name,
                             }
@@ -166,7 +196,7 @@ class Toucan:
         reqApi = requests.get(f"{self.url_api}", headers=self.get_headers())
         reqApi.raise_for_status()
         result = reqApi.json()
-        reqApp = requests.get(f"{self.urlBase}/{self.__url_tc_app_version}")
+        reqApp = requests.get(f"{self.url_base}/{self.__url_tc_app_version}")
         reqApp.raise_for_status()
         frontVersion = reqApp.text().strip()
         result["frontVersion"] = frontVersion
@@ -379,6 +409,32 @@ class Toucan:
         )
         req.raise_for_status()
         return req.json()
+
+    def embed_small_app_slide(self, small_app, slide, hosts=None):
+        allowedHosts = (
+            hosts
+            if hosts
+            else [
+                os.environ.get("PUBLIC_PROXY_API", ""),
+                os.environ.get("JUPYTERHUB_URL", ""),
+            ]
+        )
+        uid = str(uuid.uuid4())
+        {
+            "allowedHosts": allowedHosts,
+            "expirationDate": None,
+            "path": f"slides[?id==`{slide}`]",
+            "public": False,
+            "smallApp": small_app,
+            "uid": uid,
+            "variables": {},
+        }
+        req = requests.post(
+            f"{self.url_api}/{self.__url_embed}", headers=self.get_headers()
+        )
+        req.raise_for_status()
+        url = f"{self.url_base}/embedLauncher.js?id={uid}&token={self.__token}"
+        display(HTML(f'<script async src="{url}" type="text/javascript"></script>'))
 
     def load_operations(
         self,
