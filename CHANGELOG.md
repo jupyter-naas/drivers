@@ -1,3 +1,9 @@
+## 0.1.0 (2020-10-03)
+
+### Feat
+
+- :sparkles: add embed function to toucan driver
+
 ## 0.0.28 (2020-09-29)
 
 ### Fix
