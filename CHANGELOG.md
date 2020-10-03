@@ -1,3 +1,9 @@
+## 0.1.1 (2020-10-03)
+
+### Fix
+
+- :bug: fix import datetime in toucan
+
 ## 0.1.0 (2020-10-03)
 
 ### Feat
