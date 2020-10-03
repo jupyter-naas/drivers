@@ -12,7 +12,6 @@ from .plot import Plot
 from .prediction import Prediction
 from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
-from .pandas_extra import PandasExtra
 
 __version__ = "0.1.4"
 
@@ -30,7 +29,6 @@ plot = Plot
 prediction = Prediction
 sentiment_analysis = SentimentAnalysis
 toucan = Toucan
-pandas_extra = PandasExtra
 
 
 def help():
