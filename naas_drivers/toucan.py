@@ -6,7 +6,7 @@ import json
 import time
 import pandas as pd
 import cson
-from datetime import datetime, timedelta
+import datetime
 from typing import Any, Dict, List
 import jwt
 import uuid
@@ -34,7 +34,6 @@ class Toucan:
     __url_tc_params = "scripts/tc-params.js"
     __url_tc_app_version = "tucana-version.txt"
     __replace_tc_params = "window.TC_PARAMS = "
-    __today = datetime.date.today().strftime("%Y_%m_%d")
     __token = None
     __url_name = None
     # Public vars
@@ -107,7 +106,7 @@ class Toucan:
         small_apps_access: Dict[str, str],
         groups: List[str] = None,
         extra_infos: Dict[str, Any] = None,
-        expires_in: timedelta = timedelta(hours=1),
+        expires_in: datetime.timedelta = datetime.timedelta(hours=1),
     ) -> str:
         user_payload = {
             "username": username,
@@ -118,8 +117,8 @@ class Toucan:
         }
         payload = {
             **user_payload,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + expires_in,
+            "iat": datetime.datetime.utcnow(),
+            "exp": datetime.datetime.utcnow() + expires_in,
         }
         return jwt.encode(
             payload, self.__TOUCAN_EMBED_ENCRYPTION_KEY, algorithm="HS256"
@@ -506,7 +505,8 @@ class Toucan:
         return calcId
 
     def generateFolderName(self, app_name):
-        return f"{self.__today}/{self.__url_name}/{app_name}"
+        today = datetime.date.today().strftime("%Y_%m_%d")
+        return f"{today}/{self.__url_name}/{app_name}"
 
     def isAppAllowed(self, app_name):
         res = False
