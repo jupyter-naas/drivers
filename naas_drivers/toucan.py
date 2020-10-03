@@ -419,7 +419,7 @@ class Toucan:
             ]
         )
         uid = str(uuid.uuid4())
-        {
+        data = {
             "allowedHosts": allowedHosts,
             "expirationDate": None,
             "path": f"slides[?id==`{slide}`]",
@@ -429,7 +429,7 @@ class Toucan:
             "variables": {},
         }
         req = requests.post(
-            f"{self.url_api}/{self.__url_embed}", headers=self.get_headers()
+            f"{self.url_api}/{self.__url_embed}", headers=self.get_headers(), json=data
         )
         req.raise_for_status()
         url = f"{self.url_base}/embedLauncher.js?id={uid}&token={self.__token}"
