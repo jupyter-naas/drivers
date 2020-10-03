@@ -1,3 +1,9 @@
+## 0.1.5 (2020-10-03)
+
+### Fix
+
+- :bug: remove dependency for test
+
 ## 0.1.4 (2020-10-03)
 
 ### Fix
