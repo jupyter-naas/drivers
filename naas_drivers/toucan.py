@@ -23,7 +23,7 @@ class Toucan:
     __TOUCAN_EMBED_ENCRYPTION_KEY = os.environ.get("TOUCAN_EMBED_ENCRYPTION_KEY", None)
     __url_config = "config"
     __url_load = "load"
-    __url_embed = "emded"
+    __url_embed = "embed"
     __url_release = "release"
     __url_reports = "reports"
     __url_data = "data"
