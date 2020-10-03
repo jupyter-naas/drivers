@@ -1,3 +1,9 @@
+## 0.1.2 (2020-10-03)
+
+### Fix
+
+- :bug: fix typo in toucan connector
+
 ## 0.1.1 (2020-10-03)
 
 ### Fix
