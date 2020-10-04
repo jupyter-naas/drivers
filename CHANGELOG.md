@@ -1,3 +1,13 @@
+## 0.2.0b0 (2020-10-04)
+
+### Feat
+
+- add new ci for dev branch
+
+### Fix
+
+- try to trigger ci again
+
 ## 0.1.6 (2020-10-03)
 
 ### Fix
