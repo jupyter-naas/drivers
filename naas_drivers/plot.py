@@ -47,12 +47,12 @@ class Plot:
             )
         )
         for company in stock_companies:
-            print("getting data for", company)
-            stock = pd.read_csv(
-                f"https://query1.finance.yahoo.com/v7/finance/download/{company}\
-                    ?period1={period1}&period2={period2}&interval={interval}\
-                    &events=history"
+            url = (
+                f"https://query1.finance.yahoo.com/v7/finance/download/"
+                f"{company}?period1={period1}&period2={period2}&interval={interval}&events=history"
             )
+            print("getting data for", company, url)
+            stock = pd.read_csv(url)
             stock["Company"] = company
             stocks.append(stock)
             visibility = [x == company for x in stock_companies]
