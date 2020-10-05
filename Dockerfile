@@ -3,7 +3,7 @@ FROM jupyternaas/singleuser:latest
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
 ARG VCS_REF
-ARG VERSION
+ENV VERSION 0.2.0
 LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.name="Naas machine" \
     org.label-schema.description="jupyter machine with naas" \
@@ -14,5 +14,5 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.version=$VERSION \
     org.label-schema.schema-version="1.0"
 
-RUN python3 -m pip install --use-feature=2020-resolver --no-cache --upgrade naas-drivers==0.2.0b0
+RUN python3 -m pip install --use-feature=2020-resolver --no-cache --upgrade naas-drivers==$VERSION
 
