@@ -16,5 +16,6 @@
 Allow easy deploy by setting password in keyring
 `python3 -m keyring set https://upload.pypi.org/legacy/ bobapp`
 
-Then publish
-`publish.sh`
+
+### Authors:
+* [Martin donadieu](https://github.com/riderx)
