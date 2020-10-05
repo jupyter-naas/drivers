@@ -1,3 +1,12 @@
+## 0.2.1b0 (2020-10-05)
+
+### Fix
+
+- :construction_worker: fix error branch ci
+- :bug: change version
+- :green_heart: remove ci dependabot for now
+- :ci: add missing tag
+
 ## 0.2.0 (2020-10-04)
 
 ### Feat
