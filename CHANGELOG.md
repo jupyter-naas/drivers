@@ -1,3 +1,9 @@
+## 0.2.4 (2020-10-06)
+
+### Fix
+
+- force deploy to dockerhub
+
 ## 0.2.3 (2020-10-06)
 
 ### Fix
