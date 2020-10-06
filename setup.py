@@ -44,6 +44,7 @@ setup(
         "python-dotenv>=0,<1",
         "pytz>=2020,<2021",
         "plotly>=4,<5",
+        "kaleido",
         "Quandl>=3,<4",
         "requests>=2,<3",
         "scikit-learn>=0,<1",
