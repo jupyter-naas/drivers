@@ -64,7 +64,7 @@ setup(
         "google-auth-oauthlib>=0,<1",
         "gspread>=3,<4",
         "oauth2client>=4,<5",
-        "geopy>=1,<2",
+        "geopy>=1,<3",
         "GitPython>=3,<4",
         "cson>=0,<1",
         "opencv-python>=4,<5",
