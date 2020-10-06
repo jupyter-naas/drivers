@@ -1,35 +1,59 @@
 import plotly.graph_objects as go
 import pandas as pd
+import requests
 import datetime as dt
+import os
 
 
 class Plot:
     """ Plot generator lib"""
 
-    def updateChartCss(self, chart_filename, css_filename):
-        """ update css to alreaady generated chart html (chart_filename, css_filename)"""
+    def export(self, chart, filename, css=None):
+        """ create html export and add css to it"""
+        html_filename = f"{filename.split('.')[0]}.html"
+        chart.write_html(html_filename)
         html_map = None
-        css = None
-        with open(chart_filename) as f:
+        if css is None:
+            css = ".modebar {display: none;}"
+        with open(html_filename) as f:
             html_map = f.read()
-        with open(css_filename) as f:
-            css = f.read()
-        if html_map.find('id="cs_css"') != -1:
-            print("to do")
-        else:
             result = html_map.replace(
-                "<body>", f'<body><style id="cs_css">{css}</style>'
+                "<body>", f'<body><style id="naas_css">{css}</style>'
             )
-            with open(chart_filename, "w") as f:
-                f.write(result)
-                f.close()
+        with open(html_filename, "w") as f:
+            f.write(result)
+            f.close()
+        if filename.endswith(".png"):
+            html_text = result
+            json = {
+                "output": "screenshot",
+                "html": html_text,
+                #               "waitFor": 10000,
+                "emulateScreenMedia": True,
+                "ignoreHttpsErrors": True,
+                "scrollPage": False,
+                "screenshot": {"type": "png"},
+            }
+            req = requests.post(
+                url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render",
+                json=json,
+            )
+            req.raise_for_status()
+            open(filename, "wb").write(req.content)
+            os.remove(html_filename)
+        elif not filename.endswith(".png") and not filename.endswith(".html"):
+            print("Not supported for now")
+            os.remove(html_filename)
+            return
+        print("Save as", filename)
 
-    def financial_candlestick(
+    def stock(
         self,
         stock_companies,
         start=(dt.datetime.today() - dt.timedelta(days=365)),
         end=dt.datetime.today(),
         interval="1d",
+        kind="candlestick",
         filter=True,
         filter_title="Stock",
     ):
@@ -56,16 +80,29 @@ class Plot:
             stock["Company"] = company
             stocks.append(stock)
             visibility = [x == company for x in stock_companies]
-            data.append(
-                go.Candlestick(
-                    name=company,
-                    x=stock["Date"],
-                    open=stock["Open"],
-                    high=stock["High"],
-                    low=stock["Low"],
-                    close=stock["Close"],
+            if kind == "candlestick":
+                data.append(
+                    go.Candlestick(
+                        name=company,
+                        x=stock["Date"],
+                        open=stock["Open"],
+                        high=stock["High"],
+                        low=stock["Low"],
+                        close=stock["Close"],
+                    )
                 )
-            )
+            elif kind == "linechart":
+                data.append(
+                    go.Scatter(
+                        x=stock["Date"], y=stock["Open"], mode="lines", name="Open"
+                    ),
+                    go.Scatter(
+                        x=stock["Date"], y=stock["Close"], mode="lines", name="Close"
+                    ),
+                )
+            else:
+                print("Not supported for now")
+                return
             buttons.append(
                 dict(
                     args=[{"visible": visibility}],
@@ -93,13 +130,17 @@ class Plot:
         layout = None
         if filter:
             layout = dict(
+                dragmode="pan",
                 xaxis_rangeslider_visible=False,
                 showlegend=False,
                 updatemenus=updatemenus,
             )
         else:
             layout = dict(
-                xaxis_rangeslider_visible=False, showlegend=False, updatemenus=[]
+                dragmode="pan",
+                xaxis_rangeslider_visible=False,
+                showlegend=False,
+                updatemenus=[],
             )
         fig = go.Figure(data=list(data), layout=layout)
         if filter:
@@ -118,7 +159,7 @@ class Plot:
             )
         return fig
 
-    def tablechart(self, header_values, cells_values, header_color="rgb(136,233,175)"):
+    def table(self, header_values, cells_values, header_color="rgb(136,233,175)"):
         """ generate table html """
 
         fig = go.Figure(
