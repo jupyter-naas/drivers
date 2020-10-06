@@ -16,7 +16,7 @@ setup(
     packages=["naas_drivers"],
     extras_require={
         "dev": [
-            "pytest>=5,<6",
+            "pytest>=5,<7",
             "pytest-mock>=3,<4",
             "requests-mock>=1,<2",
             "twine>=3,<4",
