@@ -1,3 +1,13 @@
+## 0.2.7 (2020-10-06)
+
+### Fix
+
+- :green_heart: create our own github action
+
+### Perf
+
+- :construction_worker: add cache for faster build
+
 ## 0.2.6 (2020-10-06)
 
 ### Fix
