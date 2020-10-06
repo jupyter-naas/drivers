@@ -95,10 +95,12 @@ class Plot:
                 data.append(
                     go.Scatter(
                         x=stock["Date"], y=stock["Open"], mode="lines", name="Open"
-                    ),
+                    )
+                )
+                data.append(
                     go.Scatter(
                         x=stock["Date"], y=stock["Close"], mode="lines", name="Close"
-                    ),
+                    )
                 )
             else:
                 print("Not supported for now")
