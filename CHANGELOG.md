@@ -1,3 +1,13 @@
+## 0.3.0 (2020-10-07)
+
+### Feat
+
+- add PR linter
+
+### Fix
+
+- add upgrade before install
+
 ## 0.2.7 (2020-10-06)
 
 ### Fix
