@@ -1,3 +1,9 @@
+## 0.2.8 (2020-10-07)
+
+### Fix
+
+- add upgrade before install
+
 ## 0.2.7 (2020-10-06)
 
 ### Fix
