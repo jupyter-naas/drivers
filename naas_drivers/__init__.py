@@ -9,6 +9,7 @@ from .email import Email
 from .mongo import Mongo
 from .pdf import Pdf
 from .plot import Plot
+from .html import Html
 from .prediction import Prediction
 from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
@@ -26,6 +27,7 @@ email = Email
 mongo = Mongo
 pdf = Pdf
 plot = Plot
+html = Html
 prediction = Prediction
 sentiment_analysis = SentimentAnalysis
 toucan = Toucan

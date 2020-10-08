@@ -28,6 +28,7 @@ setup(
     },
     install_requires=[
         "pysftp>=0,<1",
+        "htmlbuilder=0,<1",
         "vaderSentiment>=3,<4",
         "chardet>=3,<4",
         "Cython>=0,<1",
