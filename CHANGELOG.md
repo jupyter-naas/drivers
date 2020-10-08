@@ -1,3 +1,9 @@
+## 0.3.1 (2020-10-08)
+
+### Fix
+
+- **plot**: :bug: add default css to all css
+
 ## 0.3.0 (2020-10-07)
 
 ### Feat
