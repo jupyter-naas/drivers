@@ -1,6 +1,7 @@
 from htmlBuilder import tags, attributes
 import IPython.core.display
 
+#  https://litmus.com/community/templates/31-accessible-product-announcement-email
 base_style = """
 /* CLIENT-SPECIFIC STYLES */
 body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -121,15 +122,18 @@ class Html:
     def space(self):
         return tags.Br()
 
-    def table(self, sentences=[]):
+    def table(self, *sentences):
         elems = [
             attributes.InlineStyle(
                 column_count="2", line_height="2", text_align="left"
             ),
         ]
         for sentence in sentences:
-            elems.append(tags.Text(sentence))
-            elems.append(tags.Br())
+            if isinstance(sentence, str):
+                elems.append(tags.Text(sentence))
+                elems.append(tags.Br())
+            else:
+                elems.append(sentence)
         return tags.P(elems)
 
     def logo(self, src, link=None, name="Logo"):
