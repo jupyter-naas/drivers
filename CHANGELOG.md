@@ -1,3 +1,9 @@
+## 0.4.0 (2020-10-08)
+
+### Feat
+
+- **html**: :sparkles: add new html lib
+
 ## 0.3.1 (2020-10-08)
 
 ### Fix
