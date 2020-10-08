@@ -15,6 +15,8 @@ class Plot:
         html_map = None
         if css is None:
             css = ".modebar {display: none;}"
+        else:
+            css = css + "\n.modebar {display: none;}"
         with open(html_filename) as f:
             html_map = f.read()
             result = html_map.replace(
