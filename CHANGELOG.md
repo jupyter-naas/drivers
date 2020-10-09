@@ -1,3 +1,9 @@
+## 0.4.10 (2020-10-09)
+
+### Fix
+
+- **html**: :art: auto add uid to image to alow user send new image with same name
+
 ## 0.4.9 (2020-10-09)
 
 ### Fix
