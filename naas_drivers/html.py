@@ -10,7 +10,7 @@ img { -ms-interpolation-mode: bicubic; }
 
 /* RESET STYLES */
 img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
-table { border-collapse: collapse !important; }
+table { border-collapse: collapse !important; text-align: left !important; }
 body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
 
 /* iOS BLUE LINKS */
@@ -43,14 +43,39 @@ u + #body a {
     line-height: inherit;
 }
 
-/* These rules set the link and hover states, making it clear that links are, in fact, links. */
-/* Embrace established conventions like underlines on links to keep emails accessible. */
 a { color: #B200FD; font-weight: 600; text-decoration: underline; }
 a:hover { color: #000000 !important; text-decoration: none !important; }
 a.button:hover { color: #ffffff !important; background-color: #000000 !important; }
 
-/* These rules adjust styles for desktop devices, keeping the email responsive for users. */
-/* Some email clients don't properly apply media query-based styles, which is why we go mobile-first. */
+
+.table_border td, th {
+    padding: 8px;
+}
+
+.table_border {
+  border-collapse: collapse;
+  border-radius: 1em;
+  overflow: hidden;
+}
+.table_border tr:hover {
+  background-color: DarkOrchid !important;
+  color: white;
+}
+.table_border tr:first-child td:first-of-type {
+  border-top-left-radius: 10px;
+}
+.table_border tr:first-child td:last-of-type {
+  border-top-right-radius: 10px;
+}
+
+.table_border tr:last-of-type td:first-of-type {
+  border-bottom-left-radius: 10px;
+}
+.table_border tr:last-of-type td:last-of-type {
+  border-bottom-right-radius: 10px;
+}
+.table_border tr:nth-child(even) { background-color: ghostwhite}
+
 @media screen and (min-width:600px) {
     h1 { font-size: 48px !important; line-height: 48px !important; }
     .intro { font-size: 24px !important; line-height: 36px !important; }
@@ -69,6 +94,10 @@ table_ie9_close = """
 </td></tr></table>
 <![endif]-->
 """
+
+
+def slice_per(source, step):
+    return [source[x : x + step] for x in range(0, len(source), step)]  # noqa: E203
 
 
 class Html:
@@ -122,19 +151,29 @@ class Html:
     def space(self):
         return tags.Br()
 
-    def table(self, *sentences):
-        elems = [
-            attributes.InlineStyle(
-                column_count="2", line_height="2", text_align="left"
-            ),
-        ]
-        for sentence in sentences:
-            if isinstance(sentence, str):
-                elems.append(tags.Text(sentence))
-                elems.append(tags.Br())
-            else:
-                elems.append(sentence)
-        return tags.P(elems)
+    def table(self, cells, column=2, border=False):
+        elems = []
+        if len(cells) > column:
+            sliced = slice_per(cells, column)
+            for row in sliced:
+                res = []
+                for cell in row:
+                    res.append(
+                        tags.Td(tags.Text(cell) if isinstance(cell, str) else cell)
+                    )
+                elems.append(tags.Tr(res))
+        else:
+            row = cells
+            res = []
+            for cell in row:
+                res.append(tags.Td(tags.Text(cell) if isinstance(cell, str) else cell))
+            elems.append(tags.Tr(res))
+        tab = tags.Table(
+            attributes.InlineStyle(width="100%"),
+            attributes.Class("table_border") if border else None,
+            elems,
+        )
+        return tags.P(tab)
 
     def logo(self, src, link=None, name="Logo"):
         if src is None:
