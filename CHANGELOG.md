@@ -1,3 +1,9 @@
+## 0.4.8 (2020-10-09)
+
+### Refactor
+
+- **html**: :art: use kwargs
+
 ## 0.4.7 (2020-10-09)
 
 ### Refactor
