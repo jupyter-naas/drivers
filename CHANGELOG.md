@@ -1,3 +1,9 @@
+## 0.4.4 (2020-10-09)
+
+### Fix
+
+- **html**: :bug: change color of subsubtitle
+
 ## 0.4.3 (2020-10-09)
 
 ### Fix
