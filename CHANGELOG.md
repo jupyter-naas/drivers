@@ -1,3 +1,9 @@
+## 0.4.2 (2020-10-09)
+
+### Fix
+
+- :green_heart: fix event who is send to naas build
+
 ## 0.4.1 (2020-10-08)
 
 ### Fix
