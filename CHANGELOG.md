@@ -1,3 +1,9 @@
+## 0.4.6 (2020-10-09)
+
+### Fix
+
+- **html**: change table to support mode usecase
+
 ## 0.4.5 (2020-10-09)
 
 ### Fix
