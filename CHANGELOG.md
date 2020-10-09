@@ -1,3 +1,9 @@
+## 0.4.3 (2020-10-09)
+
+### Fix
+
+- **html**: :bug: fix subtitle of title
+
 ## 0.4.2 (2020-10-09)
 
 ### Fix
