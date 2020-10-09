@@ -183,10 +183,11 @@ class Html:
                 text_align="center",
             ),
             tags.Text(title),
+            tags.Br(),
             (
                 tags.Span(
                     attributes.InlineStyle(font_size="24px", font_weight="600"),
-                    tags.Text(title),
+                    tags.Text(subtitle),
                 )
                 if subtitle
                 else None
