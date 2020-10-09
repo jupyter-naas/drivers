@@ -277,11 +277,11 @@ class Html:
     def text(self, text, *agrs):
         return tags.P(*agrs, tags.Text(text))
 
-    def template_basic(
+    def main(
         self,
         title,
-        sub_title,
         content,
+        sub_title=None,
         logo=None,
         cover=None,
         table=None,
@@ -292,7 +292,7 @@ class Html:
             self.header(logo, self.title(title)),
             tags.Main(
                 cover,
-                self.subtitle(sub_title),
+                self.subtitle(sub_title) if sub_title else None,
                 tags.P(tags.Text(content) if isinstance(content, str) else content),
                 table,
                 button,
