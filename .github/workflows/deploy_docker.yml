@@ -53,4 +53,4 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: jupyter-naas/naas
           event-type: pypip-deployed
-          client-payload: '{"ref": "refs/heads/main"}'
+          client-payload: '{"ref": "${{ github.event.client_payload.ref }}"}'
