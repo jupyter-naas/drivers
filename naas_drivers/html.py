@@ -279,17 +279,14 @@ class Html:
 
     def main(
         self,
-        title,
-        content,
+        content=None,
         sub_title=None,
-        logo=None,
         cover=None,
         table=None,
         button=None,
         footer=None,
     ):
         return [
-            self.header(logo, self.title(title)),
             tags.Main(
                 cover,
                 self.subtitle(sub_title) if sub_title else None,
@@ -300,7 +297,7 @@ class Html:
             footer,
         ]
 
-    def generate(self, title, *content, display=True):
+    def generate(self, title, logo=None, display=True, **kwargs):
         html = tags.Html(
             attributes.Lang("en"),
             tags.Head(
@@ -352,7 +349,8 @@ class Html:
                         padding="40px 20px 40px 20px",
                         font_family=basic_font,
                     ),
-                    *content
+                    self.header(logo, self.title(title)),
+                    self.main(**kwargs),
                 ),
                 tags.Text(table_ie9_close),
             ),
