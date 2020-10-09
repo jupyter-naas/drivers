@@ -1,3 +1,9 @@
+## 0.4.5 (2020-10-09)
+
+### Fix
+
+- **ci**: :bug: use latest ref for build naas
+
 ## 0.4.4 (2020-10-09)
 
 ### Fix
