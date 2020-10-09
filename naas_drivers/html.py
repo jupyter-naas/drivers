@@ -186,7 +186,9 @@ class Html:
             tags.Br(),
             (
                 tags.Span(
-                    attributes.InlineStyle(font_size="24px", font_weight="600"),
+                    attributes.InlineStyle(
+                        font_size="24px", font_weight="600", color="darkgray"
+                    ),
                     tags.Text(subtitle),
                 )
                 if subtitle
