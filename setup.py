@@ -27,6 +27,7 @@ setup(
         ]
     },
     install_requires=[
+        "tensorflow>=2,<3",
         "pysftp>=0,<1",
         "htmlbuilder>=0,<1",
         "vaderSentiment>=3,<4",
