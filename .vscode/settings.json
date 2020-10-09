@@ -1,6 +1,7 @@
 {
     "conventionalCommits.scopes": [
         "plot",
-        "html"
+        "html",
+        "ci"
     ]
 }
