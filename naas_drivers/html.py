@@ -1,5 +1,6 @@
 from htmlBuilder import tags, attributes
 import IPython.core.display
+import uuid
 
 #  https://litmus.com/community/templates/31-accessible-product-announcement-email
 base_style = """
@@ -145,7 +146,7 @@ class Html:
                 border_radius="4px",
                 padding="24px 48px",
             ),
-            *elems
+            *elems,
         )
 
     def space(self):
@@ -176,10 +177,11 @@ class Html:
         return tags.P(tab)
 
     def logo(self, src, link=None, name="Logo"):
+
         if src is None:
             return None
         elems_img = [
-            attributes.Src(src),
+            attributes.Src(f"{src}?naas_uid={str(uuid.uuid4())}"),
             attributes.Height(80),
             attributes.Width(80),
             {"name": "alt", "value": name},
@@ -193,7 +195,7 @@ class Html:
         if src is None:
             return None
         elems_img = [
-            attributes.Src(src),
+            attributes.Src(f"{src}?naas_uid={str(uuid.uuid4())}"),
             attributes.Height(80),
             attributes.Width(600),
             {"name": "border", "value": 0},
