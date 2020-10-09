@@ -57,4 +57,4 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: ${{ github.repository }}
           event-type: pypip-deployed
-          client-payload: '{"ref": "${{ github.ref }}"}'
+          client-payload: '{"ref": "latest"}'
