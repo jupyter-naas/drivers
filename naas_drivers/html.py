@@ -116,10 +116,10 @@ class Html:
             tags.Text(content),
         )
 
-    def link(self, link, title):
+    def link(self, title, link, color="#B200FD"):
         return tags.A(
             attributes.Href(link),
-            attributes.InlineStyle(color="#B200FD", text_decoration="underline"),
+            attributes.InlineStyle(color=color, text_decoration="underline"),
             tags.Text(title),
         )
 
