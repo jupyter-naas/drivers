@@ -10,6 +10,7 @@ from .mongo import Mongo
 from .pdf import Pdf
 from .plot import Plot
 from .html import Html
+from .cityfalcon import Cityfalcon
 from .prediction import Prediction
 from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
@@ -28,6 +29,7 @@ mongo = Mongo
 pdf = Pdf
 plot = Plot
 html = Html
+cityfalcon = Cityfalcon
 prediction = Prediction
 sentiment_analysis = SentimentAnalysis
 toucan = Toucan

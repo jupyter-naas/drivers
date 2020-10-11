@@ -2,6 +2,7 @@
     "conventionalCommits.scopes": [
         "plot",
         "html",
-        "ci"
+        "ci",
+        "citifalcon"
     ]
 }
