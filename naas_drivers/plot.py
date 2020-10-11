@@ -53,18 +53,26 @@ class Plot:
     def stock(
         self,
         stock_companies,
-        start=(dt.datetime.today() - dt.timedelta(days=365)),
-        end=dt.datetime.today(),
+        date_from=-30,
+        date_to=dt.datetime.today(),
         interval="1d",
         kind="candlestick",
         filter=True,
         filter_title="Stock",
     ):
-        """ generate financial_candlestick html """
+        """ generate financial_chart """
+        if isinstance(date_from, int) and date_from < 0:
+            date_from = dt.datetime.today() - dt.timedelta(days=date_from)
+        else:
+            raise ValueError(f"date_from ({date_from}) cannot be positive")
+        if isinstance(date_to, int) and date_to > 0:
+            date_to = dt.datetime.today() + dt.timedelta(days=date_to)
+        else:
+            raise ValueError(f"date_to ({date_to}) cannot be negative")
         stocks = []
         data = []
-        period1 = start.strftime("%s")
-        period2 = end.strftime("%s")
+        period1 = date_from.strftime("%s")
+        period2 = date_to.strftime("%s")
         buttons = []
         buttons.append(
             dict(
