@@ -60,8 +60,8 @@ a.button:hover { color: #ffffff !important; background-color: #5c1958 !important
   overflow: hidden;
 }
 .table_border tr:hover {
-  background-color: DarkOrchid !important;
-  color: white;
+  background-color: AliceBlue !important;
+  color: black;
 }
 .table_border tr:first-child td:first-of-type {
   border-top-left-radius: 10px;
@@ -149,6 +149,30 @@ class Html:
     def space(self):
         return tags.Br()
 
+    def __convert(self, data, name):
+        if name.startswith("image") and isinstance(data, str):
+            return self.image(data)
+        if name.startswith("logo") and isinstance(data, str):
+            return self.image(data, width="80px", height="80px")
+        elif name.startswith("link") and isinstance(data, str):
+            return self.link(data)
+        elif name.startswith("button") and isinstance(data, str):
+            return self.button(data)
+        elif name.startswith("info") and isinstance(data, str):
+            return self.button(data)
+        elif name.startswith("title") and isinstance(data, str):
+            return self.title(data)
+        elif name.startswith("subtitle") and isinstance(data, str):
+            return self.subtitle(data)
+        elif name.startswith("table") and (
+            isinstance(data, pd.DataFrame) or isinstance(data, list)
+        ):
+            return self.table(data)
+        elif name.startswith("heading") and isinstance(data, str):
+            return self.text(data, font_size="24px")
+        else:
+            return self.text(data) if isinstance(data, str) else data
+
     def table(self, data, border=True):
         elems = []
         table_arr = None
@@ -161,10 +185,15 @@ class Html:
         for row in table_arr:
             res = []
             if isinstance(row, list):
-                for cell in row:
-                    res.append(
-                        tags.Td(tags.Text(cell) if isinstance(cell, str) else cell)
-                    )
+                for i in range(len(row)):
+                    cell = row[i]
+                    if isinstance(data, pd.DataFrame):
+                        col = list(data.columns)[i]
+                        res.append(tags.Td(self.__convert(cell, col)))
+                    else:
+                        res.append(
+                            tags.Td(tags.Text(cell) if isinstance(cell, str) else cell)
+                        )
             else:
                 res.append(tags.Td(tags.Text(row) if isinstance(row, str) else row))
             elems.append(tags.Tr(res))
@@ -176,24 +205,9 @@ class Html:
         return tags.P(tab)
 
     def logo(self, src, link=None, name="Logo", size="80px"):
+        return self.image(src, link, name, width=size, height=size)
 
-        if src is None:
-            return None
-        elems_img = [
-            attributes.Src(f"{src}?naas_uid={str(uuid.uuid4())}"),
-            attributes.Height(size),
-            attributes.Width(size),
-            attributes.InlineStyle(
-                border_radius="4px",
-            ),
-            {"name": "alt", "value": name},
-        ]
-        if link:
-            return tags.A(attributes.Href(link), tags.Center(tags.Img(elems_img)))
-        else:
-            return tags.Center(tags.Img(elems_img))
-
-    def cover(self, src, link=None, name="Cover", width="100%", height="80%"):
+    def image(self, src, link=None, name="Cover", width="100%", height="80%"):
         if src is None:
             return None
         elems_img = [
@@ -204,7 +218,6 @@ class Html:
             attributes.InlineStyle(
                 border_radius="4px",
                 display="block",
-                min_width="100px",
             ),
             {"name": "alt", "value": name},
         ]
@@ -251,7 +264,12 @@ class Html:
         )
 
     def button(
-        self, link, text="Open", color="white", width="auto", background_color="black"
+        self,
+        link,
+        text="Check it",
+        color="white",
+        width="auto",
+        background_color="black",
     ):
         return tags.Center(
             tags.Div(
@@ -281,36 +299,19 @@ class Html:
             )
         )
 
-    def text(self, text, *agrs):
-        return tags.P(*agrs, tags.Text(text))
+    def text(self, text, font_size="18px"):
+        return tags.P(tags.Text(text), attributes.InlineStyle(font_size=font_size))
 
     def main(
         self,
-        content=None,
-        subtitle=None,
-        cover=None,
-        table=None,
-        button=None,
-        footer=None,
+        **kwargs,
     ):
-        return [
-            tags.Main(
-                self.cover(cover, button)
-                if isinstance(button, str) and isinstance(cover, str)
-                else cover,
-                self.subtitle(subtitle) if isinstance(subtitle, str) else subtitle,
-                content if not isinstance(content, str) else tags.P(tags.Text(content)),
-                self.table(table)
-                if isinstance(table, list) or isinstance(table, pd.DataFrame)
-                else table,
-                self.button(button, width="300px")
-                if isinstance(button, str)
-                else button,
-            ),
-            footer,
-        ]
+        items = []
+        for key, value in kwargs.items():
+            items.append(self.__convert(value, key))
+        return [tags.Main(items)]
 
-    def generate(self, title, logo=None, display=True, **kwargs):
+    def generate(self, title, logo=None, display=True, footer=None, **kwargs):
         html = tags.Html(
             attributes.Lang("en"),
             tags.Head(
@@ -364,6 +365,7 @@ class Html:
                     ),
                     self.header(logo, self.title(title)),
                     self.main(**kwargs),
+                    footer,
                 ),
                 tags.Text(table_ie9_close),
             ),
