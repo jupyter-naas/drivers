@@ -1,3 +1,9 @@
+## 0.6.0 (2020-10-11)
+
+### Feat
+
+- **plot**: :sparkles: allow date to be number
+
 ## 0.5.0 (2020-10-11)
 
 ### Feat
