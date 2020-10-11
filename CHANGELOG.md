@@ -1,3 +1,9 @@
+## 0.5.0 (2020-10-11)
+
+### Feat
+
+- **citifalcon**: :sparkles: add cityfalcon api + refactor html lib to make it simple
+
 ## 0.4.11 (2020-10-10)
 
 ### Fix
