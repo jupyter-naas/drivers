@@ -15,7 +15,7 @@ from .prediction import Prediction
 from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
 
-__version__ = "0.6.2"
+__version__ = "0.7.0"
 
 darkknight = DarkKnight
 ftp = Ftp
