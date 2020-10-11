@@ -1,5 +1,6 @@
 from htmlBuilder import tags, attributes
 import IPython.core.display
+import pandas as pd
 import uuid
 
 #  https://litmus.com/community/templates/31-accessible-product-announcement-email
@@ -45,8 +46,8 @@ u + #body a {
 }
 
 a { color: #B200FD; font-weight: 600; text-decoration: underline; }
-a:hover { color: #000000 !important; text-decoration: none !important; }
-a.button:hover { color: #ffffff !important; background-color: #000000 !important; }
+a:hover { color: #000000 !important; text-decoration: none !important; background-color: #5c1958 !important; }
+a.button:hover { color: #ffffff !important; background-color: #5c1958 !important; }
 
 
 .table_border td, th {
@@ -97,10 +98,6 @@ table_ie9_close = """
 """
 
 
-def slice_per(source, step):
-    return [source[x : x + step] for x in range(0, len(source), step)]  # noqa: E203
-
-
 class Html:
     """ HTML generator lib"""
 
@@ -116,7 +113,7 @@ class Html:
             tags.Text(content),
         )
 
-    def link(self, title, link, color="#B200FD"):
+    def link(self, link, title="Open", color="#B200FD"):
         return tags.A(
             attributes.Href(link),
             attributes.InlineStyle(color=color, text_decoration="underline"),
@@ -152,22 +149,24 @@ class Html:
     def space(self):
         return tags.Br()
 
-    def table(self, cells, column=2, border=False):
+    def table(self, data, border=True):
         elems = []
-        if len(cells) > column:
-            sliced = slice_per(cells, column)
-            for row in sliced:
-                res = []
+        table_arr = None
+        if isinstance(data, pd.DataFrame):
+            table_arr = list(data.values.tolist())
+        elif isinstance(data, list):
+            table_arr = data
+        else:
+            raise ValueError("Table should be array")
+        for row in table_arr:
+            res = []
+            if isinstance(row, list):
                 for cell in row:
                     res.append(
                         tags.Td(tags.Text(cell) if isinstance(cell, str) else cell)
                     )
-                elems.append(tags.Tr(res))
-        else:
-            row = cells
-            res = []
-            for cell in row:
-                res.append(tags.Td(tags.Text(cell) if isinstance(cell, str) else cell))
+            else:
+                res.append(tags.Td(tags.Text(row) if isinstance(row, str) else row))
             elems.append(tags.Tr(res))
         tab = tags.Table(
             attributes.InlineStyle(width="100%"),
@@ -176,14 +175,17 @@ class Html:
         )
         return tags.P(tab)
 
-    def logo(self, src, link=None, name="Logo"):
+    def logo(self, src, link=None, name="Logo", size="80px"):
 
         if src is None:
             return None
         elems_img = [
             attributes.Src(f"{src}?naas_uid={str(uuid.uuid4())}"),
-            attributes.Height(80),
-            attributes.Width(80),
+            attributes.Height(size),
+            attributes.Width(size),
+            attributes.InlineStyle(
+                border_radius="4px",
+            ),
             {"name": "alt", "value": name},
         ]
         if link:
@@ -191,20 +193,18 @@ class Html:
         else:
             return tags.Center(tags.Img(elems_img))
 
-    def cover(self, src, link=None, name="Cover"):
+    def cover(self, src, link=None, name="Cover", width="100%", height="80%"):
         if src is None:
             return None
         elems_img = [
             attributes.Src(f"{src}?naas_uid={str(uuid.uuid4())}"),
-            attributes.Height(80),
-            attributes.Width(600),
+            attributes.Height(height),
+            attributes.Width(width),
             {"name": "border", "value": 0},
             attributes.InlineStyle(
                 border_radius="4px",
                 display="block",
-                max_width="100%",
                 min_width="100px",
-                width="100%",
             ),
             {"name": "alt", "value": name},
         ]
@@ -250,7 +250,9 @@ class Html:
             tags.Text(subtitle),
         )
 
-    def button(self, text, link, color="#ffffff", background_color="#B200FD"):
+    def button(
+        self, link, text="Open", color="white", width="auto", background_color="black"
+    ):
         return tags.Center(
             tags.Div(
                 attributes.InlineStyle(margin="48px 0"),
@@ -268,7 +270,10 @@ class Html:
                         line_height="60px",
                         text_align="center",
                         text_decoration="none",
-                        width="300px",
+                        width=width,
+                        max_width="300px",
+                        padding_left="10px",
+                        padding_right="10px",
                         _webkit_text_size_adjust="none",
                     ),
                     tags.Text(text),
@@ -282,7 +287,7 @@ class Html:
     def main(
         self,
         content=None,
-        sub_title=None,
+        subtitle=None,
         cover=None,
         table=None,
         button=None,
@@ -290,11 +295,17 @@ class Html:
     ):
         return [
             tags.Main(
-                cover,
-                self.subtitle(sub_title) if sub_title else None,
-                tags.P(tags.Text(content) if isinstance(content, str) else content),
-                table,
-                button,
+                self.cover(cover, button)
+                if isinstance(button, str) and isinstance(cover, str)
+                else cover,
+                self.subtitle(subtitle) if isinstance(subtitle, str) else subtitle,
+                content if not isinstance(content, str) else tags.P(tags.Text(content)),
+                self.table(table)
+                if isinstance(table, list) or isinstance(table, pd.DataFrame)
+                else table,
+                self.button(button, width="300px")
+                if isinstance(button, str)
+                else button,
             ),
             footer,
         ]

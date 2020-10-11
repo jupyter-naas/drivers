@@ -8,19 +8,21 @@ import os
 class Plot:
     """ Plot generator lib"""
 
+    __css_base = ".modebar {display: none;} \n.modebar-container {display: none;} "
+
     def export(self, chart, filename, css=None):
         """ create html export and add css to it"""
         html_filename = f"{filename.split('.')[0]}.html"
         chart.write_html(html_filename)
         html_map = None
         if css is None:
-            css = ".modebar {display: none;}"
+            css = self.__css_base
         else:
-            css = css + "\n.modebar {display: none;}"
+            css = css + self.__css_base
         with open(html_filename) as f:
             html_map = f.read()
             result = html_map.replace(
-                "<body>", f'<body><style id="naas_css">{css}</style>'
+                "</head>", f'<style id="naas_css">{css}</style></head>'
             )
         with open(html_filename, "w") as f:
             f.write(result)
@@ -30,11 +32,10 @@ class Plot:
             json = {
                 "output": "screenshot",
                 "html": html_text,
-                #               "waitFor": 10000,
                 "emulateScreenMedia": True,
                 "ignoreHttpsErrors": True,
                 "scrollPage": False,
-                "screenshot": {"type": "png"},
+                "screenshot": {"type": "png", "selector": ".cartesianlayer"},
             }
             req = requests.post(
                 url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render",
@@ -149,6 +150,8 @@ class Plot:
         fig = go.Figure(data=list(data), layout=layout)
         if filter:
             fig.update_layout(
+                template="plotly_white",
+                margin=dict(t=0, b=0, l=0, r=0),
                 annotations=[
                     dict(
                         text=filter_title,
@@ -159,7 +162,7 @@ class Plot:
                         align="left",
                         showarrow=False,
                     )
-                ]
+                ],
             )
         return fig
 
