@@ -49,7 +49,7 @@ class Cityfalcon:
                 elif field == "source":
                     new_formated["source"] = element["source"]["brandName"]
                 elif field == "image":
-                    new_formated["img"] = element["imageUrls"]["large"]
+                    new_formated["img"] = element["imageUrls"][0]
                 elif field == "source_logo":
                     new_formated["img"] = element["source"]["imageUrls"]["large"]
                 else:
