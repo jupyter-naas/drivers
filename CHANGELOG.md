@@ -1,3 +1,9 @@
+## 0.6.2 (2020-10-11)
+
+### Fix
+
+- **plot**: :bug: dont remove html if already exist
+
 ## 0.6.1 (2020-10-11)
 
 ### Fix
