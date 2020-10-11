@@ -1,3 +1,9 @@
+## 0.7.0 (2020-10-11)
+
+### Feat
+
+- **citifalcon**: :sparkles: add limit in get
+
 ## 0.6.2 (2020-10-11)
 
 ### Fix
