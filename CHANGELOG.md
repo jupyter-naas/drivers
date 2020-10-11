@@ -1,3 +1,9 @@
+## 0.6.1 (2020-10-11)
+
+### Fix
+
+- **plot**: :sparkles: allow stock to be only one
+
 ## 0.6.0 (2020-10-11)
 
 ### Feat
