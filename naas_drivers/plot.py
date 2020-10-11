@@ -13,6 +13,7 @@ class Plot:
     def export(self, chart, filename, css=None):
         """ create html export and add css to it"""
         html_filename = f"{filename.split('.')[0]}.html"
+        html_exist = os.path.exist(html_filename)
         chart.write_html(html_filename)
         html_map = None
         if css is None:
@@ -43,7 +44,8 @@ class Plot:
             )
             req.raise_for_status()
             open(filename, "wb").write(req.content)
-            os.remove(html_filename)
+            if not html_exist:
+                os.remove(html_filename)
         elif not filename.endswith(".png") and not filename.endswith(".html"):
             print("Not supported for now")
             os.remove(html_filename)
