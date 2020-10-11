@@ -1,3 +1,9 @@
+## 0.7.2 (2020-10-11)
+
+### Fix
+
+- **plot**: :bug: allow 0 value, for date_to
+
 ## 0.7.1 (2020-10-11)
 
 ### Fix
