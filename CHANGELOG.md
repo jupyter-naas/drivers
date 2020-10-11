@@ -1,3 +1,9 @@
+## 0.7.1 (2020-10-11)
+
+### Fix
+
+- **html**: :sparkles: allow change order to template
+
 ## 0.7.0 (2020-10-11)
 
 ### Feat
