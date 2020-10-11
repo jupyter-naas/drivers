@@ -71,6 +71,8 @@ class Plot:
             raise ValueError(f"date_from ({date_from}) cannot be positive")
         if isinstance(date_to, int) and date_to > 0:
             date_to = dt.datetime.today() + dt.timedelta(days=date_to)
+        if isinstance(date_to, int) and date_to == 0:
+            date_to = dt.datetime.today()
         else:
             raise ValueError(f"date_to ({date_to}) cannot be negative")
         stocks = []
