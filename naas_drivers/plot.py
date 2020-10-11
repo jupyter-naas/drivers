@@ -57,10 +57,12 @@ class Plot:
         date_to=dt.datetime.today(),
         interval="1d",
         kind="candlestick",
-        filter=True,
+        filter=False,
         filter_title="Stock",
     ):
         """ generate financial_chart """
+        if isinstance(stock_companies, str):
+            stock_companies = [stock_companies]
         if isinstance(date_from, int) and date_from < 0:
             date_from = dt.datetime.today() - dt.timedelta(days=date_from)
         else:
