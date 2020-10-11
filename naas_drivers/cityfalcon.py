@@ -21,6 +21,7 @@ class Cityfalcon:
             "link",
         ],
         country="US",
+        limit=None,
         min_score=20,
         paywall=False,
         identifier_type="full_tickers",
@@ -54,4 +55,6 @@ class Cityfalcon:
                 else:
                     raise ValueError("Unknow parameter")
             news.append(new_formated)
+        if limit and isinstance(limit, int) and limit > 0:
+            news = news[:limit]
         return pd.DataFrame.from_records(news)
