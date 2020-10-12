@@ -59,6 +59,7 @@ class Plot:
         date_to="today",
         interval="1d",
         kind="candlestick",
+        moving_average=False,
         filter=False,
         filter_title="Stock",
     ):
@@ -97,6 +98,25 @@ class Plot:
             stock["Company"] = company
             stocks.append(stock)
             visibility = [x == company for x in stock_companies]
+            if moving_average:
+                stock["MA20"] = stock.Close.rolling(20).mean()
+                stock["MA50"] = stock.Close.rolling(50).mean()
+                data.append(
+                    go.Scatter(
+                        x=stock["Date"],
+                        y=stock.MA20,
+                        line=dict(color="green", width=1),
+                        name="20 MA",
+                    )
+                )
+                data.append(
+                    go.Scatter(
+                        x=stock["Date"],
+                        y=stock.MA50,
+                        line=dict(color="red", width=1),
+                        name="50 MA",
+                    )
+                )
             if kind == "candlestick":
                 data.append(
                     go.Candlestick(
@@ -108,6 +128,7 @@ class Plot:
                         close=stock["Close"],
                     )
                 )
+
             elif kind == "linechart":
                 data.append(
                     go.Scatter(
