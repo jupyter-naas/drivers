@@ -3,6 +3,7 @@
         "plot",
         "html",
         "ci",
-        "citifalcon"
+        "citifalcon",
+        "ftp"
     ]
 }
