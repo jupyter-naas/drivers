@@ -49,9 +49,15 @@ class Cityfalcon:
                 elif field == "source":
                     new_formated["source"] = element["source"]["brandName"]
                 elif field == "image":
-                    new_formated["img"] = element["imageUrls"][0]
+                    new_formated["image"] = (
+                        element["imageUrls"][0] if element["imageUrls"] else ""
+                    )
                 elif field == "source_logo":
-                    new_formated["img"] = element["source"]["imageUrls"]["large"]
+                    new_formated["logo"] = (
+                        element["source"]["imageUrls"]["large"]
+                        if element["source"] and element["source"]["imageUrls"]
+                        else ""
+                    )
                 else:
                     raise ValueError("Unknow parameter")
             news.append(new_formated)
