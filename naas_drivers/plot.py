@@ -13,7 +13,7 @@ class Plot:
     def export(self, chart, filename, css=None):
         """ create html export and add css to it"""
         html_filename = f"{filename.split('.')[0]}.html"
-        html_exist = os.path.exist(html_filename)
+        html_exist = os.path.exists(html_filename)
         chart.write_html(html_filename)
         html_map = None
         if css is None:
@@ -56,7 +56,7 @@ class Plot:
         self,
         stock_companies,
         date_from=-30,
-        date_to=dt.datetime.today(),
+        date_to="today",
         interval="1d",
         kind="candlestick",
         filter=False,
@@ -66,12 +66,12 @@ class Plot:
         if isinstance(stock_companies, str):
             stock_companies = [stock_companies]
         if isinstance(date_from, int) and date_from < 0:
-            date_from = dt.datetime.today() - dt.timedelta(days=date_from)
+            date_from = dt.datetime.today() + dt.timedelta(days=date_from)
         else:
             raise ValueError(f"date_from ({date_from}) cannot be positive")
         if isinstance(date_to, int) and date_to > 0:
             date_to = dt.datetime.today() + dt.timedelta(days=date_to)
-        if isinstance(date_to, int) and date_to == 0:
+        if isinstance(date_to, str) and date_to == "today":
             date_to = dt.datetime.today()
         else:
             raise ValueError(f"date_to ({date_to}) cannot be negative")
