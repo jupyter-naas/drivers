@@ -266,7 +266,7 @@ class Html:
     def button(
         self,
         link,
-        text="Check it",
+        text="Open",
         color="white",
         width="auto",
         background_color="black",
