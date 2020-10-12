@@ -40,6 +40,7 @@ setup(
         "numpy>=1,<2",
         "ipython>=7,<8",
         "pandas>=1,<2",
+        "pandas-datareader>=0,<1",
         "patsy>=0,<1",
         "pmdarima>=1,<2",
         "python-dateutil>=2,<3",
