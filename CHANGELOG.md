@@ -1,3 +1,9 @@
+## 0.8.0 (2020-10-12)
+
+### Feat
+
+- **ci**: :sparkles: add pandas datareader
+
 ## 0.7.4 (2020-10-12)
 
 ### Fix
