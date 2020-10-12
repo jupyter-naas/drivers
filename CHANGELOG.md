@@ -1,3 +1,9 @@
+## 0.9.1 (2020-10-12)
+
+### Fix
+
+- **ftp**: :bug: add missign toucan_ftp
+
 ## 0.9.0 (2020-10-12)
 
 ### Feat
