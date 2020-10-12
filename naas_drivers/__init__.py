@@ -1,6 +1,7 @@
 from .darkknight import DarkKnight
 from .ftp import Ftp
 from .ftps import Ftps
+from .ftps_toucan import Ftps_toucan
 from .geolocator import GeoLocator
 from .git import Git
 from .google_spreadsheet import GoogleSpreadsheet
@@ -19,8 +20,9 @@ __version__ = "0.9.0"
 
 darkknight = DarkKnight
 ftp = Ftp
-git = Git
 ftps = Ftps
+ftps_toucan = Ftps_toucan
+git = Git
 geoLocator = GeoLocator
 google_spreadsheet = GoogleSpreadsheet
 healthCheck = HealthCheck
