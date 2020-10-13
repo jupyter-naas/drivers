@@ -4,6 +4,7 @@ import pandas as pd
 import uuid
 
 #  https://litmus.com/community/templates/31-accessible-product-announcement-email
+# https://github.com/rodriguezcommaj/accessible-emails
 base_style = """
 /* CLIENT-SPECIFIC STYLES */
 body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -52,6 +53,10 @@ a.button:hover { color: #ffffff !important; background-color: #5c1958 !important
 
 .table_border td, th {
     padding: 8px;
+}
+
+table * {
+    margin: 18px 0 !important;
 }
 
 .table_border {
@@ -103,6 +108,45 @@ table_ie9_close = """
 class Html:
     """ HTML generator lib"""
 
+    def __align(self, mode):
+        margin = "0 auto 0 0"
+        if mode == "right":
+            margin = "0 0 0 auto"
+        if mode == "center":
+            margin = "0 auto 0 auto"
+        return margin
+
+    def __convert(self, data, name):
+        args = [data]
+        if name.find("_") > -1:
+            args_list = name.split("_")[1:]
+            args_list = list(filter(lambda x: not x.isdigit(), args_list))
+            args.extend(args_list)
+        if name.startswith("image") and isinstance(data, str):
+            return self.image(*args)
+        if name.startswith("logo") and isinstance(data, str):
+            return self.logo(*args)
+        elif name.startswith("link") and isinstance(data, str):
+            return self.link(*args)
+        elif name.startswith("button") and isinstance(data, str):
+            return self.button(*args)
+        elif name.startswith("info") and isinstance(data, str):
+            return self.button(*args)
+        elif name.startswith("title") and isinstance(data, str):
+            return self.title(*args)
+        elif name.startswith("heading") and isinstance(data, str):
+            return self.heading(*args)
+        elif name.startswith("address") and isinstance(data, str):
+            return self.address(*args)
+        elif name.startswith("table") and (
+            isinstance(data, pd.DataFrame) or isinstance(data, list)
+        ):
+            return self.table(*args)
+        elif name.startswith("subheading") and isinstance(data, str):
+            return self.subheading(*args)
+        else:
+            return self.text(*args) if isinstance(data, str) else data
+
     def address(self, title, content):
         return tags.Address(
             attributes.InlineStyle(
@@ -120,149 +164,6 @@ class Html:
             attributes.Href(link),
             attributes.InlineStyle(color=color, text_decoration="underline"),
             tags.Text(title),
-        )
-
-    def header(self, *elems):
-        return tags.Header(*elems)
-
-    def footer(self, text, first=None, *elems):
-        one = [
-            attributes.InlineStyle(
-                font_size="16px",
-                font_weight="400",
-                line_height="24px",
-                margin_top="48px",
-            ),
-            tags.Text(text),
-            first,
-        ]
-        return tags.Footer(tags.P(one), *elems)
-
-    def info(self, *elems):
-        return tags.Div(
-            attributes.InlineStyle(
-                background_color="ghostwhite",
-                border_radius="4px",
-                padding="24px 48px",
-            ),
-            *elems,
-        )
-
-    def space(self):
-        return tags.Br()
-
-    def __convert(self, data, name):
-        if name.startswith("image") and isinstance(data, str):
-            return self.image(data)
-        if name.startswith("logo") and isinstance(data, str):
-            return self.image(data, width="80px", height="80px")
-        elif name.startswith("link") and isinstance(data, str):
-            return self.link(data)
-        elif name.startswith("button") and isinstance(data, str):
-            return self.button(data)
-        elif name.startswith("info") and isinstance(data, str):
-            return self.button(data)
-        elif name.startswith("title") and isinstance(data, str):
-            return self.title(data)
-        elif name.startswith("subtitle") and isinstance(data, str):
-            return self.subtitle(data)
-        elif name.startswith("table") and (
-            isinstance(data, pd.DataFrame) or isinstance(data, list)
-        ):
-            return self.table(data)
-        elif name.startswith("heading") and isinstance(data, str):
-            return self.text(data, font_size="24px")
-        else:
-            return self.text(data) if isinstance(data, str) else data
-
-    def table(self, data, border=True):
-        elems = []
-        table_arr = None
-        if isinstance(data, pd.DataFrame):
-            table_arr = list(data.values.tolist())
-        elif isinstance(data, list):
-            table_arr = data
-        else:
-            raise ValueError("Table should be array")
-        for row in table_arr:
-            res = []
-            if isinstance(row, list):
-                for i in range(len(row)):
-                    cell = row[i]
-                    if isinstance(data, pd.DataFrame):
-                        col = list(data.columns)[i]
-                        res.append(tags.Td(self.__convert(cell, col)))
-                    else:
-                        res.append(
-                            tags.Td(tags.Text(cell) if isinstance(cell, str) else cell)
-                        )
-            else:
-                res.append(tags.Td(tags.Text(row) if isinstance(row, str) else row))
-            elems.append(tags.Tr(res))
-        tab = tags.Table(
-            attributes.InlineStyle(width="100%"),
-            attributes.Class("table_border") if border else None,
-            elems,
-        )
-        return tags.P(tab)
-
-    def logo(self, src, link=None, name="Logo", size="80px"):
-        return self.image(src, link, name, width=size, height=size)
-
-    def image(self, src, link=None, name="Cover", width="100%", height="80%"):
-        if src is None:
-            return None
-        elems_img = [
-            attributes.Src(f"{src}?naas_uid={str(uuid.uuid4())}"),
-            attributes.Height(height),
-            attributes.Width(width),
-            {"name": "border", "value": 0},
-            attributes.InlineStyle(
-                border_radius="4px",
-                display="block",
-            ),
-            {"name": "alt", "value": name},
-        ]
-        if link:
-            return tags.A(attributes.Href(link), tags.Img(elems_img))
-        else:
-            return tags.Img(elems_img)
-
-    def title(self, title, subtitle=None):
-        return tags.H1(
-            attributes.InlineStyle(
-                color="#000000",
-                font_size="32px",
-                font_weight="800",
-                line_height="32px",
-                margin="48px 0",
-                text_align="center",
-            ),
-            tags.Text(title),
-            tags.Br(),
-            (
-                tags.Span(
-                    attributes.InlineStyle(
-                        font_size="24px", font_weight="600", color="darkgray"
-                    ),
-                    tags.Text(subtitle),
-                )
-                if subtitle
-                else None
-            ),
-        )
-
-    def subtitle(self, subtitle):
-        return tags.H2(
-            attributes.InlineStyle(
-                color="#000000",
-                font_size="28px",
-                font_weight="600",
-                line_height="32px",
-                margin="48px 0 24px 0",
-                text_align="center",
-            ),
-            tags.Text(subtitle),
         )
 
     def button(
@@ -301,8 +202,133 @@ class Html:
             )
         )
 
+    def info(self, *elems):
+        return tags.Div(
+            attributes.InlineStyle(
+                background_color="ghostwhite",
+                border_radius="4px",
+                padding="24px 48px",
+            ),
+            *elems,
+        )
+
+    def space(self):
+        return tags.Br()
+
+    def table(self, data, border=True):
+        elems = []
+        table_arr = None
+        if isinstance(data, pd.DataFrame):
+            table_arr = list(data.values.tolist())
+        elif isinstance(data, list):
+            table_arr = data
+        else:
+            raise ValueError("Table should be array")
+        for row in table_arr:
+            res = []
+            if isinstance(row, list):
+                for i in range(len(row)):
+                    cell = row[i]
+                    if isinstance(data, pd.DataFrame):
+                        col = list(data.columns)[i]
+                        res.append(tags.Td(self.__convert(cell, col)))
+                    else:
+                        res.append(
+                            tags.Td(tags.Text(cell) if isinstance(cell, str) else cell)
+                        )
+            else:
+                res.append(tags.Td(tags.Text(row) if isinstance(row, str) else row))
+            elems.append(tags.Tr(res))
+        tab = tags.Table(
+            attributes.InlineStyle(width="100%"),
+            attributes.Class("table_border") if border else None,
+            elems,
+        )
+        return tags.P(tab)
+
+    def logo(self, src, link=None, name="Logo", size="80px"):
+        return self.image(src, link, name, width=size, height=size, align="center")
+
+    def image(
+        self, src, link=None, name="Cover", align="left", width="100%", height="80%"
+    ):
+        if src is None:
+            return None
+        elems_img = [
+            attributes.Src(f"{src}?naas_uid={str(uuid.uuid4())}"),
+            attributes.Height(height),
+            attributes.Width(width),
+            {"name": "border", "value": 0},
+            attributes.InlineStyle(
+                border_radius="4px",
+                margin=self.__align(align),
+                display="block",
+            ),
+            {"name": "alt", "value": name},
+        ]
+        if link:
+            return tags.A(attributes.Href(link), tags.Img(elems_img))
+        else:
+            return tags.Img(elems_img)
+
+    def title(self, title, heading=None):
+        return tags.H1(
+            attributes.InlineStyle(
+                color="#000000",
+                font_size="32px",
+                font_weight="800",
+                line_height="32px",
+                margin="48px 0",
+                text_align="center",
+            ),
+            tags.Text(title),
+            tags.Br(),
+            (
+                tags.Span(
+                    attributes.InlineStyle(
+                        font_size="24px", font_weight="600", color="darkgray"
+                    ),
+                    tags.Text(heading),
+                )
+                if heading
+                else None
+            ),
+        )
+
+    def heading(self, heading):
+        return tags.H2(
+            attributes.InlineStyle(
+                color="#000000",
+                font_size="28px",
+                font_weight="600",
+                line_height="32px",
+                margin="48px 0 24px 0",
+                text_align="center",
+            ),
+            tags.Text(heading),
+        )
+
+    def subheading(self, text):
+        return self.text(text, font_size="24px")
+
     def text(self, text, font_size="18px"):
         return tags.P(tags.Text(text), attributes.InlineStyle(font_size=font_size))
+
+    def header(self, *elems):
+        return tags.Header(*elems)
+
+    def footer(self, text, first=None, *elems):
+        one = [
+            attributes.InlineStyle(
+                font_size="16px",
+                font_weight="400",
+                line_height="24px",
+                margin_top="48px",
+            ),
+            tags.Text(text),
+            first,
+        ]
+        return tags.Footer(tags.P(one), *elems)
 
     def main(
         self,
@@ -374,5 +400,19 @@ class Html:
         )
         res = html.render()
         if display:
-            IPython.core.display.display(IPython.core.display.HTML(res))
+            iframe = f"""
+            <script>
+                function resizeIframe(obj) {{
+                    obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
+                }}
+            </script>
+            <iframe id="FileFrame" src="about:blank" style="border: 0; width: 100%; height: 100%" onload="resizeIframe(this)"></iframe>
+            <script type="text/javascript">
+            var doc = document.getElementById('FileFrame').contentWindow.document;
+            doc.open();
+            doc.write(`{res}`);
+            doc.close();
+            </script>
+            """
+            IPython.core.display.display(IPython.core.display.HTML(iframe))
         return res
