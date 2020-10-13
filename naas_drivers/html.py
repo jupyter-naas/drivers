@@ -339,8 +339,45 @@ class Html:
             items.append(self.__convert(value, key))
         return [tags.Main(items)]
 
-    def generate(self, title, logo=None, display=True, footer=None, **kwargs):
-        html = tags.Html(
+    def __display(self, content, mode):
+        uid = uuid.uuid4().hex
+        if mode is None:
+            return
+        if mode == "shadow":
+            shadow = f"""
+            <script type="text/javascript">
+            var div_{uid} = document.createElement('div');
+            var shadowRoot_{uid} = div_{uid}.attachShadow({{mode: 'open'}});
+            shadowRoot_{uid}.innerHTML = `
+            {content}
+            `;
+            console.log('injected')
+            </script>
+            """
+            IPython.core.display.display(IPython.core.display.HTML(shadow))
+        elif mode == "iframe":
+            iframe = f"""
+            <script>
+                function resizeIframe_{uid}(obj) {{
+                    obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
+                }}
+            </script>
+            <iframe id="FileFrame_{uid}" src="about:blank"
+                style="border: 0; width: 100%; height: 100%" onload="resizeIframe_{uid}(this)">
+            </iframe>
+            <script type="text/javascript">
+            var doc_{uid} = document.getElementById('FileFrame_{uid}').contentWindow.document;
+            doc_{uid}.open();
+            doc_{uid}.write(`{content}`);
+            doc_{uid}.close();
+            </script>
+            """
+            IPython.core.display.display(IPython.core.display.HTML(iframe))
+        elif mode == "embed":
+            IPython.core.display.display(IPython.core.display.HTML(content))
+
+    def generate(self, title, logo=None, display="embed", footer=None, **kwargs):
+        gen_html = tags.Html(
             attributes.Lang("en"),
             tags.Head(
                 tags.Title(tags.Text(title)),
@@ -398,21 +435,6 @@ class Html:
                 tags.Text(table_ie9_close),
             ),
         )
-        res = html.render()
-        if display:
-            iframe = f"""
-            <script>
-                function resizeIframe(obj) {{
-                    obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
-                }}
-            </script>
-            <iframe id="FileFrame" src="about:blank" style="border: 0; width: 100%; height: 100%" onload="resizeIframe(this)"></iframe>
-            <script type="text/javascript">
-            var doc = document.getElementById('FileFrame').contentWindow.document;
-            doc.open();
-            doc.write(`{res}`);
-            doc.close();
-            </script>
-            """
-            IPython.core.display.display(IPython.core.display.HTML(iframe))
+        res = gen_html.render()
+        self.__display(res, display)
         return res
