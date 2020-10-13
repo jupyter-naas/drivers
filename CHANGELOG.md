@@ -1,3 +1,9 @@
+## 0.9.3 (2020-10-13)
+
+### Fix
+
+- **html**: :bug: fix display into jupyter
+
 ## 0.9.2 (2020-10-13)
 
 ### Fix
