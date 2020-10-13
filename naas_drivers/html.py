@@ -82,9 +82,11 @@ a.button:hover { color: #ffffff !important; background-color: #5c1958 !important
     h1 { font-size: 48px !important; line-height: 48px !important; }
     .intro { font-size: 24px !important; line-height: 36px !important; }
 }
+.basic_font {
+    font-family: 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';  # noqa: E501
+}
 """
 
-basic_font = "'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'"  # noqa: E501
 table_ie9 = """
 <!--[if (gte mso 9)|(IE)]>
 <table cellspacing="0" cellpadding="0" border="0" width="720" align="center" role="presentation"><tr><td>
@@ -352,6 +354,7 @@ class Html:
                     {"name": "role", "value": "article"},
                     {"name": "aria-label", "value": title},
                     attributes.Lang("en"),
+                    attributes.Class("basic_font"),
                     attributes.InlineStyle(
                         background_color="white",
                         color="#2b2b2b",
@@ -361,7 +364,6 @@ class Html:
                         margin="0 auto",
                         max_width="720px",
                         padding="40px 20px 40px 20px",
-                        font_family=basic_font,
                     ),
                     self.header(logo, self.title(title)),
                     self.main(**kwargs),
