@@ -407,7 +407,8 @@ class Html:
                 tags.Div(
                     attributes.InlineStyle(
                         display="none", max_height="0", overflow="hidden"
-                    )
+                    ),
+                    tags.Text(title),
                 ),
                 tags.Div(
                     attributes.InlineStyle(
