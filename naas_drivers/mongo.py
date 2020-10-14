@@ -121,9 +121,9 @@ class Mongo:
         try:
             # Read
             df = pd.DataFrame(list(df_collection.find(filters)))
+            return df
         except Exception as e:
             print("Failed to read MongoDB. Please ask Bob for help")
             print(e.__doc__)
             print(str(e))
-
-        return df
+            return None

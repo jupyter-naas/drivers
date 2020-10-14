@@ -1,10 +1,13 @@
 import requests
 import pandas as pd
+import os
 
 
 class Cityfalcon:
     __key = None
-    _url_base = "https://api.cityfalcon.com/v0.2/stories"
+    _url_base = os.environ.get(
+        "CITYFALCON_API", "https://api.cityfalcon.com/v0.2/stories"
+    )
     url_auth = None
 
     def __init__(self, key):
