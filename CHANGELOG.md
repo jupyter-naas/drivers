@@ -1,3 +1,9 @@
+## 0.9.6 (2020-10-14)
+
+### Fix
+
+- **html**: :bug: Correct preview text
+
 ## 0.9.5 (2020-10-14)
 
 ### Fix
