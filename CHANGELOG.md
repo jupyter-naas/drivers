@@ -1,3 +1,15 @@
+## 0.9.6 (2020-10-14)
+
+### Fix
+
+- **html**: :bug: Correct preview text
+
+## 0.9.5 (2020-10-14)
+
+### Fix
+
+- :sparkles: refactor name and follow good practice
+
 ## 0.9.4 (2020-10-13)
 
 ### Fix

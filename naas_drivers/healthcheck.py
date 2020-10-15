@@ -4,12 +4,10 @@ import os
 
 
 class HealthCheck:
-    healthUrl = None
+    healthUrl = os.environ.get("HC_API", None)
 
-    def __init__(self, mode="prod", healthUrl=None):
+    def __init__(self, mode="prod"):
         """ Create health driver mode='prod', healthUrl=None"""
-        print("HealthCheck init in " + mode + " mode")
-        self.healthUrl = healthUrl if healthUrl else os.environ.get("HC_API", healthUrl)
         self.mode = mode
 
     def start(self, healthkey):
@@ -39,7 +37,7 @@ class HealthCheck:
             except requests.exceptions.RequestException:
                 return f"Error ==> cannot get health server {self.healthUrl}{healthkey}, {date.today()}"
 
-    def checkUp(self, url, healthkey, auth=None, verify=True):
+    def check_up(self, url, healthkey, auth=None, verify=True):
         """ check if url is reachable (url, healthkey, auth=None, verify=True)"""
         self.start(healthkey)
         try:

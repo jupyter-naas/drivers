@@ -25,7 +25,7 @@ jobs:
         pip3 install --use-feature=2020-resolver -e '.[dev]'
     - name: Run tests and linters
       run: |
-        python3 -m black naas
-        python3 -m flake8 naas
+        python3 -m black naas_drivers
+        python3 -m flake8 naas_drivers
     - name: Validate PR title with commitizen
       uses: CashStory/commitizen-action-pr@1.0.1

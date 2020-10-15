@@ -170,8 +170,8 @@ class Html:
         self,
         link,
         text="Open",
-        color="white",
         width="auto",
+        color="white",
         background_color="black",
     ):
         return tags.Center(
@@ -215,6 +215,9 @@ class Html:
     def space(self):
         return tags.Br()
 
+    def separator(self):
+        return tags.hr()
+
     def table(self, data, border=True):
         elems = []
         table_arr = None
@@ -246,8 +249,8 @@ class Html:
         )
         return tags.P(tab)
 
-    def logo(self, src, link=None, name="Logo", size="80px"):
-        return self.image(src, link, name, width=size, height=size, align="center")
+    def logo(self, src, link=None, name="Logo", align="center", size="80px"):
+        return self.image(src, link, name, width=size, height=size, align=align)
 
     def image(
         self, src, link=None, name="Cover", align="left", width="100%", height="80%"
@@ -295,7 +298,7 @@ class Html:
             ),
         )
 
-    def heading(self, heading):
+    def heading(self, text):
         return tags.H2(
             attributes.InlineStyle(
                 color="#000000",
@@ -305,7 +308,7 @@ class Html:
                 margin="48px 0 24px 0",
                 text_align="center",
             ),
-            tags.Text(heading),
+            tags.Text(text),
         )
 
     def subheading(self, text):
@@ -404,7 +407,8 @@ class Html:
                 tags.Div(
                     attributes.InlineStyle(
                         display="none", max_height="0", overflow="hidden"
-                    )
+                    ),
+                    tags.Text(title),
                 ),
                 tags.Div(
                     attributes.InlineStyle(
