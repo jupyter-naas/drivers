@@ -27,6 +27,7 @@ setup(
         ]
     },
     install_requires=[
+        "jwt>=1,<2",
         "tensorflow>=2,<3",
         "pysftp>=0,<1",
         "htmlbuilder>=0,<1",
