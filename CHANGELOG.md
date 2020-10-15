@@ -1,3 +1,9 @@
+## 0.9.8 (2020-10-15)
+
+### Fix
+
+- **gsheet**: fix google spreadsheet driver
+
 ## 0.9.7 (2020-10-15)
 
 ### Fix
