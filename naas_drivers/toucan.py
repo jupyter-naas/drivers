@@ -176,7 +176,9 @@ class Toucan:
     def __get_headers(self):
         return {"authorization": f"Bearer {self.__token}"}
 
-    def embed_small_app_slide(self, small_app, slide, hosts=None):
+    def embed_small_app_slide(
+        self, small_app, slide, hosts=None, mode="webcomponent", height="800px"
+    ):
         allowedHosts = (
             hosts
             if hosts
@@ -197,7 +199,6 @@ class Toucan:
             "public": False,
             "smallApp": small_app,
             "uid": uid,
-            "variables": {},
         }
         req = requests.post(
             f"{self.url_api}/{self.__url_embed}",
@@ -205,8 +206,22 @@ class Toucan:
             json=data,
         )
         req.raise_for_status()
-        url = f"{self.url_base}/embedLauncher.js?id={uid}&token={self.__token}"
-        display(HTML(f'<script async src="{url}" type="text/javascript"></script>'))
+        html = None
+        if mode == "webcomponent":
+            html = f"""
+                <div style="height:{height}">
+                <script async src="{self.url_base}/scripts/embedLauncher.js?id={uid}&token={self.__token}" type="text/javascript"></script>
+                </div>
+            """
+        else:
+            html = f"""
+                <div style="height:{height}">
+                <iframe style="border: 0; overflow: hidden;" frameBorder="0" height="100%" width="100%"
+                    src="{self.url_base}/embed.html?id=id={uid}&token={self.__token}"></iframe>
+                </div>
+            """
+        display(HTML(html))
+        return html
 
     def craft_toucan_embed_token(
         self,
