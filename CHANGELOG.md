@@ -1,3 +1,9 @@
+## 0.13.0 (2020-10-19)
+
+### Feat
+
+- **ifttt**: :sparkles: add ifttt connector
+
 ## 0.12.0 (2020-10-19)
 
 ### Feat
