@@ -1,3 +1,9 @@
+## 0.12.0 (2020-10-19)
+
+### Feat
+
+- **bubble**: :sparkles: add bubble connector
+
 ## 0.11.0 (2020-10-19)
 
 ### Feat
