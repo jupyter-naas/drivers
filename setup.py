@@ -27,6 +27,7 @@ setup(
         ]
     },
     install_requires=[
+        "airtable-python-wrapper>=0,<1",
         "jwt>=1,<2",
         "tensorflow",
         "pysftp>=0,<1",

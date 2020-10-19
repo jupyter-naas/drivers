@@ -15,10 +15,12 @@ from .cityfalcon import Cityfalcon
 from .prediction import Prediction
 from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
+from airtable import Airtable
 
 __version__ = "0.9.13"
 
 darkknight = DarkKnight
+airtable = Airtable
 ftp = Ftp
 ftps = Ftps
 ftps_toucan = Ftps_toucan
@@ -35,4 +37,3 @@ cityfalcon = Cityfalcon
 prediction = Prediction
 sentiment_analysis = SentimentAnalysis
 toucan = Toucan
-
