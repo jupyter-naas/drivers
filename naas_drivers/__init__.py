@@ -17,12 +17,14 @@ from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
 from airtable import Airtable
 from .zappier import Zappier
+from .ifttt import Ifttt
 
 __version__ = "0.12.0"
 
 darkknight = DarkKnight
 airtable = Airtable
 zappier = Zappier
+ifttt = Ifttt
 ftp = Ftp
 ftps = Ftps
 ftps_toucan = Ftps_toucan
