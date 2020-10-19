@@ -17,7 +17,7 @@ from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
 from airtable import Airtable
 
-__version__ = "0.9.13"
+__version__ = "0.10.0"
 
 darkknight = DarkKnight
 airtable = Airtable

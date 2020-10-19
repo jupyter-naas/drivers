@@ -1,3 +1,9 @@
+## 0.10.0 (2020-10-19)
+
+### Feat
+
+- **airtable**: :sparkles: add airtable
+
 ## 0.9.13 (2020-10-16)
 
 ### Fix
