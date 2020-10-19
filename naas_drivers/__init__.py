@@ -16,11 +16,13 @@ from .prediction import Prediction
 from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
 from airtable import Airtable
+from .zappier import Zappier
 
 __version__ = "0.10.0"
 
 darkknight = DarkKnight
 airtable = Airtable
+zappier = Zappier
 ftp = Ftp
 ftps = Ftps
 ftps_toucan = Ftps_toucan
