@@ -1,3 +1,9 @@
+## 0.11.0 (2020-10-19)
+
+### Feat
+
+- **zappier**: :zap: create zappier connector
+
 ## 0.10.0 (2020-10-19)
 
 ### Feat
