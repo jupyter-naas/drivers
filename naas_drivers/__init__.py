@@ -18,7 +18,7 @@ from .toucan import Toucan
 from airtable import Airtable
 from .zappier import Zappier
 
-__version__ = "0.11.0"
+__version__ = "0.12.0"
 
 darkknight = DarkKnight
 airtable = Airtable
