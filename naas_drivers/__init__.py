@@ -15,10 +15,12 @@ from .cityfalcon import Cityfalcon
 from .prediction import Prediction
 from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
+from airtable import Airtable
 
 __version__ = "0.9.13"
 
 darkknight = DarkKnight
+airtable = Airtable
 ftp = Ftp
 ftps = Ftps
 ftps_toucan = Ftps_toucan
@@ -35,21 +37,3 @@ cityfalcon = Cityfalcon
 prediction = Prediction
 sentiment_analysis = SentimentAnalysis
 toucan = Toucan
-
-
-def help():
-    print("=== Drivers === \n")
-    print("drivers.darkknight() => Init the driver to connect to our backend \n")
-    print("drivers.ftp() => Init the driver to connect to ftp\n")
-    print("drivers.ftps() => Init the driver to connect to ftps\n")
-    print("drivers.git() => Init the driver to connect to git\n")
-    print("drivers.healthcheck() => Init the driver to connect to healthcheck\n")
-    print("drivers.gsheet() => Init the driver to connect to GoogleSpreadsheet\n")
-    print("drivers.mailer() => Init the driver to send email\n")
-    print("drivers.mongo() => Get the Mongo driver\n")
-    print("drivers.pdf() => Get the pdf generator driver\n")
-    print("drivers.sentiment() => Get the sentiment driver\n")
-    print("drivers.ml() => Get the machine learning driver\n")
-    print("drivers.geo() => Get the GeoLocator driver\n")
-    print("drivers.plot() => Get the plot driver\n")
-    print("drivers.pdf() => Get the pdf driver\n")

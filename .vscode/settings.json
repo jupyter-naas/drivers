@@ -4,6 +4,7 @@
         "html",
         "ci",
         "citifalcon",
-        "ftp"
+        "ftp",
+        "airtable"
     ]
 }
