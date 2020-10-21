@@ -9,4 +9,4 @@ class Ifttt:
             json=data,
         )
         r.raise_for_status()
-        r.json()
+        return r
