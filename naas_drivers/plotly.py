@@ -26,15 +26,16 @@ class Plotly:
         with open(html_filename, "w") as f:
             f.write(result)
             f.close()
-        if filename.endswith(".png"):
+        if filename.endswith(".png") or filename.endswith(".jpeg"):
             html_text = result
+            extension = filename.split(".")[1]
             json = {
                 "output": "screenshot",
                 "html": html_text,
                 "emulateScreenMedia": True,
                 "ignoreHttpsErrors": True,
                 "scrollPage": False,
-                "screenshot": {"type": "png", "selector": ".cartesianlayer"},
+                "screenshot": {"type": extension, "selector": ".cartesianlayer"},
             }
             req = requests.post(
                 url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render",
