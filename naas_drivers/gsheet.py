@@ -14,15 +14,14 @@ class Gsheet:
         if not self.sheets_api:
             raise ValueError("GSHEETS_API not defined!")
 
-    def _get(self, url, params: dict = None):
-        resp = requests.get(url, params=params)
-        return resp
-
-    def __call__(
-        self, spreadsheet_id: str, sheet_id: str, items_per_page: int = BIG_NUM_TO_GETALL
+    def get(
+        self,
+        spreadsheet_id: str,
+        sheet_name: str,
+        items_per_page: int = BIG_NUM_TO_GETALL,
     ) -> pd.DataFrame:
-        resp = self._get(
-            urljoin(self.sheets_api, f"{spreadsheet_id}/{sheet_id}"),
+        resp = requests.get(
+            urljoin(self.sheets_api, f"{spreadsheet_id}/{sheet_name}"),
             params={"perPage": items_per_page},
         )
         if resp.status_code != 200:
