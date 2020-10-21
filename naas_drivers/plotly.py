@@ -1,11 +1,9 @@
 import plotly.graph_objects as go
-import pandas as pd
 import requests
-import datetime as dt
 import os
 
 
-class Plot:
+class Plotly:
     """ Plot generator lib"""
 
     __css_base = ".modebar {display: none;} \n.modebar-container {display: none;} "
@@ -54,72 +52,46 @@ class Plot:
 
     def stock(
         self,
-        stock_companies,
-        date_from=-30,
-        date_to="today",
-        interval="1d",
+        stock_data,
         kind="candlestick",
-        moving_average=False,
         filter=False,
         filter_title="Stock",
+        filter_all=False,
     ):
         """ generate financial_chart """
-        if isinstance(stock_companies, str):
-            stock_companies = [stock_companies]
-        if isinstance(date_from, int) and date_from < 0:
-            date_from = dt.datetime.today() + dt.timedelta(days=date_from)
-        else:
-            raise ValueError(f"date_from ({date_from}) cannot be positive")
-        if isinstance(date_to, int) and date_to > 0:
-            date_to = dt.datetime.today() + dt.timedelta(days=date_to)
-        if isinstance(date_to, str) and date_to == "today":
-            date_to = dt.datetime.today()
-        else:
-            raise ValueError(f"date_to ({date_to}) cannot be negative")
-        stocks = []
+        stock_companies = stock_data.Company.unique()
+        colors = ["green", "red"]
         data = []
-        period1 = date_from.strftime("%s")
-        period2 = date_to.strftime("%s")
         buttons = []
-        buttons.append(
-            dict(
-                args=[{"visible": [True for x in stock_companies]}],
-                label="All",
-                method="restyle",
+        if filter_all:
+            buttons.append(
+                dict(
+                    args=[{"visible": [True for x in stock_companies]}],
+                    label="All",
+                    method="restyle",
+                )
             )
-        )
-        for company in stock_companies:
-            url = (
-                f"https://query1.finance.yahoo.com/v7/finance/download/"
-                f"{company}?period1={period1}&period2={period2}&interval={interval}&events=history"
-            )
-            print("getting data for", company, url)
-            stock = pd.read_csv(url)
-            stock["Company"] = company
-            stocks.append(stock)
-            visibility = [x == company for x in stock_companies]
-            if moving_average:
-                stock["MA20"] = stock.Close.rolling(20).mean()
-                stock["MA50"] = stock.Close.rolling(50).mean()
-                data.append(
+        for y in range(len(stock_companies)):
+            company = stock_companies[y]
+            stock = stock_data.loc[stock_data["Company"] == company]
+            charts = []
+            filter_cols = [x for x in stock.columns if x.startswith("MA")]
+            for i in range(len(colors)):
+                filter_col = filter_cols[i]
+                charts.append(
                     go.Scatter(
                         x=stock["Date"],
-                        y=stock.MA20,
-                        line=dict(color="green", width=1),
-                        name="20 MA",
+                        visible=(filter_all if filter_all else y == 0),
+                        y=stock[filter_col],
+                        line=dict(color=colors[i], width=1),
+                        name=f'{filter_col.replace("MA", "")} MA',
                     )
                 )
-                data.append(
-                    go.Scatter(
-                        x=stock["Date"],
-                        y=stock.MA50,
-                        line=dict(color="red", width=1),
-                        name="50 MA",
-                    )
-                )
+
             if kind == "candlestick":
-                data.append(
+                charts.append(
                     go.Candlestick(
+                        visible=(filter_all if filter_all else y == 0),
                         name=company,
                         x=stock["Date"],
                         open=stock["Open"],
@@ -130,19 +102,31 @@ class Plot:
                 )
 
             elif kind == "linechart":
-                data.append(
+                charts.append(
                     go.Scatter(
-                        x=stock["Date"], y=stock["Open"], mode="lines", name="Open"
+                        visible=(filter_all if filter_all else y == 0),
+                        x=stock["Date"],
+                        y=stock["Open"],
+                        mode="lines",
+                        name="Open",
                     )
                 )
-                data.append(
+                charts.append(
                     go.Scatter(
-                        x=stock["Date"], y=stock["Close"], mode="lines", name="Close"
+                        visible=(filter_all if filter_all else y == 0),
+                        x=stock["Date"],
+                        y=stock["Close"],
+                        mode="lines",
+                        name="Close",
                     )
                 )
             else:
                 print("Not supported for now")
                 return
+            visibility = []
+            for x in stock_companies:
+                visibility.extend([x == company] * len(charts))
+            data.extend(charts)
             buttons.append(
                 dict(
                     args=[{"visible": visibility}],
@@ -151,7 +135,7 @@ class Plot:
                     method="restyle",
                 )
             )
-        print("generating plot")
+        print(f"Chart {kind} generated")
         updatemenus = list(
             [
                 dict(
@@ -192,6 +176,7 @@ class Plot:
                         text=filter_title,
                         x=0,
                         xref="paper",
+                        font=dict(size=24),
                         y=1.16,
                         yref="paper",
                         align="left",
