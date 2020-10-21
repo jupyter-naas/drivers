@@ -21,7 +21,7 @@ from airtable import Airtable
 from .zappier import Zappier
 from .ifttt import Ifttt
 
-__version__ = "0.15.2"
+__version__ = "0.15.3"
 
 darkknight = DarkKnight
 airtable = Airtable
