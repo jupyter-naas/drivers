@@ -20,9 +20,11 @@ from .yahoo import Yahoo
 from airtable import Airtable
 from .zappier import Zappier
 from .ifttt import Ifttt
+import requests
 
 __version__ = "0.15.3"
 
+__github_repo = "jupyter-naas/drivers"
 darkknight = DarkKnight
 airtable = Airtable
 zappier = Zappier
@@ -45,3 +47,17 @@ cityfalcon = Cityfalcon
 prediction = Prediction
 sentiment_analysis = SentimentAnalysis
 toucan = Toucan
+
+
+def version():
+    print(__version__)
+
+
+def get_last_version():
+    url = f"https://api.github.com/repos/{__github_repo}/tags"
+    response = requests.get(url, headers={"Accept": "application/vnd.github.v3+json"})
+    return response.json()[0]["name"]
+
+
+def up_to_date():
+    return get_last_version() == version()
