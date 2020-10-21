@@ -1,3 +1,9 @@
+## 0.14.2 (2020-10-21)
+
+### Fix
+
+- ifft issue who don't return json
+
 ## 0.14.1 (2020-10-21)
 
 ### Fix
