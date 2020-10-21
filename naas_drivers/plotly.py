@@ -45,7 +45,7 @@ class Plotly:
             open(filename, "wb").write(req.content)
             if not html_exist:
                 os.remove(html_filename)
-        elif not html_exist and not filename.endswith(".html"):
+        elif not filename.endswith(".html"):
             print("Not supported for now")
             os.remove(html_filename)
             return
