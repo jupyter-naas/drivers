@@ -1,3 +1,9 @@
+## 0.14.0 (2020-10-21)
+
+### Feat
+
+- split plot in plotly and yahoo
+
 ## 0.13.1 (2020-10-19)
 
 ### Fix
