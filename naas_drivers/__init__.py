@@ -1,3 +1,4 @@
+from .integromat import Integromat
 from .darkknight import DarkKnight
 from .ftp import Ftp
 from .ftps import Ftps
@@ -25,6 +26,7 @@ __version__ = "0.14.2"
 darkknight = DarkKnight
 airtable = Airtable
 zappier = Zappier
+integromat = Integromat
 ifttt = Ifttt
 yahoo = Yahoo
 ftp = Ftp
