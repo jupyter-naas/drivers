@@ -1,8 +1,6 @@
 from .integromat import Integromat
 from .darkknight import DarkKnight
 from .ftp import Ftp
-from .ftps import Ftps
-from .ftps_toucan import Ftps_toucan
 from .geolocator import GeoLocator
 from .git import Git
 from .gsheet import Gsheet
@@ -32,8 +30,6 @@ integromat = Integromat
 ifttt = Ifttt
 yahoo = Yahoo
 ftp = Ftp
-ftps = Ftps
-ftps_toucan = Ftps_toucan
 git = Git
 geoLocator = GeoLocator
 gsheet = Gsheet
