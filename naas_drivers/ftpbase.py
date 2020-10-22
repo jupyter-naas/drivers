@@ -1,0 +1,92 @@
+import ftplib
+import pysftp
+import os
+
+
+class Ftpbase:
+    """FTP/SFTP Connector class for cashstory\nSample Credentials file :{
+        "url": "",
+        "protocole": "ftp or sftp",
+        "port": ,
+        "type": "explicit TLS",
+        "auth_method": "Passif or Actif",
+        "username": "",
+        "password": ""
+    }"""
+
+    def __enter__(self):
+        return self
+
+    def get_file(self, path, dest_path=None):
+        """Read and return data from file which is specified 'path' """
+        saved_path = None
+        filename = os.path.basename(path)
+        if filename != path:
+            saved_path = self.pwd()
+            self.cwd(os.path.dirname(path))
+        if self.conprotocol == "ftp":
+            with open(dest_path if dest_path else filename, "wb") as f:
+
+                def callback(data):
+                    f.write(data)
+
+                self.retrbinary(f"RETR {filename}", callback)
+        elif self.conprotocol == "sftp":
+            with self.ftp.open(path) as f:
+                file_byte = open(dest_path if dest_path else path, "rb")  # file to send
+                file_byte.write(f)
+                file_byte.close()
+        if filename != path:
+            self.cwd(saved_path)
+
+    def send_file(self, path, dest_path=None):
+        saved_path = None
+        if dest_path is not None:
+            saved_path = self.pwd()
+            self.cwd(os.path.dirname(dest_path))
+        filename = os.path.basename(path)
+        ftpCommand = f"STOR {filename}"
+        file_byte = open(path, "rb")  # file to send
+        self.storbinary(ftpCommand, file_byte)  # send the file
+        file_byte.close()
+        if dest_path is not None:
+            self.cwd(saved_path)
+
+    def list_directory(self, path):
+        files = []
+        try:
+            files = self.ftp.nlst()
+        except ftplib.error_perm:
+            print("Error read this directory")
+        return files
+
+    def __init__(self, **credentials):
+        if credentials["protocole"] == "ftp":
+            ftp = (
+                ftplib.FTP_TLS(credentials["url"])
+                if credentials["type"] == "explicit TLS"
+                else ftplib.FTP(credentials["url"])
+            )
+            ftp.connect(credentials["url"], credentials["port"])
+            ftp.set_pasv(True) if credentials[
+                "auth_method"
+            ] == "Passif" else ftp.set_pasv(False)
+            ftp.login(credentials["username"], credentials["password"])
+            self.ftp = ftp
+        elif credentials["protocole"] == "sftp":
+            self.ftp = pysftp.Connection(
+                host=credentials["url"],
+                username=credentials["username"],
+                password=credentials["password"],
+                port=credentials["port"],
+            )
+        self.conprotocol = credentials["protocole"]
+
+    def __exit__(self, *krgs):
+        self.ftp.close()
+
+    def help(self):
+        print(f"=== {type(self).__name__} === \n")
+        print(".get_file(path) => get file from ftp path\n")
+        print(".send_file(path, dest_path) => send file to ftp path\n")
+        print(".list_directory(path) => do ls in ftp in path\n")

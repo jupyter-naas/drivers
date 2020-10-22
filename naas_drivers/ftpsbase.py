@@ -4,7 +4,7 @@ import datetime
 import os
 
 
-class Ftps(ftplib.FTP_TLS):
+class Ftpsbase(ftplib.FTP_TLS):
     """FTPS subclass that automatically wraps sockets in SSL to support implicit FTPS."""
 
     def __init__(self, *args, **kwargs):
