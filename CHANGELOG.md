@@ -1,3 +1,9 @@
+## 0.18.1 (2020-10-25)
+
+### Fix
+
+- allow HealthCheck to connect
+
 ## 0.18.0 (2020-10-25)
 
 ### Feat
