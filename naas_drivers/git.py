@@ -3,7 +3,7 @@ import urllib.parse
 
 
 class Git:
-    def __init__(self, config):
+    def connect(self, config):
         """
         Description: This class accepst a JSON configuration and executes respective
         function as per the action specified in the configuration

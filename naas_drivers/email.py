@@ -21,7 +21,7 @@ class Email:
         - smtp_type (str, optional): either SSL or STARTTLS; defaults to SSL
     """
 
-    def __init__(
+    def connect(
         self,
         username: str,
         password: str,

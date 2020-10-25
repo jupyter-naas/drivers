@@ -15,7 +15,7 @@ from .prediction import Prediction
 from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
 from .yahoo import Yahoo
-from airtable import Airtable
+from .airtable import Airtable
 from .zappier import Zappier
 from .ifttt import Ifttt
 import requests
@@ -23,26 +23,27 @@ import requests
 __version__ = "0.17.0"
 
 __github_repo = "jupyter-naas/drivers"
-darkknight = DarkKnight
+
+darkknight = DarkKnight()
 airtable = Airtable
-zappier = Zappier
-integromat = Integromat
-ifttt = Ifttt
-yahoo = Yahoo
-ftp = Ftp
-git = Git
-geoLocator = GeoLocator
-gsheet = Gsheet
-healthCheck = HealthCheck
-email = Email
-mongo = Mongo
-pdf = Pdf
-plotly = Plotly
-html = Html
-cityfalcon = Cityfalcon
-prediction = Prediction
-sentiment_analysis = SentimentAnalysis
-toucan = Toucan
+zappier = Zappier()
+integromat = Integromat()
+ifttt = Ifttt()
+yahoo = Yahoo()
+ftp = Ftp()
+git = Git()
+geoLocator = GeoLocator()
+gsheet = Gsheet()
+health_check = HealthCheck()
+email = Email()
+mongo = Mongo()
+pdf = Pdf()
+plotly = Plotly()
+html = Html()
+cityfalcon = Cityfalcon()
+prediction = Prediction()
+sentiment_analysis = SentimentAnalysis()
+toucan = Toucan()
 
 
 def version():

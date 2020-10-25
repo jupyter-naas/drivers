@@ -7,7 +7,7 @@ class Ftp:
 
     _ftp = None
 
-    def __init__(
+    def connect(
         self,
         user,
         passwd,
