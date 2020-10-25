@@ -25,7 +25,7 @@ __version__ = "0.17.0"
 __github_repo = "jupyter-naas/drivers"
 
 darkknight = DarkKnight()
-airtable = Airtable
+airtable = Airtable()
 zappier = Zappier()
 integromat = Integromat()
 ifttt = Ifttt()
