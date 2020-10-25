@@ -6,6 +6,9 @@ import os
 class HealthCheck:
     healthUrl = os.environ.get("HC_API", None)
 
+    def connect(self, url):
+        self.healthUrl = url
+
     def start(self, healthkey):
         """ send start to healthcheck (healthkey)"""
         try:
