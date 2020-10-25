@@ -1,3 +1,15 @@
+## 0.18.0 (2020-10-25)
+
+### Feat
+
+- deploy new singleuser
+- deploy new singleuser
+- switch all drivers to nocall
+
+### Fix
+
+- airtable
+
 ## 0.17.0 (2020-10-22)
 
 ### Feat
