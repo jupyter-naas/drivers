@@ -10,7 +10,7 @@ class Cityfalcon:
     )
     url_auth = None
 
-    def __init__(self, key):
+    def connect(self, key):
         self.__key = key
         self.url_auth = f"{self._url_base}?access_token={self.__key}"
 

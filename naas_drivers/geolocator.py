@@ -13,9 +13,8 @@ class GeoLocator:
         df = geo.geoloc(df, column="address")
     """
 
-    def __init__(self, limit=50):
+    def __init__(self):
         self.client = None
-        self.limit = limit
 
     def use_google(
         self,
@@ -37,14 +36,14 @@ class GeoLocator:
         client = Nominatim(user_agent=user_agent, **kwargs)
         self.client = RateLimiter(client.geocode, min_delay_seconds=min_delay_seconds)
 
-    def geoloc(self, df: pd.DataFrame, column: str) -> pd.DataFrame:
+    def geoloc(self, df: pd.DataFrame, column: str, limit=50) -> pd.DataFrame:
         if not self.client:
             raise ValueError(
                 "Please set the map service using either `use_google` or `use_osm` method"
             )
-        if df.shape[0] > self.limit:
+        if df.shape[0] > limit:
             raise ValueError(
-                f"Dataset number of rows is more than the set limit of {self.limit}"
+                f"Dataset number of rows is more than the set limit of {limit}"
             )
         df["_location"] = df[column].apply(self.client)
         df["LATITUDE"] = df["_location"].apply(

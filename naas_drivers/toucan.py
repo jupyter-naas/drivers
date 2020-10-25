@@ -44,27 +44,28 @@ class Toucan:
     config = {}
     tc_params = {}
     small_apps = []
+    debug = False
 
-    def __init__(self, url, username, password, mode="prod"):
+    def connect(self, url, username, password, debug=False):
         self.url_base = url
         host = url.partition("://")[2]
         self.__url_name = host.partition(".")[0]
         self.login = {"username": username, "password": password}
-        self.mode = mode
+        self.debug = debug
         try:
-            if self.mode == "debug":
+            if self.debug:
                 print("Get toucan tc-params")
             self.tc_params = self.__request_tc_params()
-            if self.mode == "debug":
+            if self.debug:
                 print("Get toucan url_api")
             self.url_api = self.tc_params.get("API_BASEROUTE")
-            if self.mode == "debug":
+            if self.debug:
                 print("Get toucan user")
             self.user = self.__request_user()
-            if self.mode == "debug":
+            if self.debug:
                 print("Get toucan token")
             self.__token = self.user.get("token")
-            if self.mode == "debug":
+            if self.debug:
                 print("Get toucan small_apps")
             self.small_apps = self.__request_small_apps()
         except requests.exceptions.HTTPError as errh:
@@ -75,7 +76,7 @@ class Toucan:
             print("Timeout Error:", errt)
         except requests.exceptions.RequestException as err:
             print("OOps: Something Else", err)
-        if self.mode == "debug":
+        if self.debug:
             print("user logged")
 
     def __request_small_apps(self):
@@ -128,10 +129,10 @@ class Toucan:
 
     def __generateUrls(self, app_name, config, reports, ids):
         arr = []
-        if self.mode == "debug":
+        if self.debug:
             print("Get app slides")
         slides = config.get("slides")
-        if self.mode == "debug":
+        if self.debug:
             print("Get app Home")
         home = config.get("home")
         if home is not None and "skipToReport" in home:
@@ -142,7 +143,7 @@ class Toucan:
                     "name": "dashboard",
                 }
             )
-            if self.mode == "debug":
+            if self.debug:
                 print("Add New dashboard to url list")
         else:
             arr.append(
@@ -152,9 +153,9 @@ class Toucan:
                     "name": "dashboard",
                 }
             )
-            if self.mode == "debug":
+            if self.debug:
                 print("Add Old dashboard to url list")
-        if self.mode == "debug":
+        if self.debug:
             print("Generate all url from config")
         for report in reports:
             if "id" in report and "entityName" in report:
@@ -162,7 +163,7 @@ class Toucan:
                     if "parent_id" in slide and "id" in slide and "title" in slide:
                         name = self.generate_screenshot_name(slide, report)
                         rId = self.__calc_report_id(report.get("id"), ids)
-                        if self.mode == "debug":
+                        if self.debug:
                             print("Generate url for", name)
                         arr.append(
                             {
@@ -549,12 +550,12 @@ class Toucan:
         return res
 
     def screenshots_app(self, app_name, reportName=None, fullSize=False):
-        if self.mode == "debug":
+        if self.debug:
             print("Generate screenshots for", app_name)
         if self.is_app_allowed(app_name):
             folderName = self.__generate_folder_name(app_name)
             self.__createFolder(folderName)
-            if self.mode == "debug":
+            if self.debug:
                 print("Get app config")
             config = self.get_app_config(app_name)
             ids = None
@@ -569,7 +570,7 @@ class Toucan:
                 req = ""
                 path = f"{folderName}/{url.get('name')}.png"
                 try:
-                    if self.mode == "debug":
+                    if self.debug:
                         print(f"Request Screenshot {path}")
                     req = requests.get(
                         self.__url_screenshot_api,
@@ -597,7 +598,7 @@ class Toucan:
                 if req.status_code == 200:
                     with open(path, "wb") as out_file:
                         shutil.copyfileobj(req.raw, out_file)
-                        if self.mode == "debug":
+                        if self.debug:
                             print(f"Created Screenshot {path}")
         else:
             print("this app is not allow to your account")

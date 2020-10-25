@@ -192,7 +192,7 @@ class DarkKnight:
     __auth = None
     req_headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
-    def __init__(self, api_key=None, user=None, PUBLIC_DK_API=None):
+    def connect(self, api_key=None, user=None, PUBLIC_DK_API=None):
         """
         Description: This class connect you to a darknight instance
         """
