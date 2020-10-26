@@ -23,9 +23,6 @@ class Prediction:
         # the number of data points in the future to be predicted, max 1000
         self.data_points = 20
 
-        # True if the final output needs to be stored as graph, False otherwise
-        self.plot = True
-
         self.model_params = dict(
             arima=dict(
                 start_p=1,
@@ -47,7 +44,6 @@ class Prediction:
             svr=dict(kernel="rbf", C=1e3, gamma=0.1),
         )
         self.final_predicted_df = None
-        self.plot_df = None
 
     def __init_class_vars(
         self,
@@ -56,7 +52,6 @@ class Prediction:
         label: str,
         date_column: str,
         data_points: int,
-        plot: bool,
     ):
 
         # either all to predict using all the models else one of arima, svr or linear
@@ -81,9 +76,6 @@ class Prediction:
 
         # the number of data points in the future to be predicted, max 1000
         self.data_points = data_points
-
-        # True if the final output needs to be stored as graph, False otherwise
-        self.plot = plot
 
     def __createmodel(self, model_type, df):
 
@@ -184,7 +176,6 @@ class Prediction:
         label: str = "Close",
         date_column: str = "Date",
         data_points: int = 20,
-        plot: bool = False,
     ):
         # initializes the class variables
         self.__init_class_vars(
@@ -193,7 +184,6 @@ class Prediction:
             label=label,
             date_column=date_column,
             data_points=data_points,
-            plot=plot,
         )
 
         # modelling and making the predictions
