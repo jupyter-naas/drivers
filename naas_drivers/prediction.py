@@ -199,14 +199,17 @@ class Prediction:
         # modelling and making the predictions
         output_dfs = None
         predicted_cols = None
+        group = None
         if "Company" in dataset.columns:
+            group = ["Date", "Company"]
             predicted_cols, output_dfs = self.__multi_company()
         else:
+            group = ["Date"]
             predicted_cols, output_dfs = self.__modelling_prediction(dataset)
         res = pd.concat(output_dfs)
         res = res.reset_index(drop=True)
         agg = {i: ("sum" if i in predicted_cols else "first") for i in res.columns}
-        res = res.groupby("Date", as_index=False, dropna=False).agg(agg)
+        res = res.groupby(group, as_index=False, dropna=False).agg(agg)
         res["COMPOUND"] = res[predicted_cols].mean(axis=1)
         res["COMPOUND"] = res["COMPOUND"].replace(0.000000, np.nan)
         for col in predicted_cols:
