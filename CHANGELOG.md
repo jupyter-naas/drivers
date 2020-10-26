@@ -1,3 +1,9 @@
+## 0.18.4 (2020-10-26)
+
+### Fix
+
+- prediction work with yahoo and plotly
+
 ## 0.18.3 (2020-10-26)
 
 ### Fix
