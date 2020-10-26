@@ -1,5 +1,6 @@
 import pandas as pd
 from pandas.tseries.offsets import Day
+import numpy as np
 
 
 class Prediction:
@@ -133,10 +134,12 @@ class Prediction:
                 df,
             ]
             models_dict = {}
+            predicted_cols = []
             for param in self.model_params:
                 model_type = self.param_model_map[param]
 
                 predicted_col = model_type
+                predicted_cols.append(predicted_col)
                 model, predicted_values = self.__createmodel(model_type, df)
                 models_dict[model_type] = model
                 predicted_df = self.__transform_output(
@@ -148,26 +151,31 @@ class Prediction:
                 df,
             ]
             models_dict = {}
+            predicted_cols = []
             model_type = self.param_model_map[self.prediction_type]
             predicted_col = model_type
-            model, predicted_values = self.__createmodel(model_type)
+            predicted_cols.append(predicted_col)
+            model, predicted_values = self.__createmodel(model_type, df)
             models_dict[model_type] = model
             predicted_df = self.__transform_output(
                 df.copy(), predicted_values, predicted_col
             )
             output_dfs.append(predicted_df)
-        return output_dfs
+        return predicted_cols, output_dfs
 
     def __multi_company(self):
         companies = self.input_df.Company.unique()
         output_dfs = []
+        predicted_cols = []
         for company in companies:
             filtered = self.input_df.loc[self.input_df["Company"] == company]
-            outputs = self.__modelling_prediction(filtered)
+            predicted_cols, outputs = self.__modelling_prediction(filtered)
             for out in outputs:
                 out["Company"] = company
+                out = out.reset_index(drop=True)
             output_dfs = [*output_dfs, *outputs]
-        return output_dfs
+
+        return predicted_cols, output_dfs
 
     def get(
         self,
@@ -190,10 +198,17 @@ class Prediction:
 
         # modelling and making the predictions
         output_dfs = None
+        predicted_cols = None
         if "Company" in dataset.columns:
-            output_dfs = self.__multi_company()
+            predicted_cols, output_dfs = self.__multi_company()
         else:
-            output_dfs = self.__modelling_prediction(dataset)
+            predicted_cols, output_dfs = self.__modelling_prediction(dataset)
         res = pd.concat(output_dfs)
         res = res.reset_index(drop=True)
+        agg = {i: ("sum" if i in predicted_cols else "first") for i in res.columns}
+        res = res.groupby("Date", as_index=False, dropna=False).agg(agg)
+        res["COMPOUND"] = res[predicted_cols].mean(axis=1)
+        res["COMPOUND"] = res["COMPOUND"].replace(0.000000, np.nan)
+        for col in predicted_cols:
+            res[col] = res[col].replace(0.000000, np.nan)
         return res
