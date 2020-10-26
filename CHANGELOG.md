@@ -1,3 +1,9 @@
+## 0.18.9 (2020-10-26)
+
+### Fix
+
+- show only open or close on stock plotly
+
 ## 0.18.8 (2020-10-26)
 
 ### Fix
