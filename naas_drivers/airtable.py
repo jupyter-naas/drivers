@@ -1,4 +1,4 @@
-from .airtable import Airtable as at
+from airtable import Airtable as at
 
 
 class Airtable:
