@@ -51,6 +51,101 @@ class Plotly:
             return
         print("Save as", filename)
 
+    def __predict(self, stock, visible):
+        charts = []
+        if "ARIMA" in stock.columns:
+            charts.append(
+                go.Scatter(
+                    visible=visible,
+                    x=stock["Date"],
+                    y=stock["ARIMA"],
+                    mode="lines",
+                    name="ARIMA",
+                )
+            )
+        if "COMPOUND" in stock.columns:
+            charts.append(
+                go.Scatter(
+                    visible=visible,
+                    x=stock["Date"],
+                    y=stock["COMPOUND"],
+                    mode="lines",
+                    name="COMPOUND",
+                )
+            )
+        if "LINEAR" in stock.columns:
+            charts.append(
+                go.Scatter(
+                    visible=visible,
+                    x=stock["Date"],
+                    y=stock["LINEAR"],
+                    mode="lines",
+                    name="LINEAR",
+                )
+            )
+        if "SVR" in stock.columns:
+            charts.append(
+                go.Scatter(
+                    visible=visible,
+                    x=stock["Date"],
+                    y=stock["SVR"],
+                    mode="lines",
+                    name="SVR",
+                )
+            )
+        return charts
+
+    def __linechart(self, stock, visible):
+        return [
+            go.Scatter(
+                visible=visible,
+                x=stock["Date"],
+                y=stock["Open"],
+                mode="lines",
+                name="Open",
+            ),
+            go.Scatter(
+                visible=visible,
+                x=stock["Date"],
+                y=stock["Close"],
+                mode="lines",
+                name="Close",
+            ),
+        ]
+
+    def __candlestick(self, stock, visible, company):
+        return [
+            go.Candlestick(
+                visible=visible,
+                name=company,
+                x=stock["Date"],
+                open=stock["Open"],
+                high=stock["High"],
+                low=stock["Low"],
+                close=stock["Close"],
+            )
+        ]
+
+    def __moving_average(self, stock, visible):
+        colors = ["green", "red"]
+        filter_cols = [x for x in stock.columns if x.startswith("MA")]
+        if len(filter_cols) == 0:
+            return []
+        else:
+            charts = []
+            for i in range(len(colors)):
+                filter_col = filter_cols[i]
+                charts.append(
+                    go.Scatter(
+                        x=stock["Date"],
+                        visible=visible,
+                        y=stock[filter_col],
+                        line=dict(color=colors[i], width=1),
+                        name=f'{filter_col.replace("MA", "")} MA',
+                    )
+                )
+            return charts
+
     def stock(
         self,
         stock_data,
@@ -61,7 +156,6 @@ class Plotly:
     ):
         """ generate financial_chart """
         stock_companies = stock_data.Company.unique()
-        colors = ["green", "red"]
         data = []
         buttons = []
         if filter_all:
@@ -76,51 +170,21 @@ class Plotly:
             company = stock_companies[y]
             stock = stock_data.loc[stock_data["Company"] == company]
             charts = []
-            filter_cols = [x for x in stock.columns if x.startswith("MA")]
-            for i in range(len(colors)):
-                filter_col = filter_cols[i]
-                charts.append(
-                    go.Scatter(
-                        x=stock["Date"],
-                        visible=(filter_all if filter_all else y == 0),
-                        y=stock[filter_col],
-                        line=dict(color=colors[i], width=1),
-                        name=f'{filter_col.replace("MA", "")} MA',
-                    )
-                )
-
+            visible = filter_all if filter_all else y == 0
+            charts.extend(self.__moving_average(stock, visible))
             if kind == "candlestick":
-                charts.append(
-                    go.Candlestick(
-                        visible=(filter_all if filter_all else y == 0),
-                        name=company,
-                        x=stock["Date"],
-                        open=stock["Open"],
-                        high=stock["High"],
-                        low=stock["Low"],
-                        close=stock["Close"],
-                    )
-                )
-
+                charts.extend(self.__candlestick(stock, visible, company))
             elif kind == "linechart":
-                charts.append(
-                    go.Scatter(
-                        visible=(filter_all if filter_all else y == 0),
-                        x=stock["Date"],
-                        y=stock["Open"],
-                        mode="lines",
-                        name="Open",
-                    )
-                )
-                charts.append(
-                    go.Scatter(
-                        visible=(filter_all if filter_all else y == 0),
-                        x=stock["Date"],
-                        y=stock["Close"],
-                        mode="lines",
-                        name="Close",
-                    )
-                )
+                if any(
+                    x in ["ARIMA", "LINEAR", "SVR", "COMPOUND"] for x in stock.columns
+                ):
+                    charts.extend(self.__predict(stock, visible))
+                if (
+                    "Date" in stock.columns
+                    and "Open" in stock.columns
+                    and "Close" in stock.columns
+                ):
+                    charts.extend(self.__linechart(stock, visible))
             else:
                 print("Not supported for now")
                 return

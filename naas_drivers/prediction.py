@@ -84,23 +84,18 @@ class Prediction:
         # True if the final output needs to be stored as graph, False otherwise
         self.plot = plot
 
-    def __createmodel(self, model_type):
+    def __createmodel(self, model_type, df):
 
         if model_type == "ARIMA":
             import pmdarima as pm
 
-            model = pm.auto_arima(
-                self.input_df[self.label], **self.model_params["arima"]
-            )
+            model = pm.auto_arima(df[self.label], **self.model_params["arima"])
             predicted_values = model.predict(n_periods=self.data_points)
         elif model_type in ("LINEAR", "SVR"):
             prediction = (
-                self.input_df[self.label]
-                .shift(-self.data_points)
-                .to_numpy()
-                .reshape(-1, 1)
+                df[self.label].shift(-self.data_points).to_numpy().reshape(-1, 1)
             )
-            X = self.input_df[self.label].to_numpy().reshape(-1, 1)[: -self.data_points]
+            X = df[self.label].to_numpy().reshape(-1, 1)[: -self.data_points]
             y = prediction[: -self.data_points].ravel()
             if model_type == "SVR":
                 from sklearn.svm import SVR
@@ -112,7 +107,7 @@ class Prediction:
                 model = LinearRegression(**self.model_params["linear"])
             model.fit(X, y)
             X_predict = (
-                self.input_df[self.label]
+                df[self.label]
                 .to_numpy()
                 .reshape(-1, 1)[-self.data_points :]  # noqa: E203
             )
@@ -124,69 +119,55 @@ class Prediction:
         return model, predicted_values
 
     def __transform_output(self, data_df, predicted_values, predicted_col):
-        predicted_index = pd.date_range(
-            start=data_df.index.max() + Day(1), periods=self.data_points
+        predicted_date = pd.date_range(
+            start=data_df[self.date_column].max() + Day(1), periods=self.data_points
         )
-        predict_df = pd.DataFrame(
-            data=predicted_values, index=predicted_index, columns=[predicted_col]
-        )
-        predict_df.index.name = self.date_column
+        predict_df = pd.DataFrame(data=predicted_values, columns=[predicted_col])
+        predict_df[self.date_column] = predicted_date
+        # predict_df.index.name = self.date_column
         return predict_df
 
-    def __modelling_prediction(self):
+    def __modelling_prediction(self, df):
         if self.prediction_type == "all":
             output_dfs = [
-                self.input_df,
+                df,
             ]
             models_dict = {}
-            predicted_cols = []
             for param in self.model_params:
                 model_type = self.param_model_map[param]
 
                 predicted_col = model_type
-                predicted_cols.append(predicted_col)
-                model, predicted_values = self.__createmodel(model_type)
+                model, predicted_values = self.__createmodel(model_type, df)
                 models_dict[model_type] = model
                 predicted_df = self.__transform_output(
-                    self.input_df.copy(), predicted_values, predicted_col
+                    df.copy(), predicted_values, predicted_col
                 )
                 output_dfs.append(predicted_df)
         else:
             output_dfs = [
-                self.input_df,
+                df,
             ]
             models_dict = {}
-            predicted_cols = []
             model_type = self.param_model_map[self.prediction_type]
             predicted_col = model_type
-            predicted_cols.append(predicted_col)
             model, predicted_values = self.__createmodel(model_type)
             models_dict[model_type] = model
             predicted_df = self.__transform_output(
-                self.input_df.copy(), predicted_values, predicted_col
+                df.copy(), predicted_values, predicted_col
             )
             output_dfs.append(predicted_df)
-        return predicted_cols, output_dfs
+        return output_dfs
 
-    def __melt_output(self, predicted_cols, output_dfs):
-        final_df = pd.concat(
-            output_dfs,
-            ignore_index=False,
-            axis=1,
-        )
-        for col in predicted_cols:
-            final_df[col] = final_df[col].fillna(value=self.input_df[self.label])
-        final_df["COMPOUND"] = final_df[predicted_cols].mean(axis=1)
-
-        final_df.index.name = self.date_column
-        final_df = final_df.rename(columns={self.label: "ACTUAL"})
-        plot_df = final_df.copy()
-        final_df = final_df.reset_index().melt(
-            id_vars=[self.date_column], var_name="LABEL", value_name="VALUE"
-        )
-        final_df = final_df.sort_values(by=[self.date_column, "LABEL"])
-
-        return final_df, plot_df
+    def __multi_company(self):
+        companies = self.input_df.Company.unique()
+        output_dfs = []
+        for company in companies:
+            filtered = self.input_df.loc[self.input_df["Company"] == company]
+            outputs = self.__modelling_prediction(filtered)
+            for out in outputs:
+                out["Company"] = company
+            output_dfs = [*output_dfs, *outputs]
+        return output_dfs
 
     def get(
         self,
@@ -208,10 +189,11 @@ class Prediction:
         )
 
         # modelling and making the predictions
-        predicted_cols, output_dfs = self.__modelling_prediction()
-
-        # making the output more user friendly and also plotting the graph
-        self.final_predicted_df, self.plot_df = self.__melt_output(
-            predicted_cols, output_dfs
-        )
-        return self.final_predicted_df
+        output_dfs = None
+        if "Company" in dataset.columns:
+            output_dfs = self.__multi_company()
+        else:
+            output_dfs = self.__modelling_prediction(dataset)
+        res = pd.concat(output_dfs)
+        res = res.reset_index(drop=True)
+        return res

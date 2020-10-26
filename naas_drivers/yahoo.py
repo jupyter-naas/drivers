@@ -43,5 +43,5 @@ class Yahoo:
             else:
                 stocks = stocks.append(stock)
             print("getted data for", company, url)
-
+        stocks["Date"] = pd.to_datetime(stocks["Date"], format="%Y-%m-%d")
         return stocks
