@@ -95,23 +95,30 @@ class Plotly:
             )
         return charts
 
-    def __linechart(self, stock, visible):
-        return [
-            go.Scatter(
-                visible=visible,
-                x=stock["Date"],
-                y=stock["Open"],
-                mode="lines",
-                name="Open",
-            ),
-            go.Scatter(
-                visible=visible,
-                x=stock["Date"],
-                y=stock["Close"],
-                mode="lines",
-                name="Close",
-            ),
-        ]
+    def __linechart(self, stock, visible, kind):
+        charts = []
+        filtered = kind.split("_")[1] if "_" in kind else None
+        if "Open" in stock.columns and (filtered is None or filtered == "open"):
+            charts.append(
+                go.Scatter(
+                    visible=visible,
+                    x=stock["Date"],
+                    y=stock["Open"],
+                    mode="lines",
+                    name="Open",
+                )
+            )
+        if "Close" in stock.columns and (filtered is None or filtered == "close"):
+            charts.append(
+                go.Scatter(
+                    visible=visible,
+                    x=stock["Date"],
+                    y=stock["Close"],
+                    mode="lines",
+                    name="Close",
+                )
+            )
+        return charts
 
     def __candlestick(self, stock, visible, company):
         return [
@@ -174,17 +181,13 @@ class Plotly:
             charts.extend(self.__moving_average(stock, visible))
             if kind == "candlestick":
                 charts.extend(self.__candlestick(stock, visible, company))
-            elif kind == "linechart":
+            elif kind.startswith("linechart"):
                 if any(
                     x in ["ARIMA", "LINEAR", "SVR", "COMPOUND"] for x in stock.columns
                 ):
                     charts.extend(self.__predict(stock, visible))
-                if (
-                    "Date" in stock.columns
-                    and "Open" in stock.columns
-                    and "Close" in stock.columns
-                ):
-                    charts.extend(self.__linechart(stock, visible))
+                if any(x in ["Open", "Close"] for x in stock.columns):
+                    charts.extend(self.__linechart(stock, visible, kind))
             else:
                 print("Not supported for now")
                 return
