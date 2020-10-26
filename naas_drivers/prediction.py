@@ -131,7 +131,7 @@ class Prediction:
     def __modelling_prediction(self, df):
         if self.prediction_type == "all":
             output_dfs = [
-                df,
+                df.copy(),
             ]
             models_dict = {}
             predicted_cols = []
@@ -148,7 +148,7 @@ class Prediction:
                 output_dfs.append(predicted_df)
         else:
             output_dfs = [
-                df,
+                df.copy(),
             ]
             models_dict = {}
             predicted_cols = []
