@@ -20,7 +20,7 @@ from .zappier import Zappier
 from .ifttt import Ifttt
 import requests
 
-__version__ = "0.18.5"
+__version__ = "0.18.6"
 
 __github_repo = "jupyter-naas/drivers"
 
