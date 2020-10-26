@@ -48,12 +48,7 @@ class Prediction:
         self.final_predicted_df = None
         self.plot_df = None
 
-    def plot_output(
-        self, data_points: int = 0, plot_width: int = 15, plot_height: int = 6
-    ):
-        return self.__plot_output(data_points, plot_width, plot_height)
-
-    def init_class_vars(
+    def __init_class_vars(
         self,
         prediction_type: str,
         dataset: pd.DataFrame,
@@ -173,24 +168,6 @@ class Prediction:
             output_dfs.append(predicted_df)
         return predicted_cols, output_dfs
 
-    def __plot_output(
-        self, data_points: int, plot_width: int = 15, plot_height: int = 6
-    ):
-        if data_points == 0:
-            data_points = self.data_points + 7
-        if self.plot:
-            if self.prediction_type == "all":
-                # lines no from the df = no of prediction_types * the datapoints required
-                line_nos = data_points * 5  # lines from the end to plot
-            else:
-                line_nos = data_points * 3  # lines from the end to plot
-
-            return self.plot_df.tail(line_nos).plot.line(
-                figsize=(plot_width, plot_height)
-            )
-        else:
-            raise ValueError("Rerun the prediction with plot set to True")
-
     def __melt_output(self, predicted_cols, output_dfs):
         final_df = pd.concat(
             output_dfs,
@@ -211,17 +188,17 @@ class Prediction:
 
         return final_df, plot_df
 
-    def predict(
+    def get(
         self,
-        prediction_type: str,
         dataset: pd.DataFrame,
-        label: str,
-        date_column: str,
+        prediction_type: str = "all",
+        label: str = "Close",
+        date_column: str = "Date",
         data_points: int = 20,
-        plot: bool = True,
+        plot: bool = False,
     ):
         # initializes the class variables
-        self.init_class_vars(
+        self.__init_class_vars(
             prediction_type=prediction_type,
             dataset=dataset,
             label=label,
