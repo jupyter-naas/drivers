@@ -162,7 +162,11 @@ class Plotly:
         filter_all=False,
     ):
         """ generate financial_chart """
-        stock_companies = stock_data.Company.unique()
+        stock_data_copy = stock_data.copy()
+        stock_companies = stock_data_copy.Company.unique()
+        if len(stock_companies) == 0:
+            stock_data["Company"] = "Company_1"
+            stock_companies = stock_data_copy.Company.unique()
         data = []
         buttons = []
         if filter_all:
@@ -175,7 +179,7 @@ class Plotly:
             )
         for y in range(len(stock_companies)):
             company = stock_companies[y]
-            stock = stock_data.loc[stock_data["Company"] == company]
+            stock = stock_data_copy.loc[stock_data_copy["Company"] == company]
             charts = []
             visible = filter_all if filter_all else y == 0
             charts.extend(self.__moving_average(stock, visible))
@@ -252,6 +256,7 @@ class Plotly:
                     )
                 ],
             )
+        fig.show()
         return fig
 
     def table(self, header_values, cells_values, header_color="rgb(136,233,175)"):
