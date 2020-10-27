@@ -4,11 +4,26 @@ import os
 
 
 class Jupyter:
-    api_url = f'{os.environ.get("JUPYTERHUB_URL", "https://app.naas.ai")}/hub/api'
+    base_url = os.environ.get("JUPYTERHUB_URL", "https://app.naas.ai")
+    api_url = None
     token = None
+
+    def __init__(self):
+        self.api_url = f"{self.base_url}/hub/api"
 
     def connect(self, token):
         self.token = token
+
+    def create_user(self, username, password, super_admin_token):
+        signup_url = f"{self.base_url}hub/signup"
+        login = {
+            "username": username,
+            "password": password,
+        }
+        headers = {"Authorization": super_admin_token}
+        r = requests.post(signup_url, data=login, headers=headers)
+        r.raise_for_status()
+        return r.json()
 
     def get_users(self):
         r = requests.get(
