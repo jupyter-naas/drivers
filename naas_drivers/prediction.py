@@ -121,7 +121,7 @@ class Prediction:
         return predict_df
 
     def __modelling_prediction(self, df):
-        if self.prediction_type == "all":
+        if self.prediction_type == "all" or self.prediction_type == "COMPOUND":
             output_dfs = [
                 df.copy(),
             ]
@@ -172,7 +172,7 @@ class Prediction:
     def get(
         self,
         dataset: pd.DataFrame,
-        prediction_type: str = "all",
+        prediction_type: str = "COMPOUND",
         label: str = "Close",
         date_column: str = "Date",
         data_points: int = 20,
@@ -200,8 +200,11 @@ class Prediction:
         res = res.reset_index(drop=True)
         agg = {i: ("sum" if i in predicted_cols else "first") for i in res.columns}
         res = res.groupby(group, as_index=False, dropna=False).agg(agg)
-        res["COMPOUND"] = res[predicted_cols].mean(axis=1)
-        res["COMPOUND"] = res["COMPOUND"].replace(0.000000, np.nan)
+        if len(predicted_cols) > 1:
+            res["COMPOUND"] = res[predicted_cols].mean(axis=1)
+            res["COMPOUND"] = res["COMPOUND"].replace(0.000000, np.nan)
         for col in predicted_cols:
             res[col] = res[col].replace(0.000000, np.nan)
+        if prediction_type == "COMPOUND":
+            res = res.drop(columns=predicted_cols)
         return res
