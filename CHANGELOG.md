@@ -1,3 +1,9 @@
+## 0.19.0 (2020-10-27)
+
+### Feat
+
+- add linechart simple in plot and candlestick
+
 ## 0.18.12 (2020-10-27)
 
 ### Fix
