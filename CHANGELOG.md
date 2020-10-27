@@ -1,3 +1,9 @@
+## 0.18.12 (2020-10-27)
+
+### Fix
+
+- prediction with prediction_type COMPOUND default
+
 ## 0.18.11 (2020-10-27)
 
 ### Fix
