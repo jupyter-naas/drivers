@@ -22,7 +22,7 @@ from .ifttt import Ifttt
 import requests
 import os
 
-__version__ = "0.20.1"
+__version__ = "0.21.0"
 
 __github_repo = "jupyter-naas/drivers"
 
