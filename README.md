@@ -13,8 +13,7 @@
 
 ## Publish
 
-Allow easy deploy by setting password in keyring
-`python3 -m keyring set https://upload.pypi.org/legacy/ bobapp`
+this auto publish by github action on main branch
 
 
 ### Authors:
