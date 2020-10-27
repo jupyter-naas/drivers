@@ -153,6 +153,55 @@ class Plotly:
                 )
             return charts
 
+    def linechart(dataset, label_x: str, label_y: list):
+        charts = []
+        layout = dict(
+            dragmode="pan",
+            xaxis_rangeslider_visible=False,
+            showlegend=False,
+            updatemenus=[],
+        )
+        for i in range(len(label_y)):
+            filter_col = label_y[i]
+            charts.append(
+                go.Scatter(
+                    x=dataset[label_x],
+                    y=dataset[filter_col],
+                    name=filter_col,
+                )
+            )
+        fig = go.Figure(data=charts, layout=layout)
+        fig.show()
+        return fig
+
+    def candlestick(
+        dataset,
+        label_x: str,
+        label_open: str,
+        label_high: str,
+        label_low: str,
+        label_close: str,
+    ):
+        charts = []
+        layout = dict(
+            dragmode="pan",
+            xaxis_rangeslider_visible=False,
+            showlegend=False,
+            updatemenus=[],
+        )
+        charts = [
+            go.Candlestick(
+                x=dataset[label_x],
+                open=dataset[label_open],
+                high=dataset[label_high],
+                low=dataset[label_low],
+                close=dataset[label_close],
+            )
+        ]
+        fig = go.Figure(data=charts, layout=layout)
+        fig.show()
+        return fig
+
     def stock(
         self,
         stock_data,
