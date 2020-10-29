@@ -1,3 +1,9 @@
+## 0.23.0 (2020-10-29)
+
+### Feat
+
+- **newsapi**: :sparkles: add newsapi driver
+
 ## 0.22.1 (2020-10-29)
 
 ### Fix
