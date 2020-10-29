@@ -4,15 +4,13 @@ import os
 
 
 class Cityfalcon:
-    __key = None
+    __key = os.environ.get("CITYFALCON_KEY", None)
     _url_base = os.environ.get(
         "CITYFALCON_API", "https://api.cityfalcon.com/v0.2/stories"
     )
-    url_auth = None
 
     def connect(self, key):
         self.__key = key
-        self.url_auth = f"{self._url_base}?access_token={self.__key}"
 
     def get(
         self,
@@ -31,7 +29,8 @@ class Cityfalcon:
         time_filter="d1",
         languages="en",
     ):
-        url = f"{self.url_auth}&identifier_type={identifier_type}&paywall={paywall}&identifiers={action}_{country}&categories=mp%2Cop"
+        url = f"{self._url_base}?access_token={self.__key}"
+        url = f"{url}&identifier_type={identifier_type}&paywall={paywall}&identifiers={action}_{country}&categories=mp%2Cop"
         url = f"{url}&min_cityfalcon_score={min_score}&order_by=latest&time_filter={time_filter}&all_languages=false&languages={languages}"
         req = requests.get(url)
         dict_news = req.json()
