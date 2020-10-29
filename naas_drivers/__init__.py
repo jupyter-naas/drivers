@@ -1,3 +1,4 @@
+from .newsapi import NewsApi
 from .integromat import Integromat
 from .darkknight import DarkKnight
 from .ftp import Ftp
@@ -47,6 +48,7 @@ pdf = Pdf()
 plotly = Plotly()
 html = Html()
 cityfalcon = Cityfalcon()
+newsapi = NewsApi()
 prediction = Prediction()
 sentiment_analysis = SentimentAnalysis()
 toucan = Toucan()
