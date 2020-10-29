@@ -8,8 +8,7 @@ class Plotly:
 
     __css_base = ".modebar {display: none;} \n.modebar-container {display: none;} "
 
-    def export(self, chart, filename, css=None):
-        """ create html export and add css to it"""
+    def __export(self, chart, filename, css=None):
         html_filename = f"{filename.split('.')[0]}.html"
         html_exist = os.path.exists(html_filename)
         chart.write_html(html_filename)
@@ -50,6 +49,14 @@ class Plotly:
             os.remove(html_filename)
             return
         print("Save as", filename)
+
+    def export(self, chart, filenames, css=None):
+        """ create html export and add css to it"""
+        if isinstance(filenames, list):
+            for filename in filenames:
+                self.__export(chart, filename, css)
+        else:
+            self.__export(chart, filenames, css)
 
     def __predict(self, stock, visible):
         charts = []
