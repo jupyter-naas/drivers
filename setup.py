@@ -27,6 +27,7 @@ setup(
         ]
     },
     install_requires=[
+        "newsapi-python>=0,<1",
         "airtable-python-wrapper>=0,<1",
         "jwt>=1,<2",
         "tensorflow",

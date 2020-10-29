@@ -8,6 +8,7 @@
         "airtable",
         "zappier",
         "bubble",
-        "ifttt"
+        "ifttt",
+        "newsapi"
     ]
 }
