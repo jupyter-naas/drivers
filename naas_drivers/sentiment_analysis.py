@@ -1,6 +1,6 @@
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
-from pandas.io.json import json_normalize
+from pandas import json_normalize
 from typing import Union
 
 
@@ -52,7 +52,7 @@ class SentimentAnalysis:
 
         return df
 
-    def calculate(
+    def get(
         self,
         dataset: Union[pd.DataFrame, pd.Series],
         column_name: str,
