@@ -1,3 +1,9 @@
+## 0.22.1 (2020-10-29)
+
+### Fix
+
+- **cityfalcon**: allow default config for cityfalcon
+
 ## 0.22.0 (2020-10-29)
 
 ### Feat
