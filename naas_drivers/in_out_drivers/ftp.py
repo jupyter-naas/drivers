@@ -1,11 +1,14 @@
-from .ftpbase import Ftpbase
-from .ftpsbase import Ftpsbase
+from naas_drivers.driver import In_Driver, Out_Driver
+from .__ftp import Ftpbase
+from .__ftps import Ftpsbase
 
 
-class Ftp:
+class Ftp(In_Driver, Out_Driver):
     """FTP subclass"""
 
     _ftp = None
+    _user = None
+    _passwd = None
 
     def connect(
         self,
@@ -21,28 +24,26 @@ class Ftp:
         else:
             self._ftp = Ftpbase()
         self._ftp.connect(host=host, port=port)
+        self._user = user
+        self._passwd = passwd
         self._ftp.login(user=user, passwd=passwd)
         self.__force_prot = force_prot
+        self.connected = True
 
     def __before_all(self):
+        self.check_connect()
         if self.__force_prot:
             self._ftp.prot_c()
             self._ftp.prot_p()
 
-    def get_file(self, path):
+    def get(self, path):
         self.__before_all()
         return self._ftp.get_file(path)
 
-    def send_file(self, path, dest_path=None):
+    def send(self, path, dest_path=None):
         self.__before_all()
         self._ftp.send_file(path, dest_path)
 
-    def list_directory(self, dirName):
+    def list(self, dirName):
         self.__before_all()
         return self._ftp.list_directory(dirName)
-
-    def help(self):
-        print(f"=== {type(self).__name__} === \n")
-        print(".get_file(path) => get file from ftp path\n")
-        print(".send_file(path, dest_path) => send file to ftp path\n")
-        print(".list_directory(path) => do ls in ftp in path\n")

@@ -1,13 +1,16 @@
+from naas_drivers.driver import In_Driver
 from newsapi.newsapi_client import NewsApiClient
 import pandas as pd
 import os
 
 
-class NewsApi:
+class NewsApi(In_Driver):
     __key = os.environ.get("APINEW_KEY", None)
 
     def connect(self, key):
         self.__key = key
+        self.connected = True
+        return self
 
     def __transformDate(self, data, fields, limit):
         news = []
@@ -39,16 +42,19 @@ class NewsApi:
     def get_sources(
         self, fields=["image", "title", "image", "link"], limit=20, **kargs
     ):
+        self.check_connect()
         newsapi = NewsApiClient(api_key=self.__key)
         sources = newsapi.get_sources(**kargs)
         return self.__transformDate(sources.get("sources"), fields, limit)
 
     def get_top(self, fields=["image", "title", "image", "link"], limit=20, **kargs):
+        self.check_connect()
         newsapi = NewsApiClient(api_key=self.__key)
         tops = newsapi.get_top_headlines(**kargs)
         return self.__transformDate(tops.get("articles"), fields, limit)
 
     def get(self, fields=["image", "title", "image", "link"], limit=20, **kargs):
+        self.check_connect()
         newsapi = NewsApiClient(api_key=self.__key)
         all_news = newsapi.get_everything(**kargs)
         return self.__transformDate(all_news.get("articles"), fields, limit)

@@ -1,7 +1,10 @@
+from naas_drivers.driver import In_Driver
 from htmlBuilder import tags, attributes
 import IPython.core.display
 import pandas as pd
+import requests
 import uuid
+import os
 
 #  https://litmus.com/community/templates/31-accessible-product-announcement-email
 # https://github.com/rodriguezcommaj/accessible-emails
@@ -105,7 +108,7 @@ table_ie9_close = """
 """
 
 
-class Html:
+class Html(In_Driver):
     """ HTML generator lib"""
 
     def __align(self, mode):
@@ -378,6 +381,42 @@ class Html:
             IPython.core.display.display(IPython.core.display.HTML(iframe))
         elif mode == "embed":
             IPython.core.display.display(IPython.core.display.HTML(content))
+
+    def __export(self, html, filename, css=""):
+        result = html.replace("</head>", f'<style id="naas_css">{css}</style></head>')
+        extension = filename.split(".")[1]
+        output = None
+        json = {
+            "html": result,
+            "emulateScreenMedia": True,
+            "ignoreHttpsErrors": True,
+            "scrollPage": False,
+            "screenshot": {"type": extension},
+        }
+        if filename.endswith(".png") or filename.endswith(".jpeg"):
+            output = "screenshot"
+            json["screenshot"] = {"type": extension}
+        elif filename.endswith(".pdf"):
+            output = "pdf"
+            json["pdf"] = {"width": "20.5cm", "height": "36.5cm"}
+        else:
+            raise ValueError("extension now suported for now")
+        json["output"] = output
+        req = requests.post(
+            url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render",
+            json=json,
+        )
+        req.raise_for_status()
+        open(filename, "wb").write(req.content)
+        print("Save as", filename)
+
+    def export(self, html, filenames, css=None):
+        """ create html export and add css to it"""
+        if isinstance(filenames, list):
+            for filename in filenames:
+                self.__export(html, filename, css)
+        else:
+            self.__export(html, filenames, css)
 
     def generate(self, title, logo=None, display="embed", footer=None, **kwargs):
         gen_html = tags.Html(

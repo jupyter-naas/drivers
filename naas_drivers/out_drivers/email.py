@@ -1,3 +1,4 @@
+from naas_drivers.driver import Out_Driver
 import smtplib
 from email.header import Header
 from email.mime.multipart import MIMEMultipart
@@ -7,7 +8,7 @@ from email import encoders
 from typing import Any, Dict, cast
 
 
-class Email:
+class Email(Out_Driver):
     """
     Connector for sending email from an authenticated email service over SMTP.
 
@@ -16,7 +17,7 @@ class Email:
         - password (str): password for email service
         - email_from (str, optional): the email address to send from
         - smtp_server (str, optional): the hostname of the SMTP server;
-          defaults to http://smtp.sendgrid.net/
+            defaults to http://smtp.sendgrid.net/
         - smtp_port (int, optional): the port number of the SMTP server; defaults to 465
         - smtp_type (str, optional): either SSL or STARTTLS; defaults to SSL
     """
@@ -36,6 +37,8 @@ class Email:
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.smtp_type = smtp_type
+        self.connected = True
+        return self
 
     def send(
         self,
@@ -56,7 +59,7 @@ class Email:
         Returns:
             - None
         """
-
+        self.check_connect()
         email_to = cast(str, email_to)
 
         contents = MIMEMultipart()

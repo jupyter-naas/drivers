@@ -1,22 +1,8 @@
+from naas_drivers.driver import In_Driver, Out_Driver
 from requests.auth import HTTPBasicAuth
-from escapism import escape
 import requests
-import string
-import base64
 import json
 import os
-
-_docker_safe_chars = set(string.ascii_letters + string.digits)
-_docker_escape_char = "-"
-
-
-def _escape(s):
-    """Escape a string to docker-safe characters"""
-    return escape(
-        s,
-        safe=_docker_safe_chars,
-        escape_char=_docker_escape_char,
-    )
 
 
 class Me:
@@ -66,7 +52,12 @@ class CRUD:
     auth = None
     req_headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
-    def __init__(self, base_url, endpoint, auth):
+    def __init__(
+        self,
+        base_url,
+        endpoint,
+        auth,
+    ):
         self.base_public_url = base_url
         self.endpoint = endpoint
         self.auth = auth
@@ -184,8 +175,7 @@ class SmartTable(CRUD):
         super().help()
 
 
-class DarkKnight:
-    """BOB lib"""
+class DarkKnight(In_Driver, Out_Driver):
 
     base_public_url = None
     smart_tables = []
@@ -202,50 +192,14 @@ class DarkKnight:
             if PUBLIC_DK_API
             else os.environ.get("PUBLIC_DK_API", PUBLIC_DK_API)
         )
-        self.__auth = HTTPBasicAuth(self.user, api_key)
+        if api_key:
+            self.__auth = HTTPBasicAuth(self.user, api_key)
         self.users = CRUD(self.base_public_url, "users", self.__auth)
         self.workspaces = CRUD(self.base_public_url, "workspaces", self.__auth)
         self.me = Me(self.base_public_url, self.__auth)
+        self.connected = True
         return self
 
-    def get_notebook_public_url(self, token=""):
-
-        client = self.user
-        clientEncoded = _escape(client)
-        message_bytes = clientEncoded.encode("ascii")
-        base64_bytes = base64.b64encode(message_bytes)
-        username_base64 = base64_bytes.decode("ascii")
-        return f"{self.base_public_url}/notebook/{username_base64}/{token}"
-
-    def init_smarttable(self, database, collection):
+    def connect_smarttable(self, database, collection):
+        self.check_connect()
         return SmartTable(self.base_public_url, database, collection, self.__auth)
-
-    def notification(self, email, subject, content, image_url, link_url):
-        data = {
-            "email": email,
-            "object": subject,
-            "content": content,
-            "image_url": image_url,
-            "link_url": link_url,
-        }
-        req = requests.post(
-            url=f"{self.base_public_url}/notifications/send",
-            auth=self.__auth,
-            headers=self.req_headers,
-            json=data,
-            allow_redirects=False,
-        )
-        req.raise_for_status()
-        return req
-
-    def help(self):
-        print("=== DarkKnight === \n")
-        print(
-            ".init_smarttable(database, collection) => initialise smart table with database and collection\n"
-        )
-        print(
-            ".init_smarttable(None, None).help() => show the helper of init_smarttable class\n"
-        )
-        print(".users.help() => show the helper of user class\n")
-        print(".workspaces.help() => show the helper of workspaces class\n")
-        print(".me.help() => show the helper of me class\n")

@@ -1,9 +1,10 @@
+from naas_drivers.driver import In_Driver
 import requests
 import pandas as pd
 import os
 
 
-class Cityfalcon:
+class Cityfalcon(In_Driver):
     __key = os.environ.get("CITYFALCON_KEY", None)
     _url_base = os.environ.get(
         "CITYFALCON_API", "https://api.cityfalcon.com/v0.2/stories"
@@ -11,31 +12,12 @@ class Cityfalcon:
 
     def connect(self, key):
         self.__key = key
+        self.connected = True
+        return self
 
-    def get(
-        self,
-        action,
-        fields=[
-            "image",
-            "title",
-            "source_logo",
-            "link",
-        ],
-        country="US",
-        limit=None,
-        min_score=20,
-        paywall=False,
-        identifier_type="full_tickers",
-        time_filter="d1",
-        languages="en",
-    ):
-        url = f"{self._url_base}?access_token={self.__key}"
-        url = f"{url}&identifier_type={identifier_type}&paywall={paywall}&identifiers={action}_{country}&categories=mp%2Cop"
-        url = f"{url}&min_cityfalcon_score={min_score}&order_by=latest&time_filter={time_filter}&all_languages=false&languages={languages}"
-        req = requests.get(url)
-        dict_news = req.json()
+    def convert_data_to_df(self, data, fields, limit) -> pd.DataFrame:
         news = []
-        for element in dict_news["stories"]:
+        for element in data["stories"]:
             new_formated = {}
             for field in fields:
                 if field == "title":
@@ -66,3 +48,28 @@ class Cityfalcon:
         if limit and isinstance(limit, int) and limit > 0:
             news = news[:limit]
         return pd.DataFrame.from_records(news)
+
+    def get(
+        self,
+        action,
+        fields=[
+            "image",
+            "title",
+            "source_logo",
+            "link",
+        ],
+        country="US",
+        limit=None,
+        min_score=20,
+        paywall=False,
+        identifier_type="full_tickers",
+        time_filter="d1",
+        languages="en",
+    ) -> pd.DataFrame:
+        self.check_connect()
+        url = f"{self._url_base}?access_token={self.__key}"
+        url = f"{url}&identifier_type={identifier_type}&paywall={paywall}&identifiers={action}_{country}&categories=mp%2Cop"
+        url = f"{url}&min_cityfalcon_score={min_score}&order_by=latest&time_filter={time_filter}&all_languages=false&languages={languages}"
+        req = requests.get(url)
+        dict_news = req.json()
+        return self.convert_data_to_df(dict_news, fields, limit)

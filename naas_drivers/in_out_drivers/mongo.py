@@ -1,18 +1,16 @@
+from naas_drivers.driver import In_Driver, Out_Driver
 from pymongo import MongoClient
 import pandas as pd  # noqa: F401
 import sys
 import time
 
 filter_system = {"name": {"$regex": r"^(?!system\.)"}}
-__client = None
 
 
-class Mongo:
+class Mongo(In_Driver, Out_Driver):
     """Mongo lib"""
 
-    def __init__(self):
-        return
-
+    __client = None
     # CONNECT TO MONGODB
     # - Function name : mongo_connect
     # - Arguments : host, port, username, password
@@ -24,26 +22,20 @@ class Mongo:
     def connect(
         self, mongo_host, mongo_port=None, mongo_username=None, mongo_password=None
     ):
-        global __client
         if mongo_port and mongo_username and mongo_password:
-            __client = MongoClient(
+            self.__client = MongoClient(
                 mongo_host,
                 mongo_port,
                 username=mongo_username,
                 password=mongo_password,
             )
         else:
-            __client = MongoClient(mongo_host)
+            self.__client = MongoClient(mongo_host)
 
-        try:
-            __client.server_info()
-            print("Successfully connected to MongoDB")
-        except Exception as e:
-            __client = None
-            print("Error connecting to MongoDB. Please check configuration")
-            print(e.__doc__)
-            print(str(e))
-        return __client
+        self.__client.server_info()
+        print("Successfully connected to MongoDB")
+        self.connected = True
+        return self
 
     # SAVE DF IN MONGODB
     # - Function name : save_df
@@ -53,17 +45,11 @@ class Mongo:
     # --- Success => "Dataframe successfully save in MongoDB"
     # --- Failed => "Failed to save in MongoDB. Please ask Bob for help"
 
-    def save_df(self, df, collection_name, db_name, replace=False):
+    def send(self, df, collection_name, db_name, replace=False):
+        self.check_connect()
         start_time = time.time()
-        # Control
-        if __client is None:
-            print(
-                "Error connecting to MongoDB. Please connect first to mongo with naas_drivers.mongo().connect"
-            )
-            return
-
         # Init collection
-        mongo_db = __client[db_name]
+        mongo_db = self.__client[db_name]
         df_collection = mongo_db[collection_name]
 
         try:
@@ -94,11 +80,11 @@ class Mongo:
                 % (time.time() - start_time)
             )
         except Exception as e:
-            print("Failed to save in MongoDB. Please ask Bob for help")
+            print("Failed to save in MongoDB.")
             print(e.__doc__)
             print(str(e))
 
-    # SAVE DF IN MONGODB
+    # Get DF IN MONGODB
     # - Function name : df_to_mongo
     # - Arguments : collection_name, db_name, filters => default = {}
     # - Value return : df
@@ -106,16 +92,10 @@ class Mongo:
     # --- Success => "Dataframe successfully save in MongoDB"
     # --- Failed => "Failed to save in MongoDB. Please ask Bob for help"
 
-    def read_df(self, collection_name, db_name, filters={}):
-        # Control
-        if __client is None:
-            print(
-                "Error connecting to MongoDB. Please connect first to mongo with naas_drivers.mongo().connect"
-            )
-            return
-
+    def get(self, collection_name, db_name, filters={}):
+        self.check_connect()
         # Init collection
-        mongo_db = __client[db_name]
+        mongo_db = self.__client[db_name]
         df_collection = mongo_db[collection_name]
 
         try:
@@ -123,7 +103,7 @@ class Mongo:
             df = pd.DataFrame(list(df_collection.find(filters)))
             return df
         except Exception as e:
-            print("Failed to read MongoDB. Please ask Bob for help")
+            print("Failed to read MongoDB")
             print(e.__doc__)
             print(str(e))
             return None

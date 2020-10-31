@@ -1,7 +1,8 @@
+from naas_drivers.driver import Out_Driver
 import requests
 
 
-class Zappier:
+class Zappier(Out_Driver):
     def webhook(self, url, data=None):
         r = requests.post(
             url=url,

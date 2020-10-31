@@ -1,3 +1,5 @@
+from naas_drivers.out_drivers.bubble import Bubble
+from naas_drivers.in_drivers.yahoo_finance import YahooFinance
 from .newsapi import NewsApi
 from .integromat import Integromat
 from .darkknight import DarkKnight
@@ -16,7 +18,6 @@ from .cityfalcon import Cityfalcon
 from .prediction import Prediction
 from .sentiment_analysis import SentimentAnalysis
 from .toucan import Toucan
-from .yahoo import Yahoo
 from .airtable import Airtable
 from .zappier import Zappier
 from .ifttt import Ifttt
@@ -30,27 +31,34 @@ __github_repo = "jupyter-naas/drivers"
 if os.environ.get("NAAS_DRIVER_LIGHT_INIT"):
     exit()
 
+# In drivers
+cityfalcon = Cityfalcon()
+geolocator = GeoLocator()
+newsapi = NewsApi()
+prediction = Prediction()
+sentiment_analysis = SentimentAnalysis()
+yahoo_finance = YahooFinance()
+
+# InOut drivers
+
+# Out drivers
+bubble = Bubble()
+email = Email()
+health_check = HealthCheck()
+ifttt = Ifttt()
+integromat = Integromat()
+zappier = Zappier()
+
 darkknight = DarkKnight()
 airtable = Airtable()
-zappier = Zappier()
 jupyter = Jupyter()
-integromat = Integromat()
-ifttt = Ifttt()
-yahoo = Yahoo()
 ftp = Ftp()
 git = Git()
-geoLocator = GeoLocator()
 gsheet = Gsheet()
-health_check = HealthCheck()
-email = Email()
 mongo = Mongo()
 pdf = Pdf()
 plotly = Plotly()
 html = Html()
-cityfalcon = Cityfalcon()
-newsapi = NewsApi()
-prediction = Prediction()
-sentiment_analysis = SentimentAnalysis()
 toucan = Toucan()
 
 __doc_url = "https://naas.gitbook.io/drivers/"

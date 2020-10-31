@@ -1,19 +1,20 @@
+from naas_drivers.driver import In_Driver, Out_Driver
+from IPython.core.display import display, HTML
+from typing import Any, Dict, List
+import pandas as pd
 import requests
+import datetime
 import shutil
-import os
-import io
 import json
 import time
-import pandas as pd
-import cson
-import datetime
-from typing import Any, Dict, List
-import jwt
 import uuid
-from IPython.core.display import display, HTML
+import cson
+import jwt
+import os
+import io
 
 
-class Toucan:
+class Toucan(In_Driver, Out_Driver):
     """Toucan lib"""
 
     # Private vars
@@ -400,6 +401,7 @@ class Toucan:
     def download_app_config(
         self, app_name, format_file="front_config", stage="staging"
     ):
+        formatFile = ""
         config_name = ""
         format_file = "&format=cson"
         if format_file == "etl_config":

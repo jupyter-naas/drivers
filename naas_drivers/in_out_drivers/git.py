@@ -1,8 +1,9 @@
+from naas_drivers.driver import In_Driver, Out_Driver
 from git import Repo, GitCommandError
 import urllib.parse
 
 
-class Git:
+class Git(In_Driver, Out_Driver):
     def connect(self, config):
         """
         Description: This class accepst a JSON configuration and executes respective
@@ -54,6 +55,8 @@ class Git:
                 from_dir=self.config.get("target_folder", None),
                 branch=self.config.get("branch", None),
             )
+        self.connected = True
+        return self
 
     def clone(
         self,
@@ -64,6 +67,7 @@ class Git:
         password=None,
     ):
         """ Clone the repo (dest_dir='gitSource', branch="master", repourl=None, username=None, password=None)"""
+        self.check_connect()
         try:
             if repourl[0:3] == "git":
                 Repo.clone_from(repourl, dest_dir, branch=branch)
@@ -79,6 +83,7 @@ class Git:
 
     def commit(self, from_dir, branch, message="Auto commit"):
         """ Commit the files commit(from_dir,branch,message="Auto Commit Message")"""
+        self.check_connect()
         try:
             repo = Repo(from_dir)
             repo.git.execute(["git", "add", "--all"])
@@ -91,6 +96,7 @@ class Git:
 
     def push(self, from_dir, branch="master"):
         """ Push to the specified repository push(self,from_dir,branch="master")"""
+        self.check_connect()
         try:
             self.checkout(from_dir, branch)
             origin = self.commit(from_dir, branch)
@@ -101,6 +107,7 @@ class Git:
 
     def pull(self, from_dir, branch="master"):
         """ Pull from the specified repository pull(from_dir,branch="master")"""
+        self.check_connect()
         try:
             self.checkout(from_dir, branch)
             origin = self.commit(from_dir, branch)
@@ -111,6 +118,7 @@ class Git:
 
     def checkout(self, from_dir, branch="master"):
         """ Checkout to a spcified branch (from_dir, branch="master") """
+        self.check_connect()
         try:
             repo = Repo(from_dir)
             if repo.active_branch != branch:

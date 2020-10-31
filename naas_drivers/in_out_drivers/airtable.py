@@ -1,12 +1,17 @@
+from naas_drivers.driver import In_Driver, Out_Driver
 from airtable import Airtable as at
 import pandas as pd
 
 
-class Airtable:
+class Airtable(In_Driver, Out_Driver):
     _airtable = None
+    _key = None
+    _table = None
 
-    def connect(self, api_key, base_key, table_name):
-        self._airtable = at(base_key=base_key, table_name=table_name, api_key=api_key)
+    def connect(self, key, table):
+        self._key = key
+        self._table = table
+        self._airtable = at(key, table)
         self.connected = True
         return self
 
@@ -21,18 +26,23 @@ class Airtable:
         return df
 
     def get(self, **kwagrs):
+        self.check_connect()
         data = self._airtable.get_all(**kwagrs)
         return self.convert_data_to_df(data)
 
     def send(self, **kwagrs):
+        self.check_connect()
         return self._airtable.insert(**kwagrs)
 
     def search(self, **kwagrs):
+        self.check_connect()
         data = self._airtable.search(**kwagrs)
         return self.convert_data_to_df(data)
 
     def update_by_field(self, **kwagrs):
+        self.check_connect()
         return self._airtable.update_by_field(**kwagrs)
 
     def delete_by_field(self, **kwagrs):
+        self.check_connect()
         return self._airtable.delete_by_field(**kwagrs)
