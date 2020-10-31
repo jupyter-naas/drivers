@@ -1,8 +1,9 @@
+from naas_drivers.driver import Out_Driver
 import requests
 
 
-class Integromat:
-    def webhook(self, url, data=None):
+class Integromat(Out_Driver):
+    def send(self, url, data=None):
         r = requests.post(
             url=url,
             json=data,

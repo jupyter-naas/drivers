@@ -1,49 +1,42 @@
-import pandas as pd
+from naas_drivers.driver import In_Driver
 from pandas.tseries.offsets import Day
+import pandas as pd
 import numpy as np
 
 
-class Prediction:
-    def __init__(self):
+class Prediction(In_Driver):
 
-        self.param_model_map = {"arima": "ARIMA", "linear": "LINEAR", "svr": "SVR"}
-
-        # either all to predict using all the models else one of arima, svr or linear
-        self.prediction_type = None
-
-        # input data
-        self.input_df = None
-
-        # the column name to be used as the date column
-        self.date_column = None
-
-        # The value to be predicted
-        self.label = None
-
-        # the number of data points in the future to be predicted, max 1000
-        self.data_points = 20
-
-        self.model_params = dict(
-            arima=dict(
-                start_p=1,
-                start_q=1,
-                test="adf",  # use adftest to find optimal 'd'
-                max_p=3,
-                max_q=3,  # maximum p and q
-                m=1,  # frequency of series
-                d=None,  # let model determine 'd'
-                seasonal=False,  # No Seasonality / True for seasoanal i.e. SARIMA
-                start_P=0,
-                D=0,
-                trace=True,
-                error_action="ignore",
-                suppress_warnings=True,
-                stepwise=True,
-            ),
-            linear=dict(fit_intercept=True, normalize=False, n_jobs=None),
-            svr=dict(kernel="rbf", C=1e3, gamma=0.1),
-        )
-        self.final_predicted_df = None
+    param_model_map = {"arima": "ARIMA", "linear": "LINEAR", "svr": "SVR"}
+    # either all to predict using all the models else one of arima, svr or linear
+    prediction_type = None
+    # input data
+    input_df = None
+    # the column name to be used as the date column
+    date_column = None
+    # The value to be predicted
+    label = None
+    # the number of data points in the future to be predicted, max 1000
+    data_points = 20
+    model_params = dict(
+        arima=dict(
+            start_p=1,
+            start_q=1,
+            test="adf",  # use adftest to find optimal 'd'
+            max_p=3,
+            max_q=3,  # maximum p and q
+            m=1,  # frequency of series
+            d=None,  # let model determine 'd'
+            seasonal=False,  # No Seasonality / True for seasoanal i.e. SARIMA
+            start_P=0,
+            D=0,
+            trace=True,
+            error_action="ignore",
+            suppress_warnings=True,
+            stepwise=True,
+        ),
+        linear=dict(fit_intercept=True, normalize=False, n_jobs=None),
+        svr=dict(kernel="rbf", C=1e3, gamma=0.1),
+    )
 
     def __init_class_vars(
         self,

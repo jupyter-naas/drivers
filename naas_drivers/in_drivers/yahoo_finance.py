@@ -1,9 +1,10 @@
+from naas_drivers.driver import In_Driver
 import pandas as pd
 import datetime as dt
 
 
-class Yahoo:
-    def stock(
+class YahooFinance(In_Driver):
+    def get(
         self,
         stock_companies,
         date_from=-36,

@@ -1,9 +1,10 @@
+from naas_drivers.driver import In_Driver, Out_Driver
 from dateutil.parser import parse
 import requests
 import os
 
 
-class Jupyter:
+class Jupyter(In_Driver, Out_Driver):
     base_url = os.environ.get("JUPYTERHUB_URL", "https://app.naas.ai")
     api_url = None
     token = None
@@ -13,6 +14,8 @@ class Jupyter:
 
     def connect(self, token):
         self.token = token
+        self.connected = True
+        return self
 
     def create_user(self, username, password, super_admin_token):
         signup_url = f"{self.base_url}hub/signup"
@@ -25,7 +28,17 @@ class Jupyter:
         r.raise_for_status()
         return r.json()
 
+    def get_me(self):
+        self.check_connect()
+        return self.get_user(os.environ.get("JUPYTERHUB_USER"))
+
+    def get_me_uptime(self):
+        self.check_connect()
+        me = self.get_user(os.environ.get("JUPYTERHUB_USER"))
+        return self.get_server_uptime(me)
+
     def get_users(self):
+        self.check_connect()
         r = requests.get(
             f"{self.api_url}/users",
             headers={
@@ -36,14 +49,8 @@ class Jupyter:
         r.raise_for_status()
         return r.json()
 
-    def get_me(self):
-        return self.get_user(os.environ.get("JUPYTERHUB_USER"))
-
-    def get_me_uptime(self):
-        me = self.get_user(os.environ.get("JUPYTERHUB_USER"))
-        return self.get_server_uptime(me)
-
     def get_user(self, username):
+        self.check_connect()
         r = requests.get(
             f"{self.api_url}/users/{username}",
             headers={
@@ -55,6 +62,7 @@ class Jupyter:
         return r.json()
 
     def is_user_active(self, user):
+        self.check_connect()
         servers = user.get("servers")
         keys = servers.keys()
         if len(keys) > 0:
@@ -63,6 +71,7 @@ class Jupyter:
             return False
 
     def get_server_uptime(self, user):
+        self.check_connect()
         servers = user.get("servers")
         keys = servers.keys()
         all_duration = None
@@ -78,6 +87,7 @@ class Jupyter:
         return all_duration
 
     def stop_user(self, username):
+        self.check_connect()
         r = requests.delete(
             f"{self.api_url}/users/{username}/server",
             headers={
@@ -88,6 +98,7 @@ class Jupyter:
         return r
 
     def start_user(self, username):
+        self.check_connect()
         r = requests.post(
             f"{self.api_url}/users/{username}/server",
             headers={
@@ -98,6 +109,7 @@ class Jupyter:
         return r
 
     def restart_user(self, username):
+        self.check_connect()
         user = self.get_user(username)
         if user and self.is_user_active(user):
             self.stop_user(username)
