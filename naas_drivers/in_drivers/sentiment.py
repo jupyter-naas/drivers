@@ -20,23 +20,22 @@ class Sentiment(In_Driver):
             raise ValueError(f"The {column_name} is not in dataset columns.")
         return df
 
-    @staticmethod
+    def categorize(self, comp_score):
+        if float(comp_score) >= 0.05:
+            return "Positive"
+        elif float(comp_score) <= -0.05:
+            return "Negative"
+        else:
+            return "Neutral"
+
     def __calculate_sentiment(
-        df: pd.DataFrame, column_name: str, details: bool
+        self, df: pd.DataFrame, column_name: str, details: bool
     ) -> pd.DataFrame:
         analyzer = SentimentIntensityAnalyzer()
         df["senti_score"] = df[column_name].map(analyzer.polarity_scores)
         senti_df = json_normalize(df["senti_score"])
 
-        def categorize_sentiment(comp_score):
-            if float(comp_score) >= 0.05:
-                return "Positive"
-            elif float(comp_score) <= -0.05:
-                return "Negative"
-            else:
-                return "Neutral"
-
-        senti_df["Sentiment"] = senti_df["compound"].map(categorize_sentiment)
+        senti_df["Sentiment"] = senti_df["compound"].map(self.categorize)
         senti_df = senti_df.rename(
             columns={
                 "compound": "Score",
