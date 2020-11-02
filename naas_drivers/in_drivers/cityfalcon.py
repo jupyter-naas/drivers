@@ -42,6 +42,8 @@ class Cityfalcon(In_Driver):
                         if element["source"] and element["source"]["imageUrls"]
                         else ""
                     )
+                elif field == "date":
+                    new_formated["date"] = element["publishTime"]
                 else:
                     raise ValueError("Unknow parameter")
             news.append(new_formated)
