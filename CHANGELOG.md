@@ -1,3 +1,10 @@
+## 0.23.4 (2020-11-02)
+
+### Fix
+
+- airtable connector convertor
+- airtable connect
+
 ## 0.23.3 (2020-11-02)
 
 ### Fix
