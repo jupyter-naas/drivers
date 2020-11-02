@@ -220,10 +220,9 @@ class Plotly(In_Driver):
     ):
         """ generate financial_chart """
         stock_data_copy = stock_data.copy()
-        stock_companies = stock_data_copy.Company.unique()
-        if len(stock_companies) == 0:
+        if not stock_data_copy["Company"]:
             stock_data["Company"] = "Company_1"
-            stock_companies = stock_data_copy.Company.unique()
+        stock_companies = stock_data_copy.Company.unique()
         data = []
         buttons = []
         if filter_all:
