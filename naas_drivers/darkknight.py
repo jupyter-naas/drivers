@@ -206,6 +206,7 @@ class DarkKnight:
         self.users = CRUD(self.base_public_url, "users", self.__auth)
         self.workspaces = CRUD(self.base_public_url, "workspaces", self.__auth)
         self.me = Me(self.base_public_url, self.__auth)
+        return self
 
     def get_notebook_public_url(self, token=""):
 
