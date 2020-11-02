@@ -36,7 +36,7 @@ class Cityfalcon(In_Driver):
                     new_formated["image"] = (
                         element["imageUrls"][0] if element["imageUrls"] else ""
                     )
-                elif field == "source_logo":
+                elif field == "logo":
                     new_formated["logo"] = (
                         element["source"]["imageUrls"]["large"]
                         if element["source"] and element["source"]["imageUrls"]
