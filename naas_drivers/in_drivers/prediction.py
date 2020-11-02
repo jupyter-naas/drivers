@@ -1,10 +1,8 @@
-from naas_drivers.driver import In_Driver
-from pandas.tseries.offsets import Day
 import pandas as pd
 import numpy as np
 
 
-class Prediction(In_Driver):
+class Prediction:
 
     param_model_map = {"arima": "ARIMA", "linear": "LINEAR", "svr": "SVR"}
     # either all to predict using all the models else one of arima, svr or linear
@@ -102,11 +100,11 @@ class Prediction(In_Driver):
             raise ValueError(
                 "Please specify an prediction_type as arima OR linear OR svr or all"
             )
-        return model, predicted_values
+        return model, [df[self.label].iloc[-1], *predicted_values]
 
     def __transform_output(self, data_df, predicted_values, predicted_col):
         predicted_date = pd.date_range(
-            start=data_df[self.date_column].max() + Day(1), periods=self.data_points
+            start=data_df[self.date_column].max(), periods=self.data_points + 1
         )
         predict_df = pd.DataFrame(data=predicted_values, columns=[predicted_col])
         predict_df[self.date_column] = predicted_date

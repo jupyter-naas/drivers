@@ -1,10 +1,10 @@
-from naas_drivers.driver import In_Driver
+# from naas_drivers.driver import In_Driver
 import plotly.graph_objects as go
 import requests
 import os
 
 
-class Plotly(In_Driver):
+class Plotly:
     """ Plot generator lib"""
 
     __css_base = ".modebar {display: none;} \n.modebar-container {display: none;} "
@@ -69,6 +69,7 @@ class Plotly(In_Driver):
                     y=stock["ARIMA"],
                     mode="lines",
                     name="ARIMA",
+                    line=dict(dash="dot"),
                 )
             )
         if "COMPOUND" in stock.columns:
@@ -79,6 +80,7 @@ class Plotly(In_Driver):
                     y=stock["COMPOUND"],
                     mode="lines",
                     name="COMPOUND",
+                    line=dict(dash="dot"),
                 )
             )
         if "LINEAR" in stock.columns:
@@ -89,6 +91,7 @@ class Plotly(In_Driver):
                     y=stock["LINEAR"],
                     mode="lines",
                     name="LINEAR",
+                    line=dict(dash="dot"),
                 )
             )
         if "SVR" in stock.columns:
@@ -99,6 +102,7 @@ class Plotly(In_Driver):
                     y=stock["SVR"],
                     mode="lines",
                     name="SVR",
+                    line=dict(dash="dot"),
                 )
             )
         return charts
@@ -220,8 +224,8 @@ class Plotly(In_Driver):
     ):
         """ generate financial_chart """
         stock_data_copy = stock_data.copy()
-        if not stock_data_copy["Company"]:
-            stock_data["Company"] = "Company_1"
+        if "Company" not in stock_data_copy:
+            stock_data_copy["Company"] = "Company_1"
         stock_companies = stock_data_copy.Company.unique()
         data = []
         buttons = []
