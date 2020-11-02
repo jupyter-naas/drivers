@@ -1,3 +1,17 @@
+## 0.24.0 (2020-11-02)
+
+### Fix
+
+- class parent
+- start prediction with last know day
+- plot stock if no company
+- naming
+
+### Feat
+
+- **cityfalcon**: add date
+- expose sentiment categorize
+
 ## 0.23.4 (2020-11-02)
 
 ### Fix
