@@ -4,7 +4,7 @@ from datetime import date
 import os
 
 
-class HealthCheck(Out_Driver):
+class Healthcheck(Out_Driver):
     healthUrl = None
     healthkey = None
 

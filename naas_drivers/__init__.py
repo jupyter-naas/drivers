@@ -1,26 +1,26 @@
-from naas_drivers.out_drivers.bubble import Bubble
 from naas_drivers.in_drivers.yahoo_finance import YahooFinance
-from .newsapi import NewsApi
-from .integromat import Integromat
-from .darkknight import DarkKnight
-from .ftp import Ftp
-from .geolocator import GeoLocator
-from .git import Git
-from .gsheet import Gsheet
-from .healthcheck import HealthCheck
-from .email import Email
-from .mongo import Mongo
-from .pdf import Pdf
-from .plotly import Plotly
-from .html import Html
-from .jupyter import Jupyter
-from .cityfalcon import Cityfalcon
-from .prediction import Prediction
-from .sentiment_analysis import SentimentAnalysis
-from .toucan import Toucan
-from .airtable import Airtable
-from .zappier import Zappier
-from .ifttt import Ifttt
+from naas_drivers.in_drivers.cityfalcon import Cityfalcon
+from naas_drivers.in_drivers.geolocator import Geolocator
+from naas_drivers.in_drivers.newsapi import Newsapi
+from naas_drivers.in_drivers.prediction import Prediction
+from naas_drivers.in_drivers.sentiment import Sentiment
+from naas_drivers.in_drivers.pdf import Pdf
+from naas_drivers.in_drivers.plotly import Plotly
+from naas_drivers.in_drivers.html import Html
+from naas_drivers.out_drivers.bubble import Bubble
+from naas_drivers.out_drivers.email import Email
+from naas_drivers.out_drivers.healthcheck import Healthcheck
+from naas_drivers.out_drivers.ifttt import Ifttt
+from naas_drivers.out_drivers.integromat import Integromat
+from naas_drivers.out_drivers.zappier import Zappier
+from naas_drivers.in_out_drivers.bobapp import Bobapp
+from naas_drivers.in_out_drivers.airtable import Airtable
+from naas_drivers.in_out_drivers.jupyter import Jupyter
+from naas_drivers.in_out_drivers.ftp import Ftp
+from naas_drivers.in_out_drivers.git import Git
+from naas_drivers.in_out_drivers.gsheet import Gsheet
+from naas_drivers.in_out_drivers.mongo import Mongo
+from naas_drivers.in_out_drivers.Toucan import Toucan
 import requests
 import os
 
@@ -33,32 +33,31 @@ if os.environ.get("NAAS_DRIVER_LIGHT_INIT"):
 
 # In drivers
 cityfalcon = Cityfalcon()
-geolocator = GeoLocator()
-newsapi = NewsApi()
+geolocator = Geolocator()
+newsapi = Newsapi()
 prediction = Prediction()
-sentiment_analysis = SentimentAnalysis()
+sentiment = Sentiment()
 yahoo_finance = YahooFinance()
-
-# InOut drivers
+pdf = Pdf()
+plotly = Plotly()
+html = Html()
 
 # Out drivers
 bubble = Bubble()
 email = Email()
-health_check = HealthCheck()
+health_check = Healthcheck()
 ifttt = Ifttt()
 integromat = Integromat()
 zappier = Zappier()
 
-darkknight = DarkKnight()
+# InOut drivers
+bobapp = Bobapp()
 airtable = Airtable()
 jupyter = Jupyter()
 ftp = Ftp()
 git = Git()
 gsheet = Gsheet()
 mongo = Mongo()
-pdf = Pdf()
-plotly = Plotly()
-html = Html()
 toucan = Toucan()
 
 __doc_url = "https://naas.gitbook.io/drivers/"
