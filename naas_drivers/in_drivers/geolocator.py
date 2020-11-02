@@ -3,7 +3,7 @@ import pandas as pd
 from geopy.extra.rate_limiter import RateLimiter
 
 
-class GeoLocator(In_Driver):
+class Geolocator(In_Driver):
     _key = None
     """GeoLocator allows users to fetch latitude and longitude for
     a list of address in dataframe column

@@ -4,7 +4,7 @@ import pandas as pd
 import os
 
 
-class NewsApi(In_Driver):
+class Newsapi(In_Driver):
     __key = os.environ.get("APINEW_KEY", None)
 
     def connect(self, key):

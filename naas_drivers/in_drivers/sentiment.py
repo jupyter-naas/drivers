@@ -5,7 +5,7 @@ from pandas import json_normalize
 from typing import Union
 
 
-class SentimentAnalysis(In_Driver):
+class Sentiment(In_Driver):
     def __sanitize_dataset(
         self, dataset: Union[pd.DataFrame, pd.Series], column_name: str
     ) -> pd.DataFrame:
