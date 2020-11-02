@@ -4,8 +4,8 @@ from airtable import Airtable as at
 class Airtable:
     _airtable = None
 
-    def connect(self, key, table):
-        self._airtable = at(key, table)
+    def connect(self, api_key, base_key, table_name):
+        self._airtable = at(base_key=base_key, table_name=table_name, api_key=api_key)
 
     def get_all(self, *agrs):
         return self._airtable.get_all(*agrs)
