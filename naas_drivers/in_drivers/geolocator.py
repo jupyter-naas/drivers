@@ -1,9 +1,9 @@
-from naas_drivers.driver import In_Driver
+from naas_drivers.driver import In_driver
 import pandas as pd
 from geopy.extra.rate_limiter import RateLimiter
 
 
-class Geolocator(In_Driver):
+class Geolocator(In_driver):
     _key = None
     """GeoLocator allows users to fetch latitude and longitude for
     a list of address in dataframe column

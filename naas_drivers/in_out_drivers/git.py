@@ -1,9 +1,9 @@
-from naas_drivers.driver import In_Driver, Out_Driver
+from naas_drivers.driver import In_driver, Out_driver
 from git import Repo, GitCommandError
 import urllib.parse
 
 
-class Git(In_Driver, Out_Driver):
+class Git(In_driver, Out_driver):
     def connect(self, config):
         """
         Description: This class accepst a JSON configuration and executes respective

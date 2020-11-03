@@ -1,9 +1,9 @@
-from naas_drivers.driver import In_Driver
+from naas_drivers.driver import In_driver
 import requests
 import os
 
 
-class Pdf(In_Driver):
+class Pdf(In_driver):
     """ PDF generator lib"""
 
     api_url = None

@@ -1,4 +1,4 @@
-from naas_drivers.driver import Out_Driver
+from naas_drivers.driver import Out_driver
 import smtplib
 from email.header import Header
 from email.mime.multipart import MIMEMultipart
@@ -8,7 +8,7 @@ from email import encoders
 from typing import Any, Dict, cast
 
 
-class Email(Out_Driver):
+class Email(Out_driver):
     """
     Connector for sending email from an authenticated email service over SMTP.
 

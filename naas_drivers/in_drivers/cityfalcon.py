@@ -1,10 +1,10 @@
-from naas_drivers.driver import In_Driver
+from naas_drivers.driver import In_driver
 import requests
 import pandas as pd
 import os
 
 
-class Cityfalcon(In_Driver):
+class Cityfalcon(In_driver):
     __key = os.environ.get("CITYFALCON_KEY", None)
     _url_base = os.environ.get(
         "CITYFALCON_API", "https://api.cityfalcon.com/v0.2/stories"
