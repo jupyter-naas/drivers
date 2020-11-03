@@ -19,6 +19,9 @@ class Mongo(InDriver, OutDriver):
     # --- Success => "Successfully connected to MongoDB"
     # --- Failed => "Error connecting to MongoDB. Please check configuration"
 
+    def get_client(self):
+        self.__client
+
     def connect(
         self, mongo_host, mongo_port=None, mongo_username=None, mongo_password=None
     ):
