@@ -348,47 +348,47 @@ class Toucan(In_Driver, Out_Driver):
         self, app_name, file_upload, format_file="front_config", stage="staging"
     ):
         config_name = ""
-        formatFile = "&format=cson"
+        format_url = "&format=cson"
         files = None
         data = None
         if format_file == "front_config":
-            formatFile = "&format=cson"
+            format_url = "&format=cson"
             files = {"file": io.StringIO(json.dumps({"json": cson.load(file_upload)}))}
         elif format_file == "etl_config":
             config_name = "/etl"
-            formatFile = "&format=cson"
+            format_url = "&format=cson"
             data = file_upload
         elif format_file == "report":
             config_name = "/report"
-            formatFile = "&format=cson"
+            format_url = "&format=cson"
             data = file_upload
         elif format_file == "dashboard-Group":
             config_name = "/dashboard-Group"
-            formatFile = "&format=cson"
+            format_url = "&format=cson"
             data = file_upload
         elif format_file == "augment.py":
             config_name = "/augment"
             files = {"file": file_upload}
-            formatFile = ""
+            format_url = ""
         elif format_file == "preprocess_validation":
             config_name = "/preprocess_validation"
-            formatFile = "&format=cson"
+            format_url = "&format=cson"
             data = file_upload
         elif format_file == "permissions.py":
             config_name = "/permissions"
             files = {"file": file_upload}
-            formatFile = ""
+            format_url = ""
         elif format_file == "permissions_config":
             config_name = "/permissions_config"
-            formatFile = "&format=cson"
+            format_url = "&format=cson"
             data = file_upload
         elif format_file == "notifications_handlers.py":
             config_name = "/notifications_handlers"
             files = {"file": file_upload}
-            formatFile = ""
+            format_url = ""
 
         req = requests.put(
-            f"{self.url_api}/{app_name}/{self.__url_config}{config_name}?stage={stage}{formatFile}",
+            f"{self.url_api}/{app_name}/{self.__url_config}{config_name}?stage={stage}{format_url}",
             headers=self.__get_headers(),
             files=files,
             data=data,
@@ -399,7 +399,7 @@ class Toucan(In_Driver, Out_Driver):
     def download_app_config(
         self, app_name, format_file="front_config", stage="staging"
     ):
-        formatFile = ""
+        format_url = ""
         config_name = ""
         format_file = "&format=cson"
         if format_file == "etl_config":
@@ -410,20 +410,20 @@ class Toucan(In_Driver, Out_Driver):
             config_name = "/dashboard-Group"
         elif format_file == "augment.py":
             config_name = "/augment"
-            formatFile = ""
+            format_url = ""
         elif format_file == "preprocess_validation":
             config_name = "/preprocess_validation"
         elif format_file == "permissions.py":
             config_name = "/permissions"
-            formatFile = ""
+            format_url = ""
         elif format_file == "permissions_config":
             config_name = "/permissions_config"
         elif format_file == "notifications_handlers.py":
             config_name = "/notifications_handlers"
-            formatFile = ""
+            format_url = ""
 
         req = requests.get(
-            f"{self.url_api}/{app_name}/{self.__url_config}{config_name}?stage={stage}{formatFile}",
+            f"{self.url_api}/{app_name}/{self.__url_config}{config_name}?stage={stage}{format_url}",
             headers=self.__get_headers(),
         )
         req.raise_for_status()
