@@ -482,9 +482,9 @@ class Toucan(InDriver, OutDriver):
             "populate_permissions",
         ],
     ):
-        notificationStr = "true" if notification else "false"
+        notification_str = "true" if notification else "false"
         req = requests.post(
-            f"{self.url_api}/{app_name}/{self.__url_config}/operations?notify={notificationStr}&stage={stage}",
+            f"{self.url_api}/{app_name}/{self.__url_config}/operations?notify={notification_str}&stage={stage}",
             headers=self.__get_headers(),
             json={"operations": operations},
         )
