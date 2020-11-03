@@ -44,6 +44,6 @@ class Ftp(InDriver, OutDriver):
         self.__before_all()
         self._ftp.send_file(path, dest_path)
 
-    def list(self, dirName):
+    def list(self, dir_name):
         self.__before_all()
-        return self._ftp.list_directory(dirName)
+        return self._ftp.list_directory(dir_name)

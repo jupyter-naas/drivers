@@ -5,12 +5,13 @@ import json
 import re
 import os
 
+req_headers = {"Accept": "application/json", "Content-Type": "application/json"}
+
 
 class Me:
     base_public_url = None
     endpoint = "me"
     auth = None
-    req_headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
     def __init__(self, base_url, auth, endpoint="me"):
         self.base_public_url = base_url
@@ -20,7 +21,7 @@ class Me:
     def get(self):
         req = requests.get(
             url=f"{self.base_public_url}/{self.endpoint}",
-            headers=self.req_headers,
+            headers=req_headers,
             auth=self.auth,
             allow_redirects=False,
         )
@@ -30,7 +31,7 @@ class Me:
     def update(self, data):
         req = requests.put(
             url=f"{self.base_public_url}/{self.endpoint}",
-            headers=self.req_headers,
+            headers=req_headers,
             auth=self.auth,
             json=data,
             allow_redirects=False,
@@ -43,7 +44,6 @@ class CRUD:
     base_public_url = None
     endpoint = None
     auth = None
-    req_headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
     def __init__(
         self,
@@ -67,7 +67,7 @@ class CRUD:
         req = requests.get(
             url=f"{self.base_public_url}/{self.endpoint}",
             params=params,
-            headers=self.req_headers,
+            headers=req_headers,
             auth=self.auth,
             allow_redirects=False,
         )
@@ -77,7 +77,7 @@ class CRUD:
     def get(self, id):
         req = requests.get(
             url=f"{self.base_public_url}/{self.endpoint}/{id}",
-            headers=self.req_headers,
+            headers=req_headers,
             auth=self.auth,
             allow_redirects=False,
         )
@@ -88,7 +88,7 @@ class CRUD:
         req = requests.post(
             url=f"{self.base_public_url}/{self.endpoint}",
             auth=self.auth,
-            headers=self.req_headers,
+            headers=req_headers,
             json=data,
             allow_redirects=False,
         )
@@ -100,7 +100,7 @@ class CRUD:
         req = requests.put(
             url=f"{self.base_public_url}/{self.endpoint}/{_id}",
             auth=self.auth,
-            headers=self.req_headers,
+            headers=req_headers,
             json=data,
             allow_redirects=False,
         )
@@ -111,7 +111,7 @@ class CRUD:
         req = requests.delete(
             url=f"{self.base_public_url}/{self.endpoint}/{_id}",
             auth=self.auth,
-            headers=self.req_headers,
+            headers=req_headers,
             allow_redirects=False,
         )
         req.raise_for_status()
@@ -132,7 +132,7 @@ class SmartTable(CRUD):
         req = requests.post(
             url=f"{self.base_public_url}/{self.endpoint}/allowed",
             auth=self.auth,
-            headers=self.req_headers,
+            headers=req_headers,
             allow_redirects=False,
         )
         req.raise_for_status()
@@ -143,7 +143,7 @@ class SmartTable(CRUD):
         req = requests.delete(
             url=f"{self.base_public_url}/{self.endpoint}/all",
             auth=self.auth,
-            headers=self.req_headers,
+            headers=req_headers,
             allow_redirects=False,
         )
         req.raise_for_status()
@@ -369,18 +369,17 @@ class Bobapp(InDriver, OutDriver):
     base_public_url = None
     smart_tables = []
     __auth = None
-    req_headers = {"Accept": "application/json", "Content-Type": "application/json"}
     users = None
     workspaces = None
     me = None
 
-    def connect(self, api_key=None, user=None, BOBAPP_API=None):
+    def connect(self, api_key=None, user=None, api_url=None):
         """
         Description: This class connect you to a Bobapp instance
         """
         self.user = user if user else os.environ.get("JUPYTERHUB_USER", user)
         self.base_public_url = (
-            BOBAPP_API if BOBAPP_API else os.environ.get("BOBAPP_API", BOBAPP_API)
+            api_url if api_url else os.environ.get("BOBAPP_API", api_url)
         )
         if api_key:
             self.__auth = HTTPBasicAuth(self.user, api_key)
