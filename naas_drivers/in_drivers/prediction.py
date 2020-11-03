@@ -90,12 +90,12 @@ class Prediction:
 
                 model = LinearRegression(**self.model_params["linear"])
             model.fit(X, y)
-            X_predict = (
+            x_predict = (
                 df[self.label]
                 .to_numpy()
                 .reshape(-1, 1)[-self.data_points :]  # noqa: E203
             )
-            predicted_values = model.predict(X_predict)
+            predicted_values = model.predict(x_predict)
         else:
             raise ValueError(
                 "Please specify an prediction_type as arima OR linear OR svr or all"
