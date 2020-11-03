@@ -1,3 +1,9 @@
+## 0.24.3 (2020-11-03)
+
+### Fix
+
+- bobapp functions location
+
 ## 0.24.2 (2020-11-03)
 
 ### Fix
