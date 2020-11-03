@@ -1,3 +1,9 @@
+## 0.24.4 (2020-11-03)
+
+### Fix
+
+- arg name to better naming for bobapp api
+
 ## 0.24.3 (2020-11-03)
 
 ### Fix
