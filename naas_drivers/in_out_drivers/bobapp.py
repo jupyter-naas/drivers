@@ -160,15 +160,13 @@ class Bobapp(In_Driver, Out_Driver):
     workspaces = None
     me = None
 
-    def connect(self, api_key=None, user=None, PUBLIC_DK_API=None):
+    def connect(self, api_key=None, user=None, BOBAPP_API=None):
         """
         Description: This class connect you to a Bobapp instance
         """
         self.user = user if user else os.environ.get("JUPYTERHUB_USER", user)
         self.base_public_url = (
-            PUBLIC_DK_API
-            if PUBLIC_DK_API
-            else os.environ.get("PUBLIC_DK_API", PUBLIC_DK_API)
+            BOBAPP_API if BOBAPP_API else os.environ.get("BOBAPP_API", BOBAPP_API)
         )
         if api_key:
             self.__auth = HTTPBasicAuth(self.user, api_key)
