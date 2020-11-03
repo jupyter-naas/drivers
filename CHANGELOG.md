@@ -1,3 +1,10 @@
+## 0.24.14 (2020-11-03)
+
+### Fix
+
+- code smells
+- code smells use const
+
 ## 0.24.13 (2020-11-03)
 
 ### Fix
