@@ -3,7 +3,7 @@ FROM jupyternaas/singleuser:latest
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
 ARG VCS_REF
-ENV VERSION 0.24.6
+ENV VERSION 0.24.7
 LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.name="Naas machine" \
     org.label-schema.description="jupyter machine with naas" \
