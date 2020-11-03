@@ -1,5 +1,5 @@
 from naas_drivers.driver import InDriver, OutDriver
-from git import Repo, GitCommandError
+from git import Repo
 import urllib.parse
 
 
@@ -68,62 +68,47 @@ class Git(InDriver, OutDriver):
     ):
         """ Clone the repo (dest_dir='gitSource', branch="master", repourl=None, username=None, password=None)"""
         self.check_connect()
-        try:
-            if repourl[0:3] == "git":
-                Repo.clone_from(repourl, dest_dir, branch=branch)
-            else:
-                urlsplit = repourl.split("//")
-                authstring = username + ":" + urllib.parse.quote(password)
-                urlsplit[1] = authstring + "@" + urlsplit[1]
-                repourl = "//".join(urlsplit)
-                Repo.clone_from(repourl, dest_dir, branch=branch)
-            print("Clone successful")
-        except GitCommandError as e:
-            print("wrong command! \n", str(e))
+        if repourl[0:3] == "git":
+            Repo.clone_from(repourl, dest_dir, branch=branch)
+        else:
+            urlsplit = repourl.split("//")
+            authstring = username + ":" + urllib.parse.quote(password)
+            urlsplit[1] = authstring + "@" + urlsplit[1]
+            repourl = "//".join(urlsplit)
+            Repo.clone_from(repourl, dest_dir, branch=branch)
+        print("Clone successful")
 
     def commit(self, from_dir, branch, message="Auto commit"):
         """ Commit the files commit(from_dir,branch,message="Auto Commit Message")"""
         self.check_connect()
-        try:
-            repo = Repo(from_dir)
-            repo.git.execute(["git", "add", "--all"])
-            repo.index.commit(message)
-            repo.git.clean("-xdf")
-            print("Commit successful!")
-            return repo.remote()
-        except GitCommandError as e:
-            print("wrong command! \n", str(e))
+        repo = Repo(from_dir)
+        repo.git.execute(["git", "add", "--all"])
+        repo.index.commit(message)
+        repo.git.clean("-xdf")
+        print("Commit successful!")
+        return repo.remote()
 
     def push(self, from_dir, branch="master"):
         """ Push to the specified repository push(self,from_dir,branch="master")"""
         self.check_connect()
-        try:
-            self.checkout(from_dir, branch)
-            origin = self.commit(from_dir, branch)
-            origin.push()
-            print("Push successful")
-        except GitCommandError as e:
-            print("wrong command! \n", str(e))
+        self.checkout(from_dir, branch)
+        origin = self.commit(from_dir, branch)
+        origin.push()
+        print("Push successful")
 
     def pull(self, from_dir, branch="master"):
         """ Pull from the specified repository pull(from_dir,branch="master")"""
         self.check_connect()
-        try:
-            self.checkout(from_dir, branch)
-            origin = self.commit(from_dir, branch)
-            origin.pull()
-            print("Pull successful!")
-        except GitCommandError as e:
-            print("Wrong command! \n", str(e))
+        self.checkout(from_dir, branch)
+        origin = self.commit(from_dir, branch)
+        origin.pull()
+        print("Pull successful!")
 
     def checkout(self, from_dir, branch="master"):
         """ Checkout to a spcified branch (from_dir, branch="master") """
         self.check_connect()
-        try:
-            repo = Repo(from_dir)
-            if repo.active_branch != branch:
-                repo.git.clean("-xdf")
-                repo.git.checkout(branch)
-            print("Checkout successful")
-        except GitCommandError as e:
-            print("Wrong command! \n", str(e))
+        repo = Repo(from_dir)
+        if repo.active_branch != branch:
+            repo.git.clean("-xdf")
+            repo.git.checkout(branch)
+        print("Checkout successful")
