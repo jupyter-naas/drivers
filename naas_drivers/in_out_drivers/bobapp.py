@@ -216,7 +216,7 @@ class Users(CRUD):
         return True
 
     def update_workspace(
-        self, email, workspace_id=None, workspace_name=None, default=False
+        self, email, workspace_id=None, workspace_name=None, set_default=False
     ):
         # -> email
         # Delete space: email must have no space at the begining or end
@@ -257,7 +257,7 @@ class Users(CRUD):
             print(f"Workspace already exists for user {email}")
 
         # Set workspace default
-        if default:
+        if set_default:
             user["workspaceCurrent"] = {
                 "section": 2,
                 "id": workspace_id,
