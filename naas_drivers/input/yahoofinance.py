@@ -3,7 +3,7 @@ import pandas as pd
 import datetime as dt
 
 
-class YahooFinance(InDriver):
+class Yahoofinance(InDriver):
     def get(
         self,
         stock_companies,

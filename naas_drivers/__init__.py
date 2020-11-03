@@ -1,16 +1,26 @@
-from .in_drivers import (
-    YahooFinance,
-    Cityfalcon,
-    Geolocator,
-    Newsapi,
-    Prediction,
-    Sentiment,
-    Pdf,
-    Plotly,
-    Html,
-)
-from .out_drivers import Bubble, Email, Healthcheck, Ifttt, Integromat, Zappier
-from .in_out_drivers import Bobapp, Airtable, Jupyter, Ftp, Git, Gsheet, Mongo, Toucan
+from naas_drivers.input.yahoofinance import Yahoofinance
+from naas_drivers.input.cityfalcon import Cityfalcon
+from naas_drivers.input.geolocator import Geolocator
+from naas_drivers.input.newsapi import Newsapi
+from naas_drivers.input.prediction import Prediction
+from naas_drivers.input.sentiment import Sentiment
+from naas_drivers.input.pdf import Pdf
+from naas_drivers.input.plotly import Plotly
+from naas_drivers.input.html import Html
+from naas_drivers.output.bubble import Bubble
+from naas_drivers.output.email import Email
+from naas_drivers.output.healthcheck import Healthcheck
+from naas_drivers.output.ifttt import Ifttt
+from naas_drivers.output.integromat import Integromat
+from naas_drivers.output.zappier import Zappier
+from naas_drivers.inputOutput.bobapp import Bobapp
+from naas_drivers.inputOutput.airtable import Airtable
+from naas_drivers.inputOutput.jupyter import Jupyter
+from naas_drivers.inputOutput.ftp import Ftp
+from naas_drivers.inputOutput.git import Git
+from naas_drivers.inputOutput.gsheet import Gsheet
+from naas_drivers.inputOutput.mongo import Mongo
+from naas_drivers.inputOutput.toucan import Toucan
 import requests
 import os
 
@@ -27,7 +37,7 @@ geolocator = Geolocator()
 newsapi = Newsapi()
 prediction = Prediction()
 sentiment = Sentiment()
-yahoofinance = YahooFinance()
+yahoofinance = Yahoofinance()
 pdf = Pdf()
 plotly = Plotly()
 html = Html()
