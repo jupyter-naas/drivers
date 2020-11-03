@@ -178,9 +178,7 @@ class Toucan(In_Driver, Out_Driver):
     def __get_headers(self):
         return {"authorization": f"Bearer {self.__token}"}
 
-    def embed_small_app_slide(
-        self, small_app, slide, hosts=None, mode="webcomponent", height="800px"
-    ):
+    def embed(self, small_app, slide, hosts=None, mode="webcomponent", height="800px"):
         allowedHosts = (
             hosts
             if hosts
@@ -225,7 +223,7 @@ class Toucan(In_Driver, Out_Driver):
         display(HTML(html))
         return html
 
-    def craft_toucan_embed_token(
+    def craft_token(
         self,
         username: str,
         small_apps_access: Dict[str, str],
