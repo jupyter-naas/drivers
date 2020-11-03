@@ -14,7 +14,7 @@ from .in_out_drivers import Bobapp, Airtable, Jupyter, Ftp, Git, Gsheet, Mongo, 
 import requests
 import os
 
-__version__ = "0.24.19"
+__version__ = "0.24.20"
 
 __github_repo = "jupyter-naas/drivers"
 
