@@ -165,7 +165,7 @@ class Plotly(In_driver):
                 )
             return charts
 
-    def linechart(dataset, label_x: str, label_y: list):
+    def linechart(self, dataset, label_x: str, label_y: list):
         charts = []
         layout = dict(
             dragmode="pan",
@@ -187,6 +187,7 @@ class Plotly(In_driver):
         return fig
 
     def candlestick(
+        self,
         dataset,
         label_x: str,
         label_open: str,
