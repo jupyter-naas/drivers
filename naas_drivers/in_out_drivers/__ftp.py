@@ -45,9 +45,9 @@ class Ftpbase:
             saved_path = self.pwd()
             self.cwd(os.path.dirname(dest_path))
         filename = os.path.basename(path)
-        ftpCommand = f"STOR {filename}"
+        ftp_command = f"STOR {filename}"
         file_byte = open(path, "rb")  # file to send
-        self.storbinary(ftpCommand, file_byte)  # send the file
+        self.storbinary(ftp_command, file_byte)  # send the file
         file_byte.close()
         if dest_path is not None:
             self.cwd(saved_path)
