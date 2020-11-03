@@ -1,4 +1,4 @@
-from naas_drivers.driver import In_Driver
+from naas_drivers.driver import In_driver
 from htmlBuilder import tags, attributes
 import IPython.core.display
 import pandas as pd
@@ -108,7 +108,7 @@ table_ie9_close = """
 """
 
 
-class Html(In_Driver):
+class Html(In_driver):
     """ HTML generator lib"""
 
     def __align(self, mode):

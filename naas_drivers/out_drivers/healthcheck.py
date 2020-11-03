@@ -1,10 +1,10 @@
-from naas_drivers.driver import Out_Driver
+from naas_drivers.driver import Out_driver
 import requests
 from datetime import date
 import os
 
 
-class Healthcheck(Out_Driver):
+class Healthcheck(Out_driver):
     healthUrl = None
     healthkey = None
 

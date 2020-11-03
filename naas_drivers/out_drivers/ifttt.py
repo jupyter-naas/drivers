@@ -1,8 +1,8 @@
-from naas_drivers.driver import Out_Driver
+from naas_drivers.driver import Out_driver
 import requests
 
 
-class Ifttt(Out_Driver):
+class Ifttt(Out_driver):
     def connect(self, key):
         self._key = key
         self.connected = True

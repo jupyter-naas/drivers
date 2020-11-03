@@ -1,10 +1,10 @@
-from naas_drivers.driver import In_Driver, Out_Driver
+from naas_drivers.driver import In_driver, Out_driver
 from dateutil.parser import parse
 import requests
 import os
 
 
-class Jupyter(In_Driver, Out_Driver):
+class Jupyter(In_driver, Out_driver):
     base_url = os.environ.get("JUPYTERHUB_URL", "https://app.naas.ai")
     api_url = None
     token = None

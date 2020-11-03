@@ -1,4 +1,4 @@
-from naas_drivers.driver import In_Driver, Out_Driver
+from naas_drivers.driver import In_driver, Out_driver
 from requests.auth import HTTPBasicAuth
 import requests
 import json
@@ -365,7 +365,7 @@ class Users(CRUD):
                 self.update_service(serv, email, password)
 
 
-class Bobapp(In_Driver, Out_Driver):
+class Bobapp(In_driver, Out_driver):
 
     base_public_url = None
     smart_tables = []

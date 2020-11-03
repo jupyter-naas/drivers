@@ -1,8 +1,8 @@
-from naas_drivers.driver import Out_Driver
+from naas_drivers.driver import Out_driver
 import requests
 
 
-class Bubble(Out_Driver):
+class Bubble(Out_driver):
 
     _key = None
 
