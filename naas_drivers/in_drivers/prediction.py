@@ -108,7 +108,6 @@ class Prediction:
         )
         predict_df = pd.DataFrame(data=predicted_values, columns=[predicted_col])
         predict_df[self.date_column] = predicted_date
-        # predict_df.index.name = self.date_column
         return predict_df
 
     def __modelling_prediction(self, df):

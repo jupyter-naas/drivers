@@ -96,9 +96,9 @@ class CRUD:
         return req
 
     def update(self, data):
-        id = data.get("_id")
+        _id = data.get("_id")
         req = requests.put(
-            url=f"{self.base_public_url}/{self.endpoint}/{id}",
+            url=f"{self.base_public_url}/{self.endpoint}/{_id}",
             auth=self.auth,
             headers=self.req_headers,
             json=data,
@@ -107,9 +107,9 @@ class CRUD:
         req.raise_for_status()
 
     def delete(self, data):
-        id = data.get("_id")
+        _id = data.get("_id")
         req = requests.delete(
-            url=f"{self.base_public_url}/{self.endpoint}/{id}",
+            url=f"{self.base_public_url}/{self.endpoint}/{_id}",
             auth=self.auth,
             headers=self.req_headers,
             allow_redirects=False,
@@ -209,7 +209,6 @@ class Users(CRUD):
             self.insert(user)
             print(f"User {email} created in Bobapp, password: {password}.")
         else:
-            # user = users[0]
             new_user["_id"] = users[0]["_id"]
             self.update(new_user)
             print(f"User {email} updated in Bobapp, password: {password}.")
