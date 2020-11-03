@@ -1,26 +1,16 @@
-from .in_drivers.yahoofinance import YahooFinance
-from .in_drivers.cityfalcon import Cityfalcon
-from .in_drivers.geolocator import Geolocator
-from .in_drivers.newsapi import Newsapi
-from .in_drivers.prediction import Prediction
-from .in_drivers.sentiment import Sentiment
-from .in_drivers.pdf import Pdf
-from .in_drivers.plotly import Plotly
-from .in_drivers.html import Html
-from .out_drivers.bubble import Bubble
-from .out_drivers.email import Email
-from .out_drivers.healthcheck import Healthcheck
-from .out_drivers.ifttt import Ifttt
-from .out_drivers.integromat import Integromat
-from .out_drivers.zappier import Zappier
-from .in_out_drivers.bobapp import Bobapp
-from .in_out_drivers.airtable import Airtable
-from .in_out_drivers.jupyter import Jupyter
-from .in_out_drivers.ftp import Ftp
-from .in_out_drivers.git import Git
-from .in_out_drivers.gsheet import Gsheet
-from .in_out_drivers.mongo import Mongo
-from .in_out_drivers.Toucan import Toucan
+from in_drivers import (
+    YahooFinance,
+    Cityfalcon,
+    Geolocator,
+    Newsapi,
+    Prediction,
+    Sentiment,
+    Pdf,
+    Plotly,
+    Html,
+)
+from out_drivers import Bubble, Email, Healthcheck, Ifttt, Integromat, Zappier
+from in_out_drivers import Bobapp, Airtable, Jupyter, Ftp, Git, Gsheet, Mongo, Toucan
 import requests
 import os
 
