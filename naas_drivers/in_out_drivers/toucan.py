@@ -117,16 +117,16 @@ class Toucan(In_Driver, Out_Driver):
             calcId += int(ids.get(0))
         return calcId
 
-    def __filterReport(self, reports, reportName):
-        resReport = [{"id": 0, "entityName": "default"}]
-        if reportName is None:
+    def __filterReport(self, reports, report_name):
+        res_report = [{"id": 0, "entityName": "default"}]
+        if report_name is None:
             return reports
         if not reports or len(reports) == 0:
-            return resReport
-        found = self.get_report_by_name(reports, reportName)
+            return res_report
+        found = self.get_report_by_name(reports, report_name)
         if found:
-            resReport = [found]
-        return resReport
+            res_report = [found]
+        return res_report
 
     def __generateUrls(self, app_name, config, reports, ids):
         arr = []
@@ -179,7 +179,7 @@ class Toucan(In_Driver, Out_Driver):
         return {"authorization": f"Bearer {self.__token}"}
 
     def embed(self, small_app, slide, hosts=None, mode="webcomponent", height="800px"):
-        allowedHosts = (
+        allowed_hosts = (
             hosts
             if hosts
             else [
@@ -189,7 +189,7 @@ class Toucan(In_Driver, Out_Driver):
         )
         uid = str(uuid.uuid4())
         data = {
-            "allowedHosts": allowedHosts,
+            "allowedHosts": allowed_hosts,
             "expirationDate": None,
             "layout": {
                 "type": "single",
@@ -248,21 +248,21 @@ class Toucan(In_Driver, Out_Driver):
         ).decode("utf8")
 
     def get_dashboard_selector(self):
-        statusApp = self.get_version()
-        version = statusApp["frontVersion"]
+        status_app = self.get_version()
+        version = status_app["frontVersion"]
         if version == "v64.0.0":
             return ".dashboard-report"
         else:
             return ".small-app-home__content"
 
     def get_version(self):
-        reqApi = requests.get(f"{self.url_api}", headers=self.__get_headers())
-        reqApi.raise_for_status()
-        result = reqApi.json()
-        reqApp = requests.get(f"{self.url_base}/{self.__url_tc_app_version}")
-        reqApp.raise_for_status()
-        frontVersion = reqApp.text().strip()
-        result["frontVersion"] = frontVersion
+        req_api = requests.get(f"{self.url_api}", headers=self.__get_headers())
+        req_api.raise_for_status()
+        result = req_api.json()
+        req_app = requests.get(f"{self.url_base}/{self.__url_tc_app_version}")
+        req_app.raise_for_status()
+        front_version = req_app.text().strip()
+        result["frontVersion"] = front_version
         return result
 
     def get_app_config(self, app_name):
@@ -513,19 +513,19 @@ class Toucan(In_Driver, Out_Driver):
         req.raise_for_status()
         return req.json()
 
-    def get_report_by_name(self, reports, reportName):
-        reportFound = None
+    def get_report_by_name(self, reports, report_name):
+        report_found = None
         if not reports or len(reports) == 0:
-            return reportFound
+            return report_found
         for report in reports:
             if (
-                reportName is not None
+                report_name is not None
                 and "id" in report
                 and "entityName" in report
-                and report.get("entityName") == reportName
+                and report.get("entityName") == report_name
             ):
-                reportFound = report
-        return reportFound
+                report_found = report
+        return report_found
 
     def screenshots_app_all(self):
         for app in self.small_apps:
@@ -549,12 +549,12 @@ class Toucan(In_Driver, Out_Driver):
                 res = True
         return res
 
-    def screenshots_app(self, app_name, reportName=None, fullSize=False):
+    def screenshots_app(self, app_name, report_name=None, full_size=False):
         if self.debug:
             print("Generate screenshots for", app_name)
         if self.is_app_allowed(app_name):
-            folderName = self.__generate_folder_name(app_name)
-            self.__createFolder(folderName)
+            folder_name = self.__generate_folder_name(app_name)
+            self.__createFolder(folder_name)
             if self.debug:
                 print("Get app config")
             config = self.get_app_config(app_name)
@@ -563,12 +563,12 @@ class Toucan(In_Driver, Out_Driver):
                 ids = self.get_app_reports_ids(app_name)
             except requests.exceptions.RequestException:
                 print("Cannot get report ids")
-            reportsAll = self.get_app_reports(app_name)
-            reports = self.__filterReport(reportsAll, reportName)
+            reports_all = self.get_app_reports(app_name)
+            reports = self.__filterReport(reports_all, report_name)
             urls = self.__generateUrls(app_name, config, reports, ids)
             for url in urls:
                 req = ""
-                path = f"{folderName}/{url.get('name')}.png"
+                path = f"{folder_name}/{url.get('name')}.png"
                 try:
                     if self.debug:
                         print(f"Request Screenshot {path}")
@@ -578,7 +578,7 @@ class Toucan(In_Driver, Out_Driver):
                             "url": url.get("url"),
                             "format": "png",
                             "lang": "en",
-                            "fullSize": fullSize,
+                            "fullSize": full_size,
                             "deviceScaleFactor": 1,
                             "token": self.__token,
                             "elementSelector": url.get("selector"),
@@ -594,7 +594,7 @@ class Toucan(In_Driver, Out_Driver):
                     print("Timeout Error:", errt)
                 except requests.exceptions.RequestException as err:
                     print("OOps: Something Else", err)
-                path = f"{folderName}/{url.get('name')}.png"
+                path = f"{folder_name}/{url.get('name')}.png"
                 if req.status_code == 200:
                     with open(path, "wb") as out_file:
                         shutil.copyfileobj(req.raw, out_file)
