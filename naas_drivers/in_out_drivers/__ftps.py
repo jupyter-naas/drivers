@@ -52,9 +52,9 @@ class Ftpsbase(ftplib.FTP_TLS):
         if dest_path is not None:
             self.cwd(saved_path)
 
-    def list_directory(self, dirName):
+    def list_directory(self, dir_ame):
         dirs = []
-        self.dir(dirName, dirs.append)
+        self.dir(dir_ame, dirs.append)
         files = []
         for dirr in dirs:
             line = dirr.lstrip().split()

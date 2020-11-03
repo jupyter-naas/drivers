@@ -96,8 +96,8 @@ class Toucan(In_driver, Out_driver):
             .replace("\n", "")
             .replace(";", "")
         )
-        jsonConf = json.loads(res)
-        return jsonConf
+        json_conf = json.loads(res)
+        return json_conf
 
     def __request_user(self):
         req = requests.post(f"{self.url_api}/{self.__url_login}", json=self.login)
@@ -111,11 +111,11 @@ class Toucan(In_driver, Out_driver):
         except OSError:
             print(f"Directory {name} already exist")
 
-    def __calc_report_id(self, currentId, ids):
-        calcId = currentId
+    def __calc_report_id(self, current_id, ids):
+        calc_id = current_id
         if ids is not None and 0 in ids:
-            calcId += int(ids.get(0))
-        return calcId
+            calc_id += int(ids.get(0))
+        return calc_id
 
     def __filterReport(self, reports, report_name):
         res_report = [{"id": 0, "entityName": "default"}]
@@ -163,12 +163,12 @@ class Toucan(In_driver, Out_driver):
                 for slide in slides:
                     if "parent_id" in slide and "id" in slide and "title" in slide:
                         name = self.generate_screenshot_name(slide, report)
-                        rId = self.__calc_report_id(report.get("id"), ids)
+                        r_id = self.__calc_report_id(report.get("id"), ids)
                         if self.debug:
                             print("Generate url for", name)
                         arr.append(
                             {
-                                "url": f"{self.url_base}/{app_name}?report={rId}&dashboard={rId}&slide={slide.get('id')}",
+                                "url": f"{self.url_base}/{app_name}?report={r_id}&dashboard={r_id}&slide={slide.get('id')}",
                                 "selector": ".tc-slide__content, .tc-story",
                                 "name": name,
                             }
@@ -352,19 +352,15 @@ class Toucan(In_driver, Out_driver):
         files = None
         data = None
         if format_file == "front_config":
-            format_url = "&format=cson"
             files = {"file": io.StringIO(json.dumps({"json": cson.load(file_upload)}))}
         elif format_file == "etl_config":
             config_name = "/etl"
-            format_url = "&format=cson"
             data = file_upload
         elif format_file == "report":
             config_name = "/report"
-            format_url = "&format=cson"
             data = file_upload
         elif format_file == "dashboard-Group":
             config_name = "/dashboard-Group"
-            format_url = "&format=cson"
             data = file_upload
         elif format_file == "augment.py":
             config_name = "/augment"
@@ -372,7 +368,6 @@ class Toucan(In_driver, Out_driver):
             format_url = ""
         elif format_file == "preprocess_validation":
             config_name = "/preprocess_validation"
-            format_url = "&format=cson"
             data = file_upload
         elif format_file == "permissions.py":
             config_name = "/permissions"
@@ -380,7 +375,6 @@ class Toucan(In_driver, Out_driver):
             format_url = ""
         elif format_file == "permissions_config":
             config_name = "/permissions_config"
-            format_url = "&format=cson"
             data = file_upload
         elif format_file == "notifications_handlers.py":
             config_name = "/notifications_handlers"
