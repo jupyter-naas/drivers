@@ -1,8 +1,8 @@
-from naas_drivers.driver import Out_driver
+from naas_drivers.driver import OutDriver
 import requests
 
 
-class Integromat(Out_driver):
+class Integromat(OutDriver):
     def send(self, url, data=None):
         r = requests.post(
             url=url,

@@ -1,4 +1,4 @@
-from naas_drivers.driver import In_driver, Out_driver
+from naas_drivers.driver import InDriver, OutDriver
 from IPython.core.display import display, HTML
 from typing import Any, Dict, List
 import pandas as pd
@@ -14,7 +14,7 @@ import os
 import io
 
 
-class Toucan(In_driver, Out_driver):
+class Toucan(InDriver, OutDriver):
     """Toucan lib"""
 
     # Private vars

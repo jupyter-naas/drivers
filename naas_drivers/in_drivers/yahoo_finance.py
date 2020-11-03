@@ -1,9 +1,9 @@
-from naas_drivers.driver import In_driver
+from naas_drivers.driver import InDriver
 import pandas as pd
 import datetime as dt
 
 
-class YahooFinance(In_driver):
+class YahooFinance(InDriver):
     def get(
         self,
         stock_companies,

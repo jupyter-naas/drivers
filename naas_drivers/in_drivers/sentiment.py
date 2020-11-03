@@ -1,11 +1,11 @@
-from naas_drivers.driver import In_driver
+from naas_drivers.driver import InDriver
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
 from pandas import json_normalize
 from typing import Union
 
 
-class Sentiment(In_driver):
+class Sentiment(InDriver):
     def __sanitize_dataset(
         self, dataset: Union[pd.DataFrame, pd.Series], column_name: str
     ) -> pd.DataFrame:

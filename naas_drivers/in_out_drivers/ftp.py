@@ -1,9 +1,9 @@
-from naas_drivers.driver import In_driver, Out_driver
+from naas_drivers.driver import InDriver, OutDriver
 from .__ftp import Ftpbase
 from .__ftps import Ftpsbase
 
 
-class Ftp(In_driver, Out_driver):
+class Ftp(InDriver, OutDriver):
     """FTP subclass"""
 
     _ftp = None

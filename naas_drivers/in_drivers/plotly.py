@@ -1,10 +1,10 @@
-from naas_drivers.driver import In_driver
+from naas_drivers.driver import InDriver
 import plotly.graph_objects as go
 import requests
 import os
 
 
-class Plotly(In_driver):
+class Plotly(InDriver):
     """ Plot generator lib"""
 
     __css_base = ".modebar {display: none;} \n.modebar-container {display: none;} "
