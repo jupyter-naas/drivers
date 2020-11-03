@@ -1,12 +1,15 @@
 import pandas as pd
 
+basic_text = "Define it"
+basic_error = "Define it, it should return a Dataframe"
+
 
 class ConnectDriver:
 
     connected = False
 
     def connect(self, *args, **kwargs):
-        print("define it", *args, **kwargs)
+        print(basic_text, *args, **kwargs)
         self.connected = True
         return self
 
@@ -17,16 +20,16 @@ class ConnectDriver:
 
 class InDriver(ConnectDriver):
     def convert_data_to_df(self, *args, **kwargs):
-        return "Define it, it should return a Dataframe"
+        return basic_error
 
     def get(self, *args, **kwargs) -> pd.DataFrame:
         self.check_connect()
-        print("define it", *args, **kwargs)
-        return "Define it, it should return a Dataframe"
+        print(basic_text, *args, **kwargs)
+        return basic_error
 
 
 class OutDriver(ConnectDriver):
     def send(self, *args, **kwargs):
         self.check_connect()
-        print("define it", *args, **kwargs)
-        return "Define it, it should return a Dataframe"
+        print(basic_text, *args, **kwargs)
+        return basic_error
