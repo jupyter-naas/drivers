@@ -31,14 +31,14 @@ class Healthcheck(Out_Driver):
     def check_up(self, url, auth=None, verify=True):
         """ check if url is reachable (url, healthkey, auth=None, verify=True)"""
         self.check_connect()
-        self.send(self.healthkey, "start")
+        self.send("start")
         try:
             r = requests.get(url, auth=auth, verify=verify)
             if r.status_code == 200:
-                self.send(self.healthkey)
+                self.send()
                 return f"{url} is heathy send to {self.healthUrl}{self.healthkey} {date.today()}"
             else:
-                self.send(self.healthkey, "fail")
+                self.send("fail")
                 return f"===>Fail {url} send to {self.healthUrl}{self.healthkey}, {date.today()}"
         except requests.exceptions.RequestException:
             return f"Error ==> cannot get health server {self.healthUrl}{self.healthkey}, {date.today()}"
