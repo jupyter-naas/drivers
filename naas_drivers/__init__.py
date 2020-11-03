@@ -1,4 +1,4 @@
-from naas_drivers.in_drivers.yahoo_finance import YahooFinance
+from naas_drivers.in_drivers.yahoofinance import YahooFinance
 from naas_drivers.in_drivers.cityfalcon import Cityfalcon
 from naas_drivers.in_drivers.geolocator import Geolocator
 from naas_drivers.in_drivers.newsapi import Newsapi
