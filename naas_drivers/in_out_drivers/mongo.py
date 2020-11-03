@@ -1,4 +1,4 @@
-from naas_drivers.driver import In_driver, Out_driver
+from naas_drivers.driver import InDriver, OutDriver
 from pymongo import MongoClient
 import pandas as pd  # noqa: F401
 import sys
@@ -7,7 +7,7 @@ import time
 filter_system = {"name": {"$regex": r"^(?!system\.)"}}
 
 
-class Mongo(In_driver, Out_driver):
+class Mongo(InDriver, OutDriver):
     """Mongo lib"""
 
     __client = None

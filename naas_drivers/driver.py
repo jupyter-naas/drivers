@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class Connect_driver:
+class ConnectDriver:
 
     connected = False
 
@@ -15,7 +15,7 @@ class Connect_driver:
             raise ValueError("you should call connect first")
 
 
-class In_driver(Connect_driver):
+class InDriver(ConnectDriver):
     def convert_data_to_df(self, *args, **kwargs):
         return "Define it, it should return a Dataframe"
 
@@ -25,7 +25,7 @@ class In_driver(Connect_driver):
         return "Define it, it should return a Dataframe"
 
 
-class Out_driver(Connect_driver):
+class OutDriver(ConnectDriver):
     def send(self, *args, **kwargs):
         self.check_connect()
         print("define it", *args, **kwargs)

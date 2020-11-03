@@ -1,4 +1,4 @@
-from naas_drivers.driver import In_driver, Out_driver
+from naas_drivers.driver import InDriver, OutDriver
 from urllib.parse import urljoin
 import pandas as pd
 import requests
@@ -8,7 +8,7 @@ import os
 BIG_NUM_TO_GETALL = 1000000
 
 
-class Gsheet(In_driver, Out_driver):
+class Gsheet(InDriver, OutDriver):
     sheets_api = None
     spreadsheet_id = None
     sheet_name = None

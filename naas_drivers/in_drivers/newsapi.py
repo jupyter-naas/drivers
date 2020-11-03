@@ -1,10 +1,10 @@
-from naas_drivers.driver import In_driver
+from naas_drivers.driver import InDriver
 from newsapi.newsapi_client import NewsApiClient
 import pandas as pd
 import os
 
 
-class Newsapi(In_driver):
+class Newsapi(InDriver):
     __key = os.environ.get("APINEW_KEY", None)
 
     def connect(self, key):

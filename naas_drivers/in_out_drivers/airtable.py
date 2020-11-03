@@ -1,9 +1,9 @@
-from naas_drivers.driver import In_driver, Out_driver
+from naas_drivers.driver import InDriver, OutDriver
 from airtable import Airtable as at
 import pandas as pd
 
 
-class Airtable(In_driver, Out_driver):
+class Airtable(InDriver, OutDriver):
     _airtable = None
     _key = None
     _table = None
