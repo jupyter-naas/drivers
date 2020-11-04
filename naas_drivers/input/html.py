@@ -53,9 +53,8 @@ a { color: #B200FD; font-weight: 600; text-decoration: underline; }
 a:hover { color: #000000 !important; text-decoration: none !important; background-color: #5c1958 !important; }
 a.button:hover { color: #ffffff !important; background-color: #5c1958 !important; }
 
-
-.table_border td, th {
-    padding: 8px;
+td, th {
+    padding: 10px;
 }
 
 table * {
