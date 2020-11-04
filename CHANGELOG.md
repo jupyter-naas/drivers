@@ -1,3 +1,9 @@
+## 0.25.4 (2020-11-04)
+
+### Fix
+
+- bobapp remove token in services
+
 ## 0.25.3 (2020-11-04)
 
 ### Fix
