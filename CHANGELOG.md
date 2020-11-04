@@ -1,3 +1,9 @@
+## 0.25.5 (2020-11-04)
+
+### Fix
+
+- **plotly**: allow any moving average
+
 ## 0.25.4 (2020-11-04)
 
 ### Fix
