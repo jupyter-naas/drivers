@@ -223,8 +223,12 @@ class Html(InDriver):
     def table(self, data, border=True):
         elems = []
         table_arr = None
+        row_link = False
+        row_link_index = -1
         if isinstance(data, pd.DataFrame):
             table_arr = list(data.values.tolist())
+            row_link = "row_link" in data.columns
+            row_link_index = list(data.columns).index("row_link")
         elif isinstance(data, list):
             table_arr = data
         else:
@@ -236,7 +240,19 @@ class Html(InDriver):
                     cell = row[i]
                     if isinstance(data, pd.DataFrame):
                         col = list(data.columns)[i]
-                        res.append(tags.Td(self.__convert(cell, col)))
+                        if row_link:
+                            if col != "row_link":
+                                link = row[row_link_index]
+                                res.append(
+                                    tags.Td(
+                                        tags.A(
+                                            attributes.Href(link),
+                                            self.__convert(cell, col),
+                                        )
+                                    )
+                                )
+                        else:
+                            res.append(tags.Td(self.__convert(cell, col)))
                     else:
                         res.append(
                             tags.Td(tags.Text(cell) if isinstance(cell, str) else cell)
@@ -317,7 +333,12 @@ class Html(InDriver):
         return self.text(text, font_size="24px")
 
     def text(self, text, font_size="18px"):
-        return tags.P(tags.Text(text), attributes.InlineStyle(font_size=font_size))
+        return tags.P(
+            tags.Text(text),
+            attributes.InlineStyle(
+                font_size=font_size, padding_left="10px", padding_right="10px"
+            ),
+        )
 
     def header(self, *elems):
         return tags.Header(*elems)
@@ -421,7 +442,6 @@ class Html(InDriver):
         gen_html = tags.Html(
             attributes.Lang("en"),
             tags.Head(
-                tags.Title(tags.Text(title)),
                 tags.Meta(
                     attributes.HttpEquiv("Content-Type"),
                     attributes.Content("text/html; charset=utf-8"),
@@ -439,6 +459,7 @@ class Html(InDriver):
                     attributes.Content("IE=edge"),
                 ),
                 tags.Style(tags.Text(base_style)),
+                tags.Title(tags.Text(title)),
             ),
             tags.Body(
                 attributes.InlineStyle(margin="0 !important", padding="0 !important"),
