@@ -1,6 +1,6 @@
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.25.1"
+version = "0.25.2"
 tag_format = "$major.$minor.$patch$prerelease"
 version_files = [
     "naas_drivers/__init__.py",
