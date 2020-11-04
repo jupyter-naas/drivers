@@ -1,3 +1,9 @@
+## 0.25.2 (2020-11-04)
+
+### Fix
+
+- allow connect default api newapi cityfalcon
+
 ## 0.25.1 (2020-11-04)
 
 ### Fix
