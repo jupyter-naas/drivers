@@ -1,3 +1,9 @@
+## 0.25.1 (2020-11-04)
+
+### Fix
+
+- **cityfalcon**: change default field for logo
+
 ## 0.25.0 (2020-11-04)
 
 ### Feat
