@@ -156,7 +156,7 @@ class Users(CRUD):
 
     def validate_email(self, email):
         regex_email = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
-        return not re.match(regex_email, email)
+        return re.match(regex_email, email)
 
     def get_by_email(self, email):
         # Get user
@@ -299,7 +299,7 @@ class Users(CRUD):
         else:
             print(f"Service already exists in Bobapp for {email}")
 
-    def create_service(self, serv, email, password):
+    def create_service(self, serv, email, password, token):
 
         # Create login
         email = email.strip().lower()
@@ -320,9 +320,7 @@ class Users(CRUD):
 
         if serv == "ftp":
             # Variable FTP
-            AUTH_TOKEN_FTP = (
-                "8b262ed2e3d8aae269c421babed50c48141e110ddc16ee3782929f4f46a8"
-            )
+            AUTH_TOKEN_FTP = token
             URI_FTP = "https://ftp.naas.ai/user/add"
 
             # Create user on service ftp
@@ -331,9 +329,7 @@ class Users(CRUD):
 
         if serv == "jupyter":
             # Jupyter
-            AUTH_TOKEN_JUP = (
-                "xQqs3X7zEkAhsQmnoeQAepoB4irB"  # admin of your galaxy to get it
-            )
+            AUTH_TOKEN_JUP = token
             URI_JUP = "https://app.naas.ai/hub/signup"
 
             # Create user on service jupyter
