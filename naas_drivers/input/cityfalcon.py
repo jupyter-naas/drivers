@@ -5,13 +5,13 @@ import os
 
 
 class Cityfalcon(InDriver):
-    __key = os.environ.get("CITYFALCON_KEY", None)
+    __key = None
     _url_base = os.environ.get(
         "CITYFALCON_API", "https://api.cityfalcon.com/v0.2/stories"
     )
 
     def connect(self, key):
-        self.__key = key
+        self.__key = key if key else os.environ.get("CITYFALCON_KEY", None)
         self.connected = True
         return self
 

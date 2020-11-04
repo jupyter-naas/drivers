@@ -5,10 +5,10 @@ import os
 
 
 class Newsapi(InDriver):
-    __key = os.environ.get("APINEW_KEY", None)
+    __key = None
 
-    def connect(self, key):
-        self.__key = key
+    def connect(self, key=None):
+        self.__key = key if key else os.environ.get("APINEW_KEY", None)
         self.connected = True
         return self
 
