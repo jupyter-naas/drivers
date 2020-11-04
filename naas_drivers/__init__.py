@@ -4,6 +4,7 @@ from naas_drivers.input.geolocator import Geolocator
 from naas_drivers.input.newsapi import Newsapi
 from naas_drivers.input.prediction import Prediction
 from naas_drivers.input.sentiment import Sentiment
+from naas_drivers.input.optimise import Optimise
 from naas_drivers.input.pdf import Pdf
 from naas_drivers.input.plotly import Plotly
 from naas_drivers.input.html import Html
@@ -32,6 +33,7 @@ if os.environ.get("NAAS_DRIVER_LIGHT_INIT"):
     exit()
 
 # In drivers
+optimise = Optimise()
 cityfalcon = Cityfalcon()
 geolocator = Geolocator()
 newsapi = Newsapi()
