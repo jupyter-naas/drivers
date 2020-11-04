@@ -146,7 +146,6 @@ class Plotly(InDriver):
         ]
 
     def __moving_average(self, stock, visible):
-        colors = ["green", "red"]
         filter_cols = [x for x in stock.columns if x.startswith("MA")]
         if len(filter_cols) == 0:
             return []
@@ -154,7 +153,8 @@ class Plotly(InDriver):
             charts = []
             for i in range(len(filter_cols)):
                 filter_col = filter_cols[i]
-                line = dict(color=colors[i], width=1) if i in colors else None
+                line = dict(color="green", width=1) if filter_col == "MA20" else None
+                line = dict(color="red", width=1) if filter_col == "MA50" else line
                 charts.append(
                     go.Scatter(
                         x=stock["Date"],
