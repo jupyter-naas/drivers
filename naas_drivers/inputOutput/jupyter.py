@@ -18,7 +18,7 @@ class Jupyter(InDriver, OutDriver):
         return self
 
     def create_user(self, username, password, super_admin_token):
-        signup_url = f"{self.base_url}hub/signup"
+        signup_url = f"{self.base_url}/hub/signup"
         login = {
             "username": username,
             "password": password,
