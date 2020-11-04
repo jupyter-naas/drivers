@@ -1,3 +1,9 @@
+## 0.24.24 (2020-11-04)
+
+### Fix
+
+- **cityfalcon**: add wrong field name when error
+
 ## 0.24.23 (2020-11-04)
 
 ### Fix
