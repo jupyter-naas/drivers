@@ -24,7 +24,7 @@ from naas_drivers.inputOutput.toucan import Toucan
 import requests
 import os
 
-__version__ = "0.24.22"
+__version__ = "0.24.23"
 
 __github_repo = "jupyter-naas/drivers"
 
