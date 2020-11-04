@@ -166,7 +166,13 @@ class Plotly(InDriver):
                 )
             return charts
 
-    def linechart(self, dataset, label_x: str, label_y: list):
+    def linechart(
+        self,
+        dataset,
+        label_x: str,
+        label_y: list,
+        show=False,
+    ):
         charts = []
         layout = dict(
             dragmode="pan",
@@ -184,7 +190,8 @@ class Plotly(InDriver):
                 )
             )
         fig = go.Figure(data=charts, layout=layout)
-        fig.show()
+        if show:
+            fig.show()
         return fig
 
     def candlestick(
@@ -195,6 +202,7 @@ class Plotly(InDriver):
         label_high: str,
         label_low: str,
         label_close: str,
+        show=False,
     ):
         charts = []
         layout = dict(
@@ -213,13 +221,15 @@ class Plotly(InDriver):
             )
         ]
         fig = go.Figure(data=charts, layout=layout)
-        fig.show()
+        if show:
+            fig.show()
         return fig
 
     def stock(
         self,
         stock_data,
         kind="candlestick",
+        show=False,
         filter=False,
         filter_title="Stock",
         filter_all=False,
@@ -318,10 +328,13 @@ class Plotly(InDriver):
                     )
                 ],
             )
-        fig.show()
+        if show:
+            fig.show()
         return fig
 
-    def table(self, header_values, cells_values, header_color="rgb(136,233,175)"):
+    def table(
+        self, header_values, cells_values, header_color="rgb(136,233,175)", show=False
+    ):
         """ generate table html """
 
         fig = go.Figure(
@@ -346,5 +359,6 @@ class Plotly(InDriver):
         )
 
         fig.update_layout(margin=dict(l=10, r=10, t=0, b=0))
-
+        if show:
+            fig.show()
         return fig
