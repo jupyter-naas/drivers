@@ -152,14 +152,15 @@ class Plotly(InDriver):
             return []
         else:
             charts = []
-            for i in range(len(colors)):
+            for i in range(len(filter_cols)):
                 filter_col = filter_cols[i]
+                line = dict(color=colors[i], width=1) if i in colors else None
                 charts.append(
                     go.Scatter(
                         x=stock["Date"],
                         visible=visible,
                         y=stock[filter_col],
-                        line=dict(color=colors[i], width=1),
+                        line=line,
                         name=f'{filter_col.replace("MA", "")} MA',
                     )
                 )
