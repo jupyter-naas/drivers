@@ -1,3 +1,9 @@
+## 0.25.0 (2020-11-04)
+
+### Feat
+
+- **optimise**: add optimise lib for eavy df
+
 ## 0.24.24 (2020-11-04)
 
 ### Fix
