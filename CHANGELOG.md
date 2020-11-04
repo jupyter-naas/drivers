@@ -1,3 +1,10 @@
+## 0.26.0 (2020-11-04)
+
+### Feat
+
+- **plotly**: allow show or not graph
+- **prediction**: add concat_label feature
+
 ## 0.25.6 (2020-11-04)
 
 ### Fix
