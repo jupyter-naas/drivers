@@ -57,7 +57,7 @@ class Cityfalcon(InDriver):
         fields=[
             "image",
             "title",
-            "source_logo",
+            "logo",
             "link",
         ],
         country="US",
