@@ -166,6 +166,7 @@ class Prediction:
         label: str = "Close",
         date_column: str = "Date",
         data_points: int = 20,
+        concat_label=None,
     ):
         # initializes the class variables
         self.__init_class_vars(
@@ -197,4 +198,13 @@ class Prediction:
             res[col] = res[col].replace(0.000000, np.nan)
         if prediction_type == "COMPOUND":
             res = res.drop(columns=predicted_cols)
+        if concat_label is not None:
+            if len(predicted_cols) > 1:
+                res[concat_label] = res["COMPOUND"].replace(np.nan, 0.000000) + res[
+                    label
+                ].replace(np.nan, 0.000000)
+            else:
+                res[concat_label] = res[predicted_cols[0]].replace(
+                    np.nan, 0.000000
+                ) + res[label].replace(np.nan, 0.000000)
         return res
