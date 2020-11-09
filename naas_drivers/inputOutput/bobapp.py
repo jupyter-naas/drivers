@@ -201,15 +201,15 @@ class Users(CRUD):
         }
 
         # Get user in Bobapp
-        users = self.get_by_email(email)
+        user = self.get_by_email(email)
 
         # If user does not exist => create user
-        if len(users) == 0:
+        if not user:
             user = new_user
             self.insert(user)
             print(f"User {email} created in Bobapp, password: {password}.")
         else:
-            new_user["_id"] = users[0]["_id"]
+            new_user["_id"] = user["_id"]
             self.update(new_user)
             print(f"User {email} updated in Bobapp, password: {password}.")
         return True
