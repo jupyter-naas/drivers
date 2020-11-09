@@ -28,6 +28,23 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
+    def list_user(self, super_admin_token):
+        signup_url = f"{self.base_url}/hub/signup"
+        headers = {"Authorization": super_admin_token}
+        r = requests.get(signup_url, headers=headers)
+        r.raise_for_status()
+        return r.json()
+
+    def delete_user(self, username, super_admin_token):
+        signup_url = f"{self.base_url}/hub/signup"
+        login = {
+            "username": username,
+        }
+        headers = {"Authorization": super_admin_token}
+        r = requests.delete(signup_url, data=login, headers=headers)
+        r.raise_for_status()
+        return r.json()
+
     def get_me(self):
         self.connect(os.environ.get("JUPYTERHUB_API_TOKEN"))
         return self.get_user(os.environ.get("JUPYTERHUB_USER"))
