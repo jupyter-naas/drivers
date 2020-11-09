@@ -1,3 +1,9 @@
+## 0.27.1 (2020-11-09)
+
+### Fix
+
+- **bobapp**: create_or_update function
+
 ## 0.27.0 (2020-11-04)
 
 ### Feat
