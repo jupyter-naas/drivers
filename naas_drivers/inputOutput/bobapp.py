@@ -150,7 +150,7 @@ class Users(CRUDBOB):
         # If user does not exist => create user
         if not user:
             user = new_user
-            self.insert(user)
+            self.send(user)
             print(f"User {email} created in Bobapp, password: {password}")
         else:
             new_user["_id"] = user["_id"]
@@ -269,7 +269,8 @@ class Users(CRUDBOB):
 
             # Create user on service ftp
             headers = {"X-Api-Key": AUTH_TOKEN_FTP}
-            requests.post(URI_FTP, json=login, headers=headers)
+            r = requests.post(URI_FTP, json=login, headers=headers)
+            r.raise_for_status()
 
         if serv == "jupyter":
             # Jupyter
@@ -278,7 +279,8 @@ class Users(CRUDBOB):
 
             # Create user on service jupyter
             headers = {"Authorization": AUTH_TOKEN_JUP}
-            requests.post(URI_JUP, data=login, headers=headers).json()
+            r = requests.post(URI_JUP, data=login, headers=headers)
+            r.raise_for_status()
 
     def create(
         self,
