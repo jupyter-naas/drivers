@@ -49,7 +49,7 @@ class Plotly(InDriver):
             print("Not supported for now")
             os.remove(html_filename)
             return
-        print("Save as", filename)
+        print(f"Saved as {filename}")
 
     def export(self, chart, filenames, css=None):
         """ create html export and add css to it"""

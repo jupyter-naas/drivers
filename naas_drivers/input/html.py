@@ -429,7 +429,7 @@ class Html(InDriver):
         )
         req.raise_for_status()
         open(filename, "wb").write(req.content)
-        print("Save as", filename)
+        print(f"Saved as {filename}")
 
     def __open_or_read(self, data):
         read_data = data
