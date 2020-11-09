@@ -1,3 +1,10 @@
+## 0.27.2 (2020-11-09)
+
+### Fix
+
+- connect return self
+- **gsheet**: fix connect
+
 ## 0.27.1 (2020-11-09)
 
 ### Fix
