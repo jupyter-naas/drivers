@@ -24,6 +24,7 @@ class Gsheet(InDriver, OutDriver):
         self.spreadsheet_id = spreadsheet_id
         self.sheets_api = api_url if api_url else os.getenv("GSHEETS_API")
         self.connected = True
+        return self
 
     def get(
         self,
