@@ -1,3 +1,9 @@
+## 0.29.2 (2020-11-09)
+
+### Fix
+
+- **bobapp**: use send instead of insert
+
 ## 0.29.1 (2020-11-09)
 
 ### Fix
