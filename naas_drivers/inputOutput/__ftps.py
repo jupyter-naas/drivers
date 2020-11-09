@@ -34,6 +34,7 @@ class Ftpsbase(ftplib.FTP_TLS):
 
             def callback(data):
                 f.write(data)
+                print(f"Saved as {dest_path}")
 
             self.retrbinary(f"RETR {filename}", callback)
         if filename != path:
@@ -51,6 +52,7 @@ class Ftpsbase(ftplib.FTP_TLS):
         file_byte.close()
         if dest_path is not None:
             self.cwd(saved_path)
+        print(f"Saved in {dest_path}")
 
     def list_directory(self, dir_ame):
         dirs = []

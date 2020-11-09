@@ -7,6 +7,7 @@ class Pdf(InDriver):
     """ PDF generator lib"""
 
     api_url = None
+    connected = True
 
     def connect(self, api_url=None):
         self.api_url = (
@@ -38,3 +39,4 @@ class Pdf(InDriver):
         )
         r.raise_for_status()
         open(filename, "wb").write(r.content)
+        print(f"file from {url if url else 'html'} saved in {filename}")

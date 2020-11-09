@@ -29,6 +29,7 @@ class Ftpbase:
 
                 def callback(data):
                     f.write(data)
+                    print(f"Saved as {dest_path}")
 
                 self.retrbinary(f"RETR {filename}", callback)
         elif self.conprotocol == "sftp":
@@ -36,6 +37,8 @@ class Ftpbase:
                 file_byte = open(dest_path if dest_path else path, "rb")  # file to send
                 file_byte.write(f)
                 file_byte.close()
+                print(f"Saved as {dest_path}")
+
         if filename != path:
             self.cwd(saved_path)
 
@@ -51,6 +54,7 @@ class Ftpbase:
         file_byte.close()
         if dest_path is not None:
             self.cwd(saved_path)
+        print(f"Saved in {dest_path}")
 
     def list_directory(self, path):
         files = []
