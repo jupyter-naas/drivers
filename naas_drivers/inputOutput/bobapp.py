@@ -1,4 +1,5 @@
 from naas_drivers.driver import InDriver, OutDriver
+from .__crud import CRUD
 from requests.auth import HTTPBasicAuth
 import requests
 import json
@@ -40,21 +41,7 @@ class Me:
         return req
 
 
-class CRUD:
-    base_public_url = None
-    endpoint = None
-    auth = None
-
-    def __init__(
-        self,
-        base_url,
-        endpoint,
-        auth,
-    ):
-        self.base_public_url = base_url
-        self.endpoint = endpoint
-        self.auth = auth
-
+class CRUDBOB(CRUD):
     def get_all(self, search=None, sort=None, limit=20, skip=0):
         params = {
             "limit": limit,
@@ -74,51 +61,8 @@ class CRUD:
         req.raise_for_status()
         return req
 
-    def get(self, id):
-        req = requests.get(
-            url=f"{self.base_public_url}/{self.endpoint}/{id}",
-            headers=req_headers,
-            auth=self.auth,
-            allow_redirects=False,
-        )
-        req.raise_for_status()
-        return req
 
-    def insert(self, data):
-        req = requests.post(
-            url=f"{self.base_public_url}/{self.endpoint}",
-            auth=self.auth,
-            headers=req_headers,
-            json=data,
-            allow_redirects=False,
-        )
-        req.raise_for_status()
-        return req
-
-    def update(self, data):
-        _id = data.get("_id")
-        req = requests.put(
-            url=f"{self.base_public_url}/{self.endpoint}/{_id}",
-            auth=self.auth,
-            headers=req_headers,
-            json=data,
-            allow_redirects=False,
-        )
-        req.raise_for_status()
-
-    def delete(self, data):
-        _id = data.get("_id")
-        req = requests.delete(
-            url=f"{self.base_public_url}/{self.endpoint}/{_id}",
-            auth=self.auth,
-            headers=req_headers,
-            allow_redirects=False,
-        )
-        req.raise_for_status()
-        return req
-
-
-class SmartTable(CRUD):
+class SmartTable(CRUDBOB):
     database = None
     collection = None
 
@@ -126,7 +70,7 @@ class SmartTable(CRUD):
         self.database = database
         self.collection = collection
         endpoint = f"smarttables/{database}/{collection}"
-        CRUD.__init__(self, base_url, endpoint, auth)
+        CRUDBOB.__init__(self, base_url, endpoint, auth)
 
     def allowed(self):
         req = requests.post(
@@ -150,9 +94,9 @@ class SmartTable(CRUD):
         return req
 
 
-class Users(CRUD):
+class Users(CRUDBOB):
     def __init__(self, base_url, auth):
-        CRUD.__init__(self, base_url, "users", auth)
+        CRUDBOB.__init__(self, base_url, "users", auth)
 
     def validate_email(self, email):
         regex_email = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
@@ -346,6 +290,7 @@ class Users(CRUD):
         workspace_id,
         workspace_name,
         services,
+        tokens={},
     ):
         # Create user in Bobapp
         check_dk = self.create_or_update(email, password, first_name, last_name, role)
@@ -356,7 +301,8 @@ class Users(CRUD):
 
             # Create service
             for serv in services:
-                self.create_service(serv, email, password)
+                token = tokens.get(serv)
+                self.create_service(serv, email, password, token)
                 self.update_service(serv, email, password)
 
 
