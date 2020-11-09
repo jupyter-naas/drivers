@@ -44,6 +44,7 @@ class Geolocator(InDriver):
         else:
             raise ValueError("mode should be osm or google")
         self.connected = True
+        return self
 
     def check_connect(self):
         if not self.client:
