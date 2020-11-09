@@ -29,13 +29,18 @@ class Jupyter(InDriver, OutDriver):
         return r.json()
 
     def get_me(self):
-        self.check_connect()
+        self.connect(os.environ.get("JUPYTERHUB_API_TOKEN"))
         return self.get_user(os.environ.get("JUPYTERHUB_USER"))
 
     def get_me_uptime(self):
-        self.check_connect()
+        self.connect(os.environ.get("JUPYTERHUB_API_TOKEN"))
         me = self.get_user(os.environ.get("JUPYTERHUB_USER"))
         return self.get_server_uptime(me)
+
+    def restart_me(self):
+        self.connect(os.environ.get("JUPYTERHUB_API_TOKEN"))
+        username = os.environ.get("JUPYTERHUB_USER")
+        return self.stop_user(username)
 
     def get_users(self):
         self.check_connect()
