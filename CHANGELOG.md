@@ -1,3 +1,9 @@
+## 0.30.0 (2020-11-09)
+
+### Feat
+
+- **jupyter**: add list and delete users
+
 ## 0.29.3 (2020-11-09)
 
 ### Fix
