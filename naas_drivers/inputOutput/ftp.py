@@ -29,6 +29,7 @@ class Ftp(InDriver, OutDriver):
         self._ftp.login(user=user, passwd=passwd)
         self.__force_prot = force_prot
         self.connected = True
+        return self
 
     def __before_all(self):
         self.check_connect()

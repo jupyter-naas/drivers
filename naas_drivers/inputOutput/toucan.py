@@ -79,6 +79,8 @@ class Toucan(InDriver, OutDriver):
             print("OOps: Something Else", err)
         if self.debug:
             print("user logged")
+        self.connected = True
+        return self
 
     def __request_small_apps(self):
         req = requests.get(
