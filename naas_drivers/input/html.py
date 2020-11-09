@@ -2,6 +2,7 @@ from naas_drivers.driver import InDriver
 from htmlBuilder import tags, attributes
 import IPython.core.display
 import pandas as pd
+import markdown2
 import requests
 import uuid
 import os
@@ -429,6 +430,22 @@ class Html(InDriver):
         req.raise_for_status()
         open(filename, "wb").write(req.content)
         print("Save as", filename)
+
+    def __open_or_read(self, data):
+        read_data = data
+        if "." in data:
+            try:
+                read_data = open(data, "r").read()
+            except OSError:
+                pass
+        return read_data
+
+    def convert(self, data, input_type="markdown"):
+        data_read = self.__open_or_read(data)
+        if input_type == "markdown":
+            return markdown2.markdown(data_read)
+        else:
+            raise ValueError(f"{input_type} not supported for now")
 
     def export(self, html, filenames, css=None):
         """ create html export and add css to it"""
