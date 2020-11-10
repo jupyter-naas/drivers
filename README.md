@@ -24,7 +24,7 @@ Each driver try to return dataframe to strandardise the output.
 Few drivers need specific env var set, that will be notified in the documentation:
 
 <p>
-  <a href="https://naas.gitbook.io/drivers/ title="Redirect to Documentation">
+  <a href="https://naas.gitbook.io/drivers/" title="Redirect to Documentation">
     <img width="200px" src="https://raw.githubusercontent.com/jupyter-naas/drivers/main/images/gitbook.svg" alt="Gitbooks https://naas.gitbook.io/drivers/" />
   </a>
  </p>
