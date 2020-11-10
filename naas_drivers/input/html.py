@@ -228,8 +228,11 @@ class Html(InDriver):
         row_link_index = -1
         if isinstance(data, pd.DataFrame):
             table_arr = list(data.values.tolist())
-            row_link = "row_link" in data.columns
-            row_link_index = list(data.columns).index("row_link")
+            row_link = True if "row_link" in data.columns else False
+            try:
+                row_link_index = list(data.columns).index("row_link")
+            except ValueError:
+                pass
         elif isinstance(data, list):
             table_arr = data
         else:
