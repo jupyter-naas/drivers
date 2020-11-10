@@ -32,7 +32,7 @@ Few drivers need specific env var set, that will be notified in the documentatio
 
 <p>
   <a href="https://naas.gitbook.io/drivers/" title="Redirect to Documentation">
-    <img width="200px" src="https://raw.githubusercontent.com/jupyter-naas/drivers/main/images/gitbook.svg" alt="Gitbooks https://naas.gitbook.io/drivers/" />
+    <img width="200px" src="https://raw.githubusercontent.com/jupyter-naas/drivers/main/images/gitbook.svg" alt="Gitbooks drivers" />
   </a>
  </p>
 
