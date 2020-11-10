@@ -1,7 +1,9 @@
 ![Bump version](https://github.com/jupyter-naas/drivers/workflows/Bump%20version/badge.svg)
+![GitHub license](https://img.shields.io/github/license/jupyter-naas/drivers)
 ![Test Python package](https://github.com/jupyter-naas/drivers/workflows/Test%20Python%20package/badge.svg)
 ![Upload Python Package](https://github.com/jupyter-naas/drivers/workflows/Upload%20Python%20Package/badge.svg)
 ![codecov](https://codecov.io/gh/jupyter-naas/drivers/branch/master/graph/badge.svg?token=IUF0AKYEB0)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 # Welcome to Naas Drivers
 
