@@ -3,8 +3,37 @@
 ![Upload Python Package](https://github.com/jupyter-naas/drivers/workflows/Upload%20Python%20Package/badge.svg)
 ![codecov](https://codecov.io/gh/jupyter-naas/drivers/branch/master/graph/badge.svg?token=IUF0AKYEB0)
 
-# Drivers
+# Welcome to Naas Drivers
+
 🏎 Simple formulas to build highly efficient scripts
+
+## Why Naas Drivers?
+
+We came from excel with the conviction that Python is awesome .
+Python can be use by developpers, or in low-code way.
+<br/>
+That what we try to achieve with naas_drivers.
+Simple formula to interact with powerfull tools.
+<br/>
+Each driver try to return dataframe to strandardise the output.
+
+##install
+
+`pip install naas_drivers`
+
+Few drivers need specific env var set, that will be notified in the documentation:
+
+<p>
+  <a href="https://naas.gitbook.io/drivers/ title="Redirect to Documentation">
+    <img width="200px" src="https://raw.githubusercontent.com/jupyter-naas/drivers/main/images/gitbook.svg" alt="Gitbooks https://naas.gitbook.io/drivers/" />
+  </a>
+ </p>
+
+# Dev
+
+## Install 
+
+`pip install -e .`
 
 ## Check lint
 
@@ -14,7 +43,6 @@
 ## Publish
 
 this auto publish by github action on main branch
-
 
 ### Authors:
 * [Martin donadieu](https://github.com/riderx)
