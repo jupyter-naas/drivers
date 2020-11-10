@@ -7,7 +7,7 @@ import os
 class Users(CRUD):
     def get_by_email(self, email):
         data = {
-            "apiKey": self.token,
+            "apiKey": self.auth,
             "email": email,
         }
         req = requests.post(
@@ -21,7 +21,7 @@ class Users(CRUD):
 
     def get(self, uid):
         data = {
-            "apiKey": self.token,
+            "apiKey": self.auth,
             "id": uid,
         }
         req = requests.post(
@@ -35,7 +35,7 @@ class Users(CRUD):
 
     def send(self, email, name=None):
         data = {
-            "apiKey": self.token,
+            "apiKey": self.auth,
             "email": email,
         }
         if name:
@@ -51,7 +51,7 @@ class Users(CRUD):
 
     def delete(self, uid):
         data = {
-            "apiKey": self.token,
+            "apiKey": self.auth,
             "id": uid,
         }
         req = requests.post(
@@ -76,5 +76,5 @@ class Canny(InDriver, OutDriver):
     def connect(self, api_token):
         self.token = api_token
         self.connected = True
-        self.users = Users(self.api_url, "users", self.__auth)
+        self.users = Users(self.api_url, "users", self.token)
         return self
