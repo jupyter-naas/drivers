@@ -1,3 +1,9 @@
+## 0.31.1 (2020-11-10)
+
+### Fix
+
+- **thinkific**: use api as expected with subdomain
+
 ## 0.31.0 (2020-11-10)
 
 ### Feat
