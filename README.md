@@ -4,6 +4,11 @@
 ![Upload Python Package](https://github.com/jupyter-naas/drivers/workflows/Upload%20Python%20Package/badge.svg)
 ![codecov](https://codecov.io/gh/jupyter-naas/drivers/branch/master/graph/badge.svg?token=IUF0AKYEB0)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=jupyter-naas_drivers&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=jupyter-naas_naas)
+<a href="#badge">
+  <img alt="semantic-release" src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg">
+</a>
+<a href="http://commitizen.github.io/cz-cli/"><img alt="Commitizen friendly" src="https://img.shields.io/badge/commitizen-friendly-brightgreen.svg"></a>
 
 # Welcome to Naas Drivers
 
