@@ -41,45 +41,79 @@ class TKCRUD:
         return df
 
     def get(self, uid):
-        req = requests.get(
-            url=f"{self.base_url}/{uid}",
-            headers=self.req_headers,
-            allow_redirects=False,
-        )
-        req.raise_for_status()
-        return req.json()
+        if not uid:
+            raise ValueError("Uid can not be None.")
+
+        try:
+            req = requests.get(
+                url=f"{self.base_url}/{uid}",
+                headers=self.req_headers,
+                allow_redirects=False,
+            )
+            req.raise_for_status()
+            return req.json()
+        except requests.HTTPError as err:
+            err_code = err.response.status_code
+            if err_code == 404:
+                print(f"Uid '{uid}' not found.")
+            else:
+                print(err.response.json())
 
     def update(self, data):
         uid = data["id"]
-        req = requests.put(
-            url=f"{self.base_url}/{uid}",
-            headers=self.req_headers,
-            json=data,
-            allow_redirects=False,
-        )
-        req.raise_for_status()
-        print(f"'{self.model_name}' '{uid}' updated.")
-        return req.json()
+        if not uid:
+            raise ValueError("Uid can not be None.")
+        try:
+            req = requests.put(
+                url=f"{self.base_url}/{uid}",
+                headers=self.req_headers,
+                json=data,
+                allow_redirects=False,
+            )
+            req.raise_for_status()
+            print(f"'{self.model_name}' '{uid}' updated.")
+        except requests.HTTPError as err:
+            err_code = err.response.status_code
+            if err_code == 404:
+                print(f"Uid '{uid}' not found.")
+            else:
+                print(err.response.json())
 
     def send(self, data):
-        req = requests.post(
-            url=f"{self.base_url}/",
-            headers=self.req_headers,
-            json=data,
-            allow_redirects=False,
-        )
-        req.raise_for_status()
-        return req.json()
+        if len(data) == 0:
+            raise ValueError("Data is empty")
+
+        try:
+            req = requests.post(
+                url=f"{self.base_url}/",
+                headers=self.req_headers,
+                json=data,
+                allow_redirects=False,
+            )
+            req.raise_for_status()
+            return req.json()
+        except requests.HTTPError as err:
+            err_code = err.response.status_code
+            if err_code == 422:
+                print("User already exists.")
+            else:
+                print(err.response.json())
 
     def delete(self, uid):
-        req = requests.delete(
-            url=f"{self.base_url}/{uid}",
-            headers=self.req_headers,
-            allow_redirects=False,
-        )
-        req.raise_for_status()
-        print(f"'{self.model_name}' '{uid}' delete.")
-        return {}
+        try:
+            req = requests.delete(
+                url=f"{self.base_url}/{uid}",
+                headers=self.req_headers,
+                allow_redirects=False,
+            )
+            req.raise_for_status()
+            print(f"'{self.model_name}' '{uid}' delete.")
+        except requests.HTTPError as err:
+            err_code = err.response.status_code
+            if err_code == 404:
+                print(f"Uid '{uid}' not found.")
+            else:
+                print(err.response.json())
 
 
 class User(TKCRUD):
@@ -108,8 +142,6 @@ class Courses(TKCRUD):
 
 class Thinkific(InDriver, OutDriver):
 
-    subdomain = None
-
     base_url = os.environ.get(
         "THINKIFIC_API_URL", "https://api.thinkific.com/api/public/v1"
     )
@@ -119,11 +151,20 @@ class Thinkific(InDriver, OutDriver):
     enrollments = None
 
     def connect(self, api_token, subdomain):
+        # Init thinkific attribute
         self.token = api_token
-        self.connected = True
         self.subdomain = subdomain
-        self.users = User(f"{self.base_url}/users", subdomain, self.token)
-        self.enrollments = TKCRUD(f"{self.base_url}/enrollments", subdomain, self.token)
-        self.courses = Courses(f"{self.base_url}/courses", subdomain, self.token)
-        self.reviews = TKCRUD(f"{self.base_url}//course_reviews", subdomain, self.token)
+
+        # Init end point
+        self.users = User(f"{self.base_url}/users", self.subdomain, self.token)
+        self.enrollments = TKCRUD(
+            f"{self.base_url}/enrollments", self.subdomain, self.token
+        )
+        self.courses = Courses(f"{self.base_url}/courses", self.subdomain, self.token)
+        self.reviews = TKCRUD(
+            f"{self.base_url}/course_reviews", self.subdomain, self.token
+        )
+
+        # Set connexion to active
+        self.connected = True
         return self
