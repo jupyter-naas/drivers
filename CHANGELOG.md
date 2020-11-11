@@ -1,3 +1,9 @@
+## 0.32.0 (2020-11-11)
+
+### Feat
+
+- **thinkific**: add course_reviews
+
 ## 0.31.1 (2020-11-10)
 
 ### Fix
