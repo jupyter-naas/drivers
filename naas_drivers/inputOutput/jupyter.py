@@ -28,6 +28,17 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
+    def change_password_user(self, username, password, super_admin_token):
+        signup_url = f"{self.base_url}/hub/change-password"
+        login = {
+            "username": username,
+            "password": password,
+        }
+        headers = {"Authorization": super_admin_token}
+        r = requests.put(signup_url, data=login, headers=headers)
+        r.raise_for_status()
+        return r.json()
+
     def list_user(self, super_admin_token):
         signup_url = f"{self.base_url}/hub/signup"
         headers = {"Authorization": super_admin_token}
