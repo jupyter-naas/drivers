@@ -45,7 +45,7 @@ class Email(OutDriver):
         email_to: str,
         subject: str,
         msg: str = "",
-        attachments: Dict[str, Any] = None,
+        files: Dict[str, Any] = None,
     ) -> None:
         """
         Method which sends an email.
@@ -68,8 +68,8 @@ class Email(OutDriver):
         contents["Subject"] = Header(subject, "UTF-8")
         contents["From"] = self.email_from
         contents["To"] = email_to
-        if attachments:
-            for k, v in attachments.items():
+        if files:
+            for k, v in files.items():
                 p = MIMEBase("application", "octet-stream")
                 with open(v, "rb") as f:
                     p.set_payload(f.read())

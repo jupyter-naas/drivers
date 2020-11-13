@@ -1,5 +1,6 @@
 from naas_drivers.driver import InDriver, OutDriver
 from dateutil.parser import parse
+import pandas as pd
 import requests
 import os
 
@@ -28,6 +29,21 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
+    def get_authorize_user(self, username):
+        signup_url = f"{self.base_url}/hub/authorize/{username}"
+        headers = {"Authorization": self.token}
+        r = requests.get(signup_url, headers=headers)
+        r.raise_for_status()
+        return r.json()
+
+    def change_authorize_user(self, username, is_authorized):
+        signup_url = f"{self.base_url}/hub/authorize/{username}"
+        headers = {"Authorization": self.token}
+        data = {"is_authorized": is_authorized}
+        r = requests.put(signup_url, json=data, headers=headers)
+        r.raise_for_status()
+        return r.json()
+
     def change_password_user(self, username, password, super_admin_token):
         signup_url = f"{self.base_url}/hub/change-password"
         login = {
@@ -44,7 +60,8 @@ class Jupyter(InDriver, OutDriver):
         headers = {"Authorization": super_admin_token}
         r = requests.get(signup_url, headers=headers)
         r.raise_for_status()
-        return r.json()
+        df = pd.DataFrame.from_records(r.json())
+        return df
 
     def delete_user(self, username, super_admin_token):
         signup_url = f"{self.base_url}/hub/signup"
