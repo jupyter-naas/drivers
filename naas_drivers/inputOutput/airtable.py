@@ -37,15 +37,26 @@ class Airtable(InDriver, OutDriver):
         else:
             return self._airtable.insert(data)
 
-    def search(self, **kwagrs):
+    def search(
+        self,
+        field_name,
+        field,
+    ):
         self.check_connect()
-        data = self._airtable.search(**kwagrs)
+        data = self._airtable.search(
+            field_name,
+            field,
+        )
         return self.convert_data_to_df(data)
 
-    def update_by_field(self, **kwagrs):
+    def update_by_field(self, field_name, field, data):
         self.check_connect()
-        return self._airtable.update_by_field(**kwagrs)
+        return self._airtable.update_by_field(field_name, field, data)
 
-    def delete_by_field(self, **kwagrs):
+    def delete_by_field(
+        self,
+        field_name,
+        field,
+    ):
         self.check_connect()
-        return self._airtable.delete_by_field(**kwagrs)
+        return self._airtable.delete_by_field(field_name, field)
