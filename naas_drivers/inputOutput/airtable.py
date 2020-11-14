@@ -8,10 +8,10 @@ class Airtable(InDriver, OutDriver):
     _key = None
     _table = None
 
-    def connect(self, key, table):
+    def connect(self, key, database, table):
         self._key = key
         self._table = table
-        self._airtable = at(key, table)
+        self._airtable = at(base_key=database, table_name=table, api_key=key)
         self.connected = True
         return self
 
