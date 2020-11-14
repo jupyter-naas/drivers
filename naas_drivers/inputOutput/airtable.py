@@ -30,9 +30,12 @@ class Airtable(InDriver, OutDriver):
         data = self._airtable.get_all(**kwagrs)
         return self.convert_data_to_df(data)
 
-    def send(self, **kwagrs):
+    def send(self, data):
         self.check_connect()
-        return self._airtable.insert(**kwagrs)
+        if isinstance(data, list):
+            return self._airtable.batch_insert(data)
+        else:
+            return self._airtable.insert(data)
 
     def search(self, **kwagrs):
         self.check_connect()
