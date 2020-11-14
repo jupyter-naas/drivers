@@ -1,3 +1,10 @@
+## 0.34.2 (2020-11-14)
+
+### Fix
+
+- **jupyter**: use normal token to connect
+- **airtable**: send
+
 ## 0.34.1 (2020-11-14)
 
 ### Fix
