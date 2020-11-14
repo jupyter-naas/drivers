@@ -24,21 +24,21 @@ class Jupyter(InDriver, OutDriver):
             "username": username,
             "password": password,
         }
-        headers = {"Authorization": self.token}
+        headers = {"Authorization": f"token {self.token}"}
         r = requests.post(signup_url, data=login, headers=headers)
         r.raise_for_status()
         return r.json()
 
     def get_authorize_user(self, username):
         signup_url = f"{self.base_url}/hub/authorize/{username}"
-        headers = {"Authorization": self.token}
+        headers = {"Authorization": f"token {self.token}"}
         r = requests.get(signup_url, headers=headers)
         r.raise_for_status()
         return r.json()
 
     def change_authorize_user(self, username, is_authorized):
         signup_url = f"{self.base_url}/hub/authorize/{username}"
-        headers = {"Authorization": self.token}
+        headers = {"Authorization": f"token {self.token}"}
         data = {"is_authorized": is_authorized}
         r = requests.put(signup_url, json=data, headers=headers)
         r.raise_for_status()
@@ -50,14 +50,14 @@ class Jupyter(InDriver, OutDriver):
             "username": username,
             "password": password,
         }
-        headers = {"Authorization": self.token}
+        headers = {"Authorization": f"token {self.token}"}
         r = requests.put(signup_url, data=login, headers=headers)
         r.raise_for_status()
         return r.json()
 
     def list_users(self):
         signup_url = f"{self.base_url}/hub/signup"
-        headers = {"Authorization": self.token}
+        headers = {"Authorization": f"token {self.token}"}
         r = requests.get(signup_url, headers=headers)
         r.raise_for_status()
         df = pd.DataFrame.from_records(r.json().get("data"))
@@ -68,7 +68,7 @@ class Jupyter(InDriver, OutDriver):
         login = {
             "username": username,
         }
-        headers = {"Authorization": self.token}
+        headers = {"Authorization": f"token {self.token}"}
         r = requests.delete(signup_url, data=login, headers=headers)
         r.raise_for_status()
         return r.json()
