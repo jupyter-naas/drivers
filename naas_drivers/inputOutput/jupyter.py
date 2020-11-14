@@ -18,13 +18,13 @@ class Jupyter(InDriver, OutDriver):
         self.connected = True
         return self
 
-    def create_user(self, username, password, super_admin_token):
+    def create_user(self, username, password):
         signup_url = f"{self.base_url}/hub/signup"
         login = {
             "username": username,
             "password": password,
         }
-        headers = {"Authorization": super_admin_token}
+        headers = {"Authorization": self.token}
         r = requests.post(signup_url, data=login, headers=headers)
         r.raise_for_status()
         return r.json()
@@ -44,31 +44,31 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
-    def change_password_user(self, username, password, super_admin_token):
+    def change_password_user(self, username, password):
         signup_url = f"{self.base_url}/hub/change-password"
         login = {
             "username": username,
             "password": password,
         }
-        headers = {"Authorization": super_admin_token}
+        headers = {"Authorization": self.token}
         r = requests.put(signup_url, data=login, headers=headers)
         r.raise_for_status()
         return r.json()
 
-    def list_user(self, super_admin_token):
+    def list_users(self):
         signup_url = f"{self.base_url}/hub/signup"
-        headers = {"Authorization": super_admin_token}
+        headers = {"Authorization": self.token}
         r = requests.get(signup_url, headers=headers)
         r.raise_for_status()
-        df = pd.DataFrame.from_records(r.json())
+        df = pd.DataFrame.from_records(r.json().get("data"))
         return df
 
-    def delete_user(self, username, super_admin_token):
+    def delete_user(self, username):
         signup_url = f"{self.base_url}/hub/signup"
         login = {
             "username": username,
         }
-        headers = {"Authorization": super_admin_token}
+        headers = {"Authorization": self.token}
         r = requests.delete(signup_url, data=login, headers=headers)
         r.raise_for_status()
         return r.json()
