@@ -44,7 +44,7 @@ class Email(OutDriver):
         self,
         email_to: str,
         subject: str,
-        msg: str = "",
+        content: str = "",
         files: Dict[str, Any] = None,
     ) -> None:
         """
@@ -53,8 +53,8 @@ class Email(OutDriver):
         Args:
             - email_to (str): the destination email address to send the message to
             - subject (str): the subject of the email
-            - msg (str, Optional): the contents of the email
-            - attachments (Dict, optional): Dict of attachments to send
+            - content (str, Optional): the contents of the email
+            - files (Dict, optional): Dict of attachments to send
 
         Returns:
             - None
@@ -63,7 +63,7 @@ class Email(OutDriver):
         email_to = cast(str, email_to)
 
         contents = MIMEMultipart()
-        contents.attach(MIMEText(cast(str, msg), "plain"))
+        contents.attach(MIMEText(cast(str, content), "plain"))
 
         contents["Subject"] = Header(subject, "UTF-8")
         contents["From"] = self.email_from
