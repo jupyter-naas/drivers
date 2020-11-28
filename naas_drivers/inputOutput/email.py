@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from typing import Any, Dict, cast
-from imap_tools import MailBox, A
+from imap_tools import MailBox, AND
 import pandas as pd
 import smtplib
 
@@ -49,7 +49,7 @@ class Email(OutDriver):
     def get_attachments(self, uid):
         with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
             attachments = []
-            for msg in mailbox.fetch(A(uid=uid)):
+            for msg in mailbox.fetch(AND(uid=uid)):
                 for att in msg.attachments:
                     attachments.append(
                         {
@@ -64,16 +64,25 @@ class Email(OutDriver):
                     )
         return pd.DataFrame.from_records(attachments)
 
-    def get(self, box="INBOX", limit=None, mark=None):
+    def status(self, box="INBOX"):
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            return mailbox.folder.status(box)
+
+    def get(self, box="INBOX", criteria="ALL", limit=None, mark=None):
         emails = []
         mark_seen = False
+        mail_filter = "ALL"
         if mark and mark == "seen":
             mark_seen = True
+        if criteria and criteria == "seen":
+            mail_filter = AND(seen=True)
+        elif criteria and criteria == "unseen":
+            mail_filter = AND(seen=False)
         with MailBox(self.smtp_server).login(
             self.username, self.password, initial_folder=box
         ) as mailbox:
             emails = []
-            for msg in mailbox.fetch(limit=limit, mark_seen=mark_seen):
+            for msg in mailbox.fetch(mail_filter, limit=limit, mark_seen=mark_seen):
                 parsed = {
                     "uid": msg.uid,
                     "subject": msg.subject,
