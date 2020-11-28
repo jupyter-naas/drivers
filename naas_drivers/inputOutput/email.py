@@ -1,11 +1,13 @@
 from naas_drivers.driver import OutDriver
-import smtplib
 from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from typing import Any, Dict, cast
+from imap_tools import MailBox, A
+import pandas as pd
+import smtplib
 
 
 class Email(OutDriver):
@@ -21,6 +23,10 @@ class Email(OutDriver):
         - smtp_port (int, optional): the port number of the SMTP server; defaults to 465
         - smtp_type (str, optional): either SSL or STARTTLS; defaults to SSL
     """
+
+    def get_mailbox(self, box=""):
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            return mailbox.folder.list(box)
 
     def connect(
         self,
@@ -39,6 +45,57 @@ class Email(OutDriver):
         self.smtp_type = smtp_type
         self.connected = True
         return self
+
+    def get_attachments(self, uid):
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            attachments = []
+            for msg in mailbox.fetch(A(uid=uid)):
+                for att in msg.attachments:
+                    attachments.append(
+                        {
+                            "filename": att.filename,
+                            "payload": att.payload,
+                            "content_id": att.content_id,
+                            "content_type": att.content_type,
+                            "content_disposition": att.content_disposition,
+                            "part": att.part,
+                            "size": att.size,
+                        }
+                    )
+        return pd.DataFrame.from_records(attachments)
+
+    def get(self, box="INBOX", limit=None, mark=None):
+        emails = []
+        mark_seen = False
+        if mark and mark == "seen":
+            mark_seen = True
+        with MailBox(self.smtp_server).login(
+            self.username, self.password, initial_folder=box
+        ) as mailbox:
+            emails = []
+            for msg in mailbox.fetch(limit=limit, mark_seen=mark_seen):
+                parsed = {
+                    "uid": msg.uid,
+                    "subject": msg.subject,
+                    "from": msg.from_values,
+                    "to": list(msg.to_values),
+                    "cc": list(msg.cc_values),
+                    "bcc": list(msg.bcc_values),
+                    "reply_to": list(msg.reply_to_values),
+                    "date": msg.date,
+                    "text": msg.text,
+                    "html": msg.html,
+                    "flags": msg.flags,
+                    "headers": msg.headers,
+                    "size_rfc822": msg.size_rfc822,
+                    "size": msg.size,
+                    "obj": msg.obj,
+                    "attachments": len(msg.attachments),
+                }
+                emails.append(parsed)
+                if mark and mark == "archive":
+                    mailbox.delete([msg.uid])
+            return pd.DataFrame.from_records(emails)
 
     def send(
         self,
