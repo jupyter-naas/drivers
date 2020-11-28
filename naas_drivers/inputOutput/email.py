@@ -24,10 +24,6 @@ class Email(OutDriver):
         - smtp_type (str, optional): either SSL or STARTTLS; defaults to SSL
     """
 
-    def get_mailbox(self, box=""):
-        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
-            return mailbox.folder.list(box)
-
     def connect(
         self,
         username: str,
@@ -46,6 +42,10 @@ class Email(OutDriver):
         self.connected = True
         return self
 
+    def get_mailbox(self, box=""):
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            return mailbox.folder.list(box)
+
     def get_attachments(self, uid):
         with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
             attachments = []
@@ -63,6 +63,15 @@ class Email(OutDriver):
                         }
                     )
         return pd.DataFrame.from_records(attachments)
+
+    def set_seen(self, uid, status=True):
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            mailbox.seen(mailbox.fetch(AND(uid=uid)), status)
+
+    def set_flag(self, uid, name, status=True):
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            flags = name.upper()
+            mailbox.flag(mailbox.fetch(AND(uid=uid)), flags, status)
 
     def status(self, box="INBOX"):
         with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
