@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="naas-drivers",
-    version="0.34.5",
+    version="0.35.0b1",
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
     license="BSD",
@@ -27,6 +27,7 @@ setup(
         ]
     },
     install_requires=[
+        "imap_tools>=0,<1",
         "markdown2>=2,<3",
         "newsapi-python>=0,<1",
         "airtable-python-wrapper>=0,<1",

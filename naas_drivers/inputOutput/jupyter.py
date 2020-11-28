@@ -4,6 +4,8 @@ import pandas as pd
 import requests
 import os
 
+current_token = os.environ.get("JUPYTERHUB_API_TOKEN", None)
+
 
 class Jupyter(InDriver, OutDriver):
     base_url = os.environ.get("JUPYTERHUB_URL", "https://app.naas.ai")
@@ -13,7 +15,7 @@ class Jupyter(InDriver, OutDriver):
     def __init__(self):
         self.api_url = f"{self.base_url}/hub/api"
 
-    def connect(self, token):
+    def connect(self, token=current_token):
         self.token = token
         self.connected = True
         return self
