@@ -1,3 +1,14 @@
+## 0.36.0 (2020-11-28)
+
+### Feat
+
+- add set_seen and set_flag
+- add criteria in get email
+
+### Fix
+
+- use reverse mode
+
 ## 0.35.0 (2020-11-28)
 
 ### Fix
