@@ -9,11 +9,11 @@ from naas_drivers.input.pdf import Pdf
 from naas_drivers.input.plotly import Plotly
 from naas_drivers.input.html import Html
 from naas_drivers.output.bubble import Bubble
-from naas_drivers.output.email import Email
 from naas_drivers.output.healthcheck import Healthcheck
 from naas_drivers.output.ifttt import Ifttt
 from naas_drivers.output.integromat import Integromat
 from naas_drivers.output.zappier import Zappier
+from naas_drivers.inputOutput.email import Email
 from naas_drivers.inputOutput.bobapp import Bobapp
 from naas_drivers.inputOutput.airtable import Airtable
 from naas_drivers.inputOutput.jupyter import Jupyter
@@ -25,7 +25,7 @@ from naas_drivers.inputOutput.toucan import Toucan
 import requests
 import os
 
-__version__ = "0.34.6"
+__version__ = "0.35.0b1"
 
 __github_repo = "jupyter-naas/drivers"
 
