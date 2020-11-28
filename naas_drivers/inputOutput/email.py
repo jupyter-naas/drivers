@@ -1,20 +1,16 @@
-from naas_drivers.driver import OutDriver, InDriver
+from naas_drivers.driver import OutDriver
+from email.header import Header
 from email.mime.multipart import MIMEMultipart
-from email.header import decode_header
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
-from typing import Any, Dict, cast
-from email.header import Header
 from email import encoders
+from typing import Any, Dict, cast
+from imap_tools import MailBox, A
 import pandas as pd
-import datetime
 import smtplib
-import imaplib
-import email
-import re
 
 
-class Email(InDriver, OutDriver):
+class Email(OutDriver):
     """
     Connector for sending email from an authenticated email service over SMTP.
 
@@ -28,46 +24,9 @@ class Email(InDriver, OutDriver):
         - smtp_type (str, optional): either SSL or STARTTLS; defaults to SSL
     """
 
-    def __imap_connect(self):
-        imap = imaplib.IMAP4_SSL(self.smtp_server)
-        imap.login(self.username, self.password)
-        return imap
-
-    def __imap_disconnect(self, imap):
-        imap.select()
-        imap.close()
-        imap.logout()
-
-    def __trimEmail(self, s):
-        """
-        only necessary for "From" header.
-        only necessary for "To" header.
-        """
-        s = re.sub(r"""\?=["']<""", "?= <", s)
-        s = s.replace('"', "")
-        s = s.replace("'", "")
-        matchObj = re.search(r"\<(.*)\>", s, re.M | re.I)
-        if matchObj:
-            s = matchObj.group()
-            s = s.replace("<", "")
-            s = s.replace(">", "")
-            return s
-        return s
-
-    def get_mailbox(self):
-        imap = self.__imap_connect()
-        res, boxs = imap.list()
-        box_list = []
-        for box in boxs:
-            list_response_pattern = re.compile(
-                r'\((?P<flags>.*?)\) "(?P<delimiter>.*)" (?P<name>.*)'
-            )
-            folder = box.decode("utf-8")
-            flags, delimiter, name = list_response_pattern.match(folder).groups()
-            name = name.strip('"')
-            box_list.append(name)
-        self.__imap_disconnect(imap)
-        return box_list
+    def get_mailbox(self, box=""):
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            return mailbox.folder.list(box)
 
     def connect(
         self,
@@ -87,75 +46,56 @@ class Email(InDriver, OutDriver):
         self.connected = True
         return self
 
-    def get(self, box="INBOX", date_limit=None, limit_messages=-1, receiver=None):
-        imap = self.__imap_connect()
-        status, messages = imap.select(box)
-        messages = int(messages[0])
-        messages
+    def get_attachments(self, uid):
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            attachments = []
+            for msg in mailbox.fetch(A(uid=uid)):
+                for att in msg.attachments:
+                    attachments.append(
+                        {
+                            "filename": att.filename,
+                            "payload": att.payload,
+                            "content_id": att.content_id,
+                            "content_type": att.content_type,
+                            "content_disposition": att.content_disposition,
+                            "part": att.part,
+                            "size": att.size,
+                        }
+                    )
+        return pd.DataFrame.from_records(attachments)
+
+    def get(self, box="INBOX", limit=None, mark=None):
         emails = []
-        total = (
-            messages
-            if limit_messages == -1 or limit_messages > messages
-            else limit_messages
-        )
-        for i in range(total, 0, -1):
-            # fetch the email message by ID
-            res, msg = imap.fetch(str(i), "(RFC822)")
-            for response in msg:
-                if isinstance(response, tuple):
-                    # parse a bytes email into a message object
-                    msg = email.message_from_bytes(response[1])
-                    body = ""
-                    content_type = ""
-                    # decode the email date
-                    date = None
-                    date_tuple = email.utils.parsedate_tz(msg["Date"])
-                    if date_tuple:
-                        date = datetime.datetime.fromtimestamp(
-                            email.utils.mktime_tz(date_tuple)
-                        )
-                    # decode the email subject
-                    subject = decode_header(msg["Subject"])[0][0]
-                    if isinstance(subject, bytes):
-                        # if it's a bytes, decode to str
-                        subject = subject.decode()
-                    # decode email sender
-                    to, encoding = decode_header(msg.get("To"))[0]
-                    if to and isinstance(to, bytes):
-                        to = to.decode(encoding)
-                        to = self.__trimEmail(to)
-                    From, encoding = decode_header(msg.get("From"))[0]
-                    if From and isinstance(From, bytes):
-                        From = From.decode(encoding)
-                        From = self.__trimEmail(From)
-                    # if the email message is multipart
-                    if msg.is_multipart():
-                        # iterate over email parts
-                        for part in msg.walk():
-                            # extract content type of email
-                            content_type = part.get_content_type()
-                            # get the email body
-                            body = part.get_payload(decode=True).decode()
-                    else:
-                        # extract content type of email
-                        content_type = msg.get_content_type()
-                        # get the email body
-                        body = msg.get_payload(decode=True).decode()
-                    if receiver == to:
-                        emails.append(
-                            {
-                                "subject": subject,
-                                "from": From,
-                                "body": body,
-                                "date": date,
-                                "content_type": content_type,
-                            }
-                        )
-                    if date_limit and date_limit > date:
-                        self.__imap_disconnect(imap)
-                        return pd.DataFrame.from_records(emails)
-        self.__imap_disconnect(imap)
-        return pd.DataFrame.from_records(emails)
+        mark_seen = False
+        if mark and mark == "seen":
+            mark_seen = True
+        with MailBox(self.smtp_server).login(
+            self.username, self.password, initial_folder=box
+        ) as mailbox:
+            emails = []
+            for msg in mailbox.fetch(limit=limit, mark_seen=mark_seen):
+                parsed = {
+                    "uid": msg.uid,
+                    "subject": msg.subject,
+                    "from": msg.from_values,
+                    "to": list(msg.to_values),
+                    "cc": list(msg.cc_values),
+                    "bcc": list(msg.bcc_values),
+                    "reply_to": list(msg.reply_to_values),
+                    "date": msg.date,
+                    "text": msg.text,
+                    "html": msg.html,
+                    "flags": msg.flags,
+                    "headers": msg.headers,
+                    "size_rfc822": msg.size_rfc822,
+                    "size": msg.size,
+                    "obj": msg.obj,
+                    "attachments": len(msg.attachments),
+                }
+                emails.append(parsed)
+                if mark and mark == "archive":
+                    mailbox.delete([msg.uid])
+            return pd.DataFrame.from_records(emails)
 
     def send(
         self,
