@@ -82,7 +82,9 @@ class Email(OutDriver):
             self.username, self.password, initial_folder=box
         ) as mailbox:
             emails = []
-            for msg in mailbox.fetch(mail_filter, limit=limit, mark_seen=mark_seen):
+            for msg in mailbox.fetch(
+                mail_filter, limit=limit, mark_seen=mark_seen, reverse=True
+            ):
                 parsed = {
                     "uid": msg.uid,
                     "subject": msg.subject,
