@@ -21,7 +21,7 @@ class Organizations:
     def get(self):
         try:
             req = requests.get(
-                url=f"{self.url}/{user_id}",
+                url=f"{self.url}/{self.user_id}",
                 headers=self.req_headers
             )
             req.raise_for_status()
