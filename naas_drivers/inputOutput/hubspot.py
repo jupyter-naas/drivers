@@ -355,7 +355,7 @@ class Association:
         if object_check and associate_check:
             try:
                 req = requests.put(
-                    url=f"{self.base_url}/{object_name}/{objet_id}/associations/"
+                    url=f"{self.base_url}/{object_name}/{object_id}/associations/"
                         f"{associate}/{id_associate}/{object_name}_to_{associate}",
                     headers=self.req_headers,
                     params=self.params,
