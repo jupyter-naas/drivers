@@ -8,6 +8,7 @@ from naas_drivers.input.optimise import Optimise
 from naas_drivers.input.pdf import Pdf
 from naas_drivers.input.plotly import Plotly
 from naas_drivers.input.html import Html
+from naas_drivers.input.qonto import Qonto
 from naas_drivers.output.bubble import Bubble
 from naas_drivers.output.healthcheck import Healthcheck
 from naas_drivers.output.ifttt import Ifttt
@@ -43,6 +44,7 @@ yahoofinance = Yahoofinance()
 pdf = Pdf()
 plotly = Plotly()
 html = Html()
+qonto = Qonto()
 
 # Out drivers
 bubble = Bubble()
