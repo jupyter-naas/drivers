@@ -1,10 +1,12 @@
-from naas_drivers.driver import InDriver
+from naas_drivers.driver import InDriver, OutDriver
 import pandas as pd
 import requests
 import os
 from datetime import datetime
 
- 
+DATE_FORMAT = "%Y-%m-%d"
+
+
 class Organizations:
     def __init__(self, user_id, api_key):
         self.base_url = os.environ.get(
@@ -87,10 +89,28 @@ class Transactions(Organizations):
 
 
 class Statements(Transactions):
+    def __filter_dates(self, df):
+        # Dates
+        if date_from is not None and date_to is None:
+            date_to = df["DATE"].max()
+
+        if date_to is not None and date_from is None:
+            date_from = df["DATE"].min()
+
+        if (date_from and date_to) is not None:
+            dates_range = pd.date_range(start=date_from, end=date_to)
+            dates = []
+            for date in dates_range:
+                date = str(date.strftime(DATE_FORMAT))
+                dates.append(date)
+
+            df = df[df["DATE"].isin(dates)]
+        return df
+
     def detailed(self, date_from=None, date_to=None):
         df = self.get_all()
         df = df.rename(columns={"EMITTED_AT": "DATE"})
-        df["DATE"] = pd.to_datetime(df["DATE"], format='%Y-%m-%dT%H:%M:%S.%fZ').dt.strftime("%Y-%m-%d")
+        df["DATE"] = pd.to_datetime(df["DATE"], format='%Y-%m-%dT%H:%M:%S.%fZ').dt.strftime(DATE_FORMAT)
 
         # Calc positions
         to_sort = ['IBAN', 'DATE']
@@ -109,28 +129,12 @@ class Statements(Transactions):
            "CURRENCY",
            ]
         df = df[to_keep]
-
-        # Dates
-        if date_from is not None and date_to is None:
-            date_to = df["DATE"].max()
-
-        if date_to is not None and date_from is None:
-            date_from = df["DATE"].min()
-
-        if (date_from and date_to) is not None: 
-            dates_range = pd.date_range(start=date_from, end=date_to)
-            dates = []
-            for date in dates_range:
-                date = str(date.strftime("%Y-%m-%d"))
-                dates.append(date)
-
-            df = df[df["DATE"].isin(dates)]
-        return df
+        return self.__filter_dates(df)
 
     def aggregated(self, date_from=None, date_to=None):
         df = self.get_all()
         df = df.rename(columns={"EMITTED_AT": "DATE"})
-        df["DATE"] = pd.to_datetime(df["DATE"], format='%Y-%m-%dT%H:%M:%S.%fZ').dt.strftime("%Y-%m-%d")
+        df["DATE"] = pd.to_datetime(df["DATE"], format='%Y-%m-%dT%H:%M:%S.%fZ').dt.strftime(DATE_FORMAT)
 
         # Aggregation
         to_group = ["IBAN", "DATE", "CURRENCY"]
@@ -149,23 +153,7 @@ class Statements(Transactions):
            "CURRENCY",
            ]
         df = df[to_keep]
-
-        # Dates
-        if date_from is not None and date_to is None:
-            date_to = df["DATE"].max()
-
-        if date_to is not None and date_from is None:
-            date_from = df["DATE"].min()
-
-        if (date_from and date_to) is not None: 
-            dates_range = pd.date_range(start=date_from, end=date_to)
-            dates = []
-            for date in dates_range:
-                date = str(date.strftime("%Y-%m-%d"))
-                dates.append(date)
-
-            df = df[df["DATE"].isin(dates)]
-        return df
+        return self.__filter_dates(df)
 
 
 class Qonto(InDriver):
