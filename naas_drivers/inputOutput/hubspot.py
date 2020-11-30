@@ -38,7 +38,7 @@ class HSCRUD:
                     try:
                         value = datetime.strptime(value, "%d/%m/%Y")
                         value = str(int(value.timestamp()))+"000"
-                    except BaseException:
+                    except ValueError:
                         print(f"Close date '{value}' is in wrong format.\n"
                               "Please change it to %d/%m/%Y.")
                 elif key == 'amount':
@@ -259,7 +259,7 @@ class Pipeline:
         return req.json()
 
 
-class Pipeline_deal(Pipeline):
+class Pipelines(Pipeline):
     def get_all(self):
         data = self.get_all_pipeline()
         df = pd.DataFrame.from_records(data['results'])
@@ -278,19 +278,19 @@ class Dealstage(Pipeline):
             id_pipeline = row['id']
             for stage in stages:
                 label = stage['label']
-                displayOrder = stage['displayOrder']
+                display_order = stage['displayOrder']
                 id_dealstage = stage['id']
-                createdAt = stage['createdAt']
-                updatedAt = stage['updatedAt']
+                created_at = stage['createdAt']
+                updated_at = stage['updatedAt']
                 archived = stage['archived']
 
                 deal_stage = {'pipeline': pipeline,
                               'id_pipeline': id_pipeline,
                               'dealstage': label,
                               'id_dealstage': id_dealstage,
-                              'displayOrder': displayOrder,
-                              'createdAt': createdAt,
-                              'updatedAt': updatedAt,
+                              'displayOrder': display_order,
+                              'createdAt': created_at,
+                              'updatedAt': updated_at,
                               'archived': archived}
                 items.append(deal_stage)
         df = pd.DataFrame(items)
@@ -392,7 +392,7 @@ class Hubspot(InDriver, OutDriver):
         self.contacts = Contact(f"{self.obj_url}/contacts", self.req_headers, self.params)
         self.company = HSCRUD(f"{self.obj_url}/company", self.req_headers, self.params)
         self.deals = Deal(f"{self.obj_url}/deals", self.req_headers, self.params)
-        self.pipelines = Pipeline_deal(f"{self.pip_url}/deals", self.req_headers, self.params)
+        self.pipelines = Pipelines(f"{self.pip_url}/deals", self.req_headers, self.params)
         self.dealstages = Dealstage(f"{self.pip_url}/deals", self.req_headers, self.params)
         self.associations = Association(f"{self.obj_url}", self.req_headers, self.params)
 
