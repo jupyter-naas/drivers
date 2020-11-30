@@ -1,4 +1,4 @@
-from naas_drivers.driver import InDriver, OutDriver
+from naas_drivers.driver import InDriver
 import pandas as pd
 import requests
 import os
@@ -89,7 +89,7 @@ class Transactions(Organizations):
 
 
 class Statements(Transactions):
-    def __filter_dates(self, df):
+    def __filter_dates(self, df, date_from=None, date_to=None):
         # Dates
         if date_from is not None and date_to is None:
             date_to = df["DATE"].max()
@@ -129,7 +129,7 @@ class Statements(Transactions):
            "CURRENCY",
            ]
         df = df[to_keep]
-        return self.__filter_dates(df)
+        return self.__filter_dates(df, date_from, date_to)
 
     def aggregated(self, date_from=None, date_to=None):
         df = self.get_all()
@@ -153,7 +153,7 @@ class Statements(Transactions):
            "CURRENCY",
            ]
         df = df[to_keep]
-        return self.__filter_dates(df)
+        return self.__filter_dates(df, date_from, date_to)
 
 
 class Qonto(InDriver):
