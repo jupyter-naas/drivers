@@ -1,3 +1,17 @@
+## 0.37.0 (2020-11-30)
+
+### Fix
+
+- correct user_id by self.user_id in request
+- correct __filter_dates parameters
+- code smell and duplicates
+- apply pycodestyle
+- udpate new formulas
+
+### Feat
+
+- init qonto driver
+
 ## 0.36.0 (2020-11-28)
 
 ### Feat
