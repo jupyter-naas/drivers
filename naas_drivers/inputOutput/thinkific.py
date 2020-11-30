@@ -45,7 +45,7 @@ class TKCRUD:
                     try:
                         value = datetime.strptime(value, "%d/%m/%Y")
                         value = value.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-                    except BaseException:
+                    except ValueError:
                         print(
                             f"'{value}' is not in the correct format.\n"
                             f"Please change it to %d/%m/%Y.\n"
@@ -136,7 +136,7 @@ class TKCRUD:
                 uid = res["id"]
                 print(f"{self.msg} successfully created (id={uid})!")
                 return uid
-            except BaseException:
+            except ValueError:
                 print("Send successfull ! No json returned")
         except requests.HTTPError as err:
             err_code = err.response.status_code
