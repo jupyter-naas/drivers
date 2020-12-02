@@ -19,11 +19,13 @@ class TKCRUD:
         self.model_name = self.base_url.split("/")[-1]
 
         # Manage message
-        message_dict = {"users": "User",
-                        "enrollments": "Enrollment",
-                        "courses": "Course",
-                        "groups": "Group",
-                        "group_users": "User group"}
+        message_dict = {
+            "users": "User",
+            "enrollments": "Enrollment",
+            "courses": "Course",
+            "groups": "Group",
+            "group_users": "User group",
+        }
         self.msg = message_dict[self.model_name]
 
     def __values_format(self, data):
@@ -34,18 +36,20 @@ class TKCRUD:
                 value = str(value).strip()
 
                 # Specific rules
-                if key == 'first_name':
-                    value = value.replace('-', ' ')
-                    value = string.capwords(value).replace(' ', '-')
-                elif key == 'last_name':
+                if key == "first_name":
+                    value = value.replace("-", " ")
+                    value = string.capwords(value).replace(" ", "-")
+                elif key == "last_name":
                     value = value.upper()
-                elif key in ['activated_at', 'expiry_date']:
+                elif key in ["activated_at", "expiry_date"]:
                     try:
                         value = datetime.strptime(value, "%d/%m/%Y")
                         value = value.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-                    except BaseException:
-                        print(f"'{value}' is not in the correct format.\n"
-                              f"Please change it to %d/%m/%Y.\n")
+                    except ValueError:
+                        print(
+                            f"'{value}' is not in the correct format.\n"
+                            f"Please change it to %d/%m/%Y.\n"
+                        )
                 # Change value in dict
                 data[key] = value
         return data
@@ -129,10 +133,10 @@ class TKCRUD:
             req.raise_for_status()
             try:
                 res = req.json()
-                uid = res['id']
+                uid = res["id"]
                 print(f"{self.msg} successfully created (id={uid})!")
                 return uid
-            except BaseException:
+            except ValueError:
                 print("Send successfull ! No json returned")
         except requests.HTTPError as err:
             err_code = err.response.status_code
@@ -160,36 +164,34 @@ class TKCRUD:
 
 
 class User(TKCRUD):
-    def update(self, uid,
-               email=None,
-               password=None,
-               first_name=None,
-               last_name=None,
-               company=None):
+    def update(
+        self,
+        uid,
+        email=None,
+        password=None,
+        first_name=None,
+        last_name=None,
+        company=None,
+    ):
         data = {
-                "id": uid,
-                "email": email,
-                "password": password,
-                "first_name": first_name,
-                "last_name": last_name,
-                "company": company,
-                }
+            "id": uid,
+            "email": email,
+            "password": password,
+            "first_name": first_name,
+            "last_name": last_name,
+            "company": company,
+        }
         res = self.patch(data)
         return res
 
-    def create(self,
-               email,
-               password,
-               first_name=None,
-               last_name=None,
-               company=None):
+    def create(self, email, password, first_name=None, last_name=None, company=None):
         data = {
-                "email": email,
-                "password": password,
-                "first_name": first_name,
-                "last_name": last_name,
-                "company": company,
-                }
+            "email": email,
+            "password": password,
+            "first_name": first_name,
+            "last_name": last_name,
+            "company": company,
+        }
         res = self.send(data)
         return res
 
@@ -197,19 +199,19 @@ class User(TKCRUD):
 class Enrollment(TKCRUD):
     def update(self, uid, activated=None, expired=None):
         data = {
-               "id": uid,
-               "activated_at": activated,
-               "expiry_date": expired,
+            "id": uid,
+            "activated_at": activated,
+            "expiry_date": expired,
         }
         res = self.patch(data)
         return res
 
     def create(self, course_id, user_id, activated, expired):
         data = {
-               "course_id": course_id,
-               "user_id": user_id,
-               "activated_at": activated,
-               "expiry_date": expired,
+            "course_id": course_id,
+            "user_id": user_id,
+            "activated_at": activated,
+            "expiry_date": expired,
         }
         res = self.send(data)
         return res
@@ -241,10 +243,14 @@ class Thinkific(InDriver, OutDriver):
 
         # Init end point
         self.users = User(f"{self.base_url}/users", self.subdomain, self.token)
-        self.enrollments = Enrollment(f"{self.base_url}/enrollments", self.subdomain, self.token)
+        self.enrollments = Enrollment(
+            f"{self.base_url}/enrollments", self.subdomain, self.token
+        )
         self.courses = Courses(f"{self.base_url}/courses", self.subdomain, self.token)
         self.groups = TKCRUD(f"{self.base_url}/groups", self.subdomain, self.token)
-        self.group_users = TKCRUD(f"{self.base_url}/group_users", self.subdomain, self.token)
+        self.group_users = TKCRUD(
+            f"{self.base_url}/group_users", self.subdomain, self.token
+        )
 
         # Set connexion to active
         self.connected = True
