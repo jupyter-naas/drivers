@@ -1,6 +1,6 @@
 from naas_drivers.driver import InDriver, OutDriver
-from .__crud import CRUD
 from requests.auth import HTTPBasicAuth
+from .__crud import CRUD
 import requests
 import json
 import re
@@ -9,21 +9,22 @@ import os
 req_headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-class Me(InDriver):
+class Me(CRUD):
     base_public_url = None
     endpoint = "me"
-    auth = None
+    key = None
 
     def __init__(self, base_url, auth, endpoint="me"):
         self.base_public_url = base_url
-        self.auth = auth
+        self.key = auth
         self.endpoint = endpoint
 
     def get(self):
+        self.check_connect()
         req = requests.get(
             url=f"{self.base_public_url}/{self.endpoint}",
             headers=req_headers,
-            auth=self.auth,
+            auth=self.key,
             allow_redirects=False,
         )
         if self.raise_error:
@@ -31,10 +32,11 @@ class Me(InDriver):
         return req
 
     def update(self, data):
+        self.check_connect()
         req = requests.put(
             url=f"{self.base_public_url}/{self.endpoint}",
             headers=req_headers,
-            auth=self.auth,
+            auth=self.key,
             json=data,
             allow_redirects=False,
         )
@@ -43,7 +45,7 @@ class Me(InDriver):
         return req
 
 
-class CRUDBOB(CRUD, InDriver):
+class CRUDBOB(CRUD):
     def get_all(self, search=None, sort=None, limit=20, skip=0):
         params = {
             "limit": limit,
@@ -53,6 +55,7 @@ class CRUDBOB(CRUD, InDriver):
             params["search"] = json.dumps(search)
         if sort:
             params["sort"] = json.dumps(sort)
+        self.check_connect()
         req = requests.get(
             url=f"{self.base_public_url}/{self.endpoint}",
             params=params,
@@ -76,6 +79,7 @@ class SmartTable(CRUDBOB):
         CRUDBOB.__init__(self, base_url, endpoint, auth)
 
     def allowed(self):
+        self.check_connect()
         req = requests.post(
             url=f"{self.base_public_url}/{self.endpoint}/allowed",
             auth=self.auth,
@@ -88,6 +92,7 @@ class SmartTable(CRUDBOB):
         return True if req_json.allowed else False
 
     def delete_all(self):
+        self.check_connect()
         req = requests.delete(
             url=f"{self.base_public_url}/{self.endpoint}/all",
             auth=self.auth,

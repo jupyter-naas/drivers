@@ -1,6 +1,7 @@
 import pandas as pd
 
 basic_text = "Not defined, it should to allow user to connect"
+key_text = "Connect key missing"
 basic_error = "Not defined, it should return a Dataframe"
 connect_error = "You should connect first"
 
@@ -8,17 +9,21 @@ connect_error = "You should connect first"
 class ConnectDriver:
 
     connected = False
+    key = None
     raise_error = False
 
     def raise_for_error(self, raise_error=True):
         self.raise_error = raise_error
 
-    def connect(self, *args, **kwargs):
-        if self.raise_error:
-            raise ValueError(basic_text)
+    def connect(self, key=None):
+        self.key = key
+        if self.key:
+            self.connected = True
         else:
-            print(basic_text, *args, **kwargs)
-        self.connected = True
+            if self.raise_error:
+                raise ValueError(key_text)
+            else:
+                print(key_text)
         return self
 
     def check_connect(self):
