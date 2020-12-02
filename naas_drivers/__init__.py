@@ -23,6 +23,7 @@ from naas_drivers.inputOutput.gsheet import Gsheet
 from naas_drivers.inputOutput.mongo import Mongo
 from naas_drivers.inputOutput.toucan import Toucan
 from naas_drivers.inputOutput.hubspot import Hubspot
+from naas_drivers.inputOutput.hubspot import Thinkific
 import requests
 import os
 
@@ -63,6 +64,7 @@ gsheet = Gsheet()
 mongo = Mongo()
 toucan = Toucan()
 hubspot = Hubspot()
+thinkific = Thinkific()
 
 __doc_url = "https://naas.gitbook.io/drivers/"
 
