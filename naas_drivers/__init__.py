@@ -23,7 +23,7 @@ from naas_drivers.inputOutput.gsheet import Gsheet
 from naas_drivers.inputOutput.mongo import Mongo
 from naas_drivers.inputOutput.toucan import Toucan
 from naas_drivers.inputOutput.hubspot import Hubspot
-from naas_drivers.inputOutput.hubspot import Thinkific
+from naas_drivers.inputOutput.thinkific import Thinkific
 import requests
 import os
 
