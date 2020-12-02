@@ -6,6 +6,7 @@ class CRUD:
     base_public_url = None
     endpoint = None
     auth = None
+    raise_error = False
 
     def __init__(
         self,

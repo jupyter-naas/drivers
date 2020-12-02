@@ -9,7 +9,7 @@ import os
 req_headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-class Me:
+class Me(InDriver):
     base_public_url = None
     endpoint = "me"
     auth = None
@@ -26,7 +26,8 @@ class Me:
             auth=self.auth,
             allow_redirects=False,
         )
-        req.raise_for_status()
+        if self.raise_error:
+            req.raise_for_status()
         return req
 
     def update(self, data):
@@ -37,11 +38,12 @@ class Me:
             json=data,
             allow_redirects=False,
         )
-        req.raise_for_status()
+        if self.raise_error:
+            req.raise_for_status()
         return req
 
 
-class CRUDBOB(CRUD):
+class CRUDBOB(CRUD, InDriver):
     def get_all(self, search=None, sort=None, limit=20, skip=0):
         params = {
             "limit": limit,
@@ -58,7 +60,8 @@ class CRUDBOB(CRUD):
             auth=self.auth,
             allow_redirects=False,
         )
-        req.raise_for_status()
+        if self.raise_error:
+            req.raise_for_status()
         return req
 
 
@@ -79,7 +82,8 @@ class SmartTable(CRUDBOB):
             headers=req_headers,
             allow_redirects=False,
         )
-        req.raise_for_status()
+        if self.raise_error:
+            req.raise_for_status()
         req_json = req.json()
         return True if req_json.allowed else False
 
@@ -90,7 +94,8 @@ class SmartTable(CRUDBOB):
             headers=req_headers,
             allow_redirects=False,
         )
-        req.raise_for_status()
+        if self.raise_error:
+            req.raise_for_status()
         return req
 
 
@@ -128,10 +133,20 @@ class Users(CRUDBOB):
 
         # -> role
         if role not in ["user", "admin"]:
-            raise ValueError(f"Role {role} not recognized in Bobapp")
+            error_text = f"Role {role} not recognized in Bobapp"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
         if not self.validate_email(email):
-            raise ValueError(f"User {email} not valid")
+            error_text = f"User {email} not valid"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
         # Init user info
         new_user = {
@@ -166,11 +181,21 @@ class Users(CRUDBOB):
         email = email.strip().lower()
 
         if not self.validate_email(email):
-            raise ValueError(f"User {email} not valid")
+            error_text = f"User {email} not valid"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
         user = self.get_by_email(email)
         if not user:
-            raise ValueError(f"User {email} does not exist in Bobapp")
+            error_text = f"User {email} does not exist in Bobapp"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
         # Init workspace info
         workspace_param = {
@@ -197,7 +222,12 @@ class Users(CRUDBOB):
                 f"Workspace {workspace_id} : '{workspace_name}' added to user {email}"
             )
         elif user["workspaces"].get(workspace_id, None):
-            print(f"Workspace already exists for user {email}")
+            error_text = f"Workspace already exists for user {email}"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
         # Set workspace default
         if set_default:
@@ -212,18 +242,33 @@ class Users(CRUDBOB):
         # Check service
         serv_list = ["ftp", "jupyter", "wekan"]
         if serv not in serv_list:
-            raise ValueError(
-                f"Service {serv} does not exist. Please change it to {serv_list}."
+            error_text = (
+                f"Service {serv} does not exist. Please change it to {serv_list}"
             )
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
         # -> email
         email = email.strip().lower()
         if not self.validate_email(email):
-            raise ValueError(f"User {email} not valid")
+            error_text = f"User {email} not valid"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
         user = self.get_by_email(email)
         if not user:
-            raise ValueError(f"User {email} does not exist in Bobapp")
+            error_text = f"User {email} does not exist in Bobapp"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
         # Init service
         service = {
             "authMethod": serv,
@@ -241,14 +286,24 @@ class Users(CRUDBOB):
             self.update(user)
             print(f"Service {serv} Added to user", email)
         else:
-            print(f"Service already exists in Bobapp for {email}")
+            error_text = f"Service already exists in Bobapp for {email}"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
     def create_service(self, serv, email, password, token):
 
         # Create login
         email = email.strip().lower()
         if not self.validate_email(email):
-            raise ValueError(f"User {email} not valid")
+            error_text = f"User {email} not valid"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
         login = {
             "username": email,
@@ -258,9 +313,14 @@ class Users(CRUDBOB):
         # Init services
         serv_list = ["ftp", "jupyter"]
         if serv not in serv_list:
-            raise ValueError(
-                f"Service {serv} does not exist. Please change it to {serv_list}."
+            error_text = (
+                f"Service {serv} does not exist. Please change it to {serv_list}"
             )
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
 
         if serv == "ftp":
             # Variable FTP
@@ -270,7 +330,8 @@ class Users(CRUDBOB):
             # Create user on service ftp
             headers = {"X-Api-Key": AUTH_TOKEN_FTP}
             r = requests.post(URI_FTP, json=login, headers=headers)
-            r.raise_for_status()
+            if self.raise_error:
+                r.raise_for_status()
 
         if serv == "jupyter":
             # Jupyter
@@ -280,7 +341,8 @@ class Users(CRUDBOB):
             # Create user on service jupyter
             headers = {"Authorization": AUTH_TOKEN_JUP}
             r = requests.post(URI_JUP, data=login, headers=headers)
-            r.raise_for_status()
+            if self.raise_error:
+                r.raise_for_status()
 
     def create(
         self,
@@ -332,6 +394,12 @@ class Bobapp(InDriver, OutDriver):
         self.me = Me(self.base_public_url, self.__auth)
         self.connected = True
         return self
+
+    def raise_for_error(self, raise_error=True):
+        self.raise_error = raise_error
+        self.users.raise_for_error(raise_error)
+        self.workspaces.raise_for_error(raise_error)
+        self.me.raise_for_error(raise_error)
 
     def connect_smarttable(self, database, collection):
         self.check_connect()

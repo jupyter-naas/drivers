@@ -14,10 +14,19 @@ class Sentiment(InDriver):
         elif isinstance(dataset, pd.DataFrame):
             df = dataset
         else:
-            raise ValueError("The dataset should either be a Dataframe or a Series")
-
+            error_text = f"The dataset should either be a Dataframe or a Series, not {dataset.__name__}"
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
         if column_name not in df.columns:
-            raise ValueError(f"The {column_name} is not in dataset columns.")
+            error_text = f"The {column_name} is not in dataset columns."
+            if self.raise_error:
+                raise ValueError(error_text)
+            else:
+                print(error_text)
+                return
         return df
 
     def categorize(self, comp_score):

@@ -27,6 +27,7 @@ class ConnectDriver:
                 raise ValueError(connect_error)
             else:
                 print(connect_error)
+                return
 
 
 class InDriver(ConnectDriver):
@@ -39,7 +40,7 @@ class InDriver(ConnectDriver):
             raise ValueError(basic_error)
         else:
             print(basic_text, *args, **kwargs)
-        return pd.DataFrame()
+            return
 
 
 class OutDriver(ConnectDriver):
