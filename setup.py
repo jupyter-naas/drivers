@@ -60,7 +60,7 @@ setup(
         "six>=1,<2",
         "statsmodels>=0,<1",
         "urllib3>=1,<2",
-        "xlrd>=1,<2",
+        "xlrd>=1,<3",
         "pymongo>=3,<4",
         "pysftp>=0,<1",
         "md2pdf>=0,<1",
