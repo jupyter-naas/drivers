@@ -70,7 +70,8 @@ class HSCRUD:
                 params['after'] = data['paging']['next']['after']
             else:
                 more_page = False
-
+        params.pop('after')
+        self.params = params
         df = pd.DataFrame(items).reset_index(drop=True)
         return df
 
