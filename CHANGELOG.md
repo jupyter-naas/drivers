@@ -1,3 +1,205 @@
+## 0.37.0 (2020-11-30)
+
+### Fix
+
+- correct user_id by self.user_id in request
+- correct __filter_dates parameters
+- code smell and duplicates
+- apply pycodestyle
+- udpate new formulas
+
+### Feat
+
+- init qonto driver
+
+## 0.36.0 (2020-11-28)
+
+### Feat
+
+- add set_seen and set_flag
+- add criteria in get email
+
+### Fix
+
+- use reverse mode
+
+## 0.35.0 (2020-11-28)
+
+### Fix
+
+- **ci**: switch to conventional-pr-title-action
+- **ci**: pr script
+
+### Feat
+
+- add get attachement
+- add get email from email box
+
+## 0.35.0b1 (2020-11-19)
+
+### Feat
+
+- **jupyter**: add default token
+
+## 0.35.0b0 (2020-11-17)
+
+## 0.30.0b0 (2020-11-09)
+
+### Fix
+
+- remove docker build
+- **bobapp**: use send instead of insert
+- bobapp print
+- add print when file creating
+- connect return self
+- **gsheet**: fix connect
+- **bobapp**: create_or_update function
+- **html**: padding
+- **plotly**: colors for ma20 ma50
+- **plotly**: allow any moving average
+- bobapp remove token in services
+- **jupyter**: create_user
+- allow connect default api newapi cityfalcon
+- **cityfalcon**: change default field for logo
+- **cityfalcon**: add wrong field name when error
+- error in mongo connector
+- **mongo**: allow get client
+- import errors
+- setup config
+- import
+- path import
+- build
+- **ftp**: code smell
+- code smells
+- code smells
+- code smells use const
+- error class naming
+- code smells
+- **plotly**: add missing self
+- code smells prediction
+- code smells Out_Driver
+- **toucan**: code smel
+- error
+- halthchecks
+- naming
+- arg name to better naming for bobapp api
+- bobapp functions location
+- BOBAPP_API env var
+- cityfalcon logo field
+- class parent
+- start prediction with last know day
+- plot stock if no company
+- naming
+- airtable connector convertor
+- airtable connect
+- for dk connect
+- sentiment analysis
+- **newsapi**: add missing import
+- **cityfalcon**: allow default config for cityfalcon
+- add doc function
+- prediction with prediction_type COMPOUND default
+- readme
+- remove update description
+- show only open or close on stock plotly
+- remove useless plot var
+- allow multi company group
+- predict for multi company
+- prediction
+- prediction work with yahoo and plotly
+- prediction
+- import airtable
+- allow HealthCheck to connect
+- airtable
+- plotly for not supported
+- plotly html remove
+- allow plotly export jpeg
+- ifft issue who don't return json
+- simplify gsheet driver
+- build ci
+- python version build to 8
+- tensorflow error version
+- embed_small_app_slide
+- **gsheets**: comment test for now
+- add missing lib
+- **gsheet**: fix google spreadsheet driver
+- ci typo pr check
+- **html**: :bug: Correct preview text
+- :sparkles: refactor name and follow good practice
+- **html**: :bug: fix display feature
+- **html**: :bug: fix display into jupyter
+- **html**: :bug: font familly
+- **ftp**: :bug: add missign toucan_ftp
+- **html**: :bug: rename default button
+- **plot**: :sparkles: add moving average
+- update to AGPL
+- **citifalcon**: :bug: fix typo
+- **citifalcon**: :bug: fix get image\
+- **plot**: :bug: allow 0 value, for date_to
+- **html**: :sparkles: allow change order to template
+- **plot**: :bug: dont remove html if already exist
+- **plot**: :sparkles: allow stock to be only one
+- **html**: :bug: fix order link args
+- **html**: :art: auto add uid to image to alow user send new image with same name
+- triger ci build
+- **html**: change table to support mode usecase
+- **ci**: :bug: use latest ref for build naas
+- **html**: :bug: change color of subsubtitle
+- **html**: :bug: fix subtitle of title
+- :green_heart: fix event who is send to naas build
+- **html**: :bug: fix missing module
+- **plot**: :bug: add default css to all css
+- add upgrade before install
+- :green_heart: create our own github action
+- :bug: ci fix
+- :bug: fix build docker image
+- force deploy to dockerhub
+- :bug: fix append error in scatter chart
+
+### Feat
+
+- add canny
+- **html**: add utils
+- **html**: table
+- **plotly**: allow show or not graph
+- **prediction**: add concat_label feature
+- **optimise**: add optimise lib for eavy df
+- **cityfalcon**: add date
+- expose sentiment categorize
+- **newsapi**: :sparkles: add newsapi driver
+- **plotly**: allow multi export
+- **jupyter**: add create_user
+- add jupyter drivers
+- add linechart simple in plot and candlestick
+- deploy new singleuser
+- deploy new singleuser
+- switch all drivers to nocall
+- mix all ftp libs
+- add update check
+- add integromat
+- split plot in plotly and yahoo
+- **ifttt**: :sparkles: add ifttt connector
+- **bubble**: :sparkles: add bubble connector
+- **zappier**: :zap: create zappier connector
+- **airtable**: :sparkles: add airtable
+- **ftp**: :sparkles: add ftp toucan lib and fix ftps lib
+- **ci**: :sparkles: add pandas datareader
+- **citifalcon**: :sparkles: add limit in get
+- **plot**: :sparkles: allow date to be number
+- **citifalcon**: :sparkles: add cityfalcon api + refactor html lib to make it simple
+- **html**: :sparkles: add new html lib
+- add PR linter
+
+### Refactor
+
+- **html**: :art: use kwargs
+- **html**: :truck: tempalte_basic t0 main
+
+### Perf
+
+- :construction_worker: add cache for faster build
+
+## 0.2.2b0 (2020-10-06)
+
 ## 0.34.6 (2020-11-26)
 
 ### Fix

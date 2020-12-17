@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="naas-drivers",
-    version="0.35.0b1",
+    version="0.37.0",
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
     license="BSD",
@@ -40,7 +40,7 @@ setup(
         "Cython>=0,<1",
         "idna>=2,<3",
         "inflection>=0,<1",
-        "joblib>=0,<1",
+        "joblib>=0,<2",
         "more-itertools>=8,<9",
         "numpy>=1,<2",
         "ipython>=7,<8",
