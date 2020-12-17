@@ -40,7 +40,7 @@ setup(
         "Cython>=0,<1",
         "idna>=2,<3",
         "inflection>=0,<1",
-        "joblib>=0,<1",
+        "joblib>=0,<2",
         "more-itertools>=8,<9",
         "numpy>=1,<2",
         "ipython>=7,<8",
