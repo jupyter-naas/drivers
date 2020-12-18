@@ -31,6 +31,7 @@ setup(
         "markdown2>=2,<3",
         "newsapi-python>=0,<1",
         "airtable-python-wrapper>=0,<1",
+        "notion>0,<1",
         "pyjwt>=1,<2",
         "tensorflow",
         "pysftp>=0,<1",
