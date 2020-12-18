@@ -20,12 +20,9 @@ class Notion(InDriver, OutDriver):
         email:str,
         password:str,
     ):
-        try:
-            cookie_response = requests.get('http://naas-auth-proxy:3000/token?url=https://www.notion.so/login&filter=token_v2&email='+email+'&password='+password)
-            return cookie_response.json()['cookies'][0]['value']
-        except:
-            raise Exception("Unable to login to your account! Please check the credentials provided.")
-    
+        cookie_response = requests.get('http://naas-auth-proxy:3000/token?url=https://www.notion.so/login&filter=token_v2&email='+email+'&password='+password)    
+        return cookie_response.json()['cookies'][0]['value']
+
     def get(
         self,
         url:str,
