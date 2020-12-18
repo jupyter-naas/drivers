@@ -1,17 +1,16 @@
-
 from naas_drivers.driver import InDriver, OutDriver
-from datetime import datetime
-from .__crud import CRUD
 import pandas as pd
 import requests
+from datetime import datetime
 import os
 import string
 
 
-class HSCRUD(CRUD):
-    def __init__(self, base_url, api_token):
-        self.key = api_token
-        self.params = {"limit": "100", "archived": "false", "hapikey": api_token}
+class HSCRUD:
+    # class HSCRUD(CRUD):
+    def __init__(self, base_url, req_headers, params):
+        self.req_headers = req_headers
+        self.params = params
         self.base_url = base_url
         self.model_name = self.base_url.split("/")[-1]
 
@@ -38,9 +37,10 @@ class HSCRUD(CRUD):
                         value = datetime.strptime(value, "%d/%m/%Y")
                         value = str(int(value.timestamp())) + "000"
                     except ValueError:
-                        error_text = f"Close date '{value}' is in wrong format.\n, Please change it to %d/%m/%Y."
-                        self.print_error(error_text)
-                        return None
+                        print(
+                            f"Close date '{value}' is in wrong format.\n"
+                            "Please change it to %d/%m/%Y."
+                        )
                 elif key == "amount":
                     value = value.replace(".", "")
                 # Change value in dict
@@ -70,7 +70,7 @@ class HSCRUD(CRUD):
                 params["after"] = data["paging"]["next"]["after"]
             else:
                 more_page = False
-        params.pop('after')
+        params.pop("after")
         self.params = params
         df = pd.DataFrame(items).reset_index(drop=True)
         return df
@@ -247,8 +247,14 @@ class Deal(HSCRUD):
         return res
 
 
-class Pipeline(HSCRUD):
-    def get_all(self):
+class Pipeline:
+    def __init__(self, base_url, req_headers, params):
+        self.req_headers = req_headers
+        self.params = params
+        self.base_url = base_url
+        self.model_name = self.base_url.split("/")[-1]
+
+    def get_all_pipeline(self):
         req = requests.get(
             url=f"{self.base_url}/",
             headers=self.req_headers,
@@ -261,7 +267,7 @@ class Pipeline(HSCRUD):
 
 class Pipelines(Pipeline):
     def get_all(self):
-        data = self.get_all()
+        data = self.get_all_pipeline()
         df = pd.DataFrame.from_records(data["results"])
         df = df.drop(["stages"], axis=1)
         df = df.sort_values(by=["displayOrder"]).reset_index(drop=True)
@@ -270,7 +276,7 @@ class Pipelines(Pipeline):
 
 class Dealstage(Pipeline):
     def get_all(self):
-        data = self.get_all()
+        data = self.get_all_pipeline()
         items = []
         for row in data["results"]:
             pipeline = row["label"]
@@ -385,26 +391,34 @@ class Association:
 class Hubspot(InDriver, OutDriver):
 
     base_url = os.environ.get("HUBSPOT_API_URL", "https://api.hubapi.com/crm/v3")
-
-    def raise_for_error(self, raise_error=True):
-        self.raise_error = raise_error
-        self.contacts.raise_for_error(raise_error)
-        self.company.raise_for_error(raise_error)
-        self.deals.raise_for_error(raise_error)
-        self.pipelines.raise_for_error(raise_error)
-        self.dealstages.raise_for_error(raise_error)
-        self.associations.raise_for_error(raise_error)
+    api_token = None
 
     def connect(self, api_token):
+        # Init Hubspot attribute
+        self.token = api_token
+        self.req_headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+        }
+        self.params = {"limit": "100", "archived": "false", "hapikey": api_token}
+
         # Init end point
         self.obj_url = f"{self.base_url}/objects"
         self.pip_url = f"{self.base_url}/pipelines"
-        self.contacts = Contact(f"{self.obj_url}/contacts", self.api_token)
-        self.company = HSCRUD(f"{self.obj_url}/company", self.api_token)
-        self.deals = Deal(f"{self.obj_url}/deals", self.api_token)
-        self.pipelines = Pipelines(f"{self.pip_url}/deals", self.api_token)
-        self.dealstages = Dealstage(f"{self.pip_url}/deals", self.api_token)
-        self.associations = Association(f"{self.obj_url}", self.api_token)
+        self.contacts = Contact(
+            f"{self.obj_url}/contacts", self.req_headers, self.params
+        )
+        self.company = HSCRUD(f"{self.obj_url}/company", self.req_headers, self.params)
+        self.deals = Deal(f"{self.obj_url}/deals", self.req_headers, self.params)
+        self.pipelines = Pipelines(
+            f"{self.pip_url}/deals", self.req_headers, self.params
+        )
+        self.dealstages = Dealstage(
+            f"{self.pip_url}/deals", self.req_headers, self.params
+        )
+        self.associations = Association(
+            f"{self.obj_url}", self.req_headers, self.params
+        )
 
         # Set connexion to active
         self.connected = True
