@@ -22,6 +22,7 @@ from naas_drivers.inputOutput.git import Git
 from naas_drivers.inputOutput.gsheet import Gsheet
 from naas_drivers.inputOutput.mongo import Mongo
 from naas_drivers.inputOutput.toucan import Toucan
+from naas_drivers.inputOutput.notion import Notion
 import requests
 import os
 
@@ -59,6 +60,7 @@ jupyter = Jupyter()
 ftp = Ftp()
 git = Git()
 gsheet = Gsheet()
+notion = Notion()
 mongo = Mongo()
 toucan = Toucan()
 
