@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="naas-drivers",
-    version="0.35.0b1",
+    version="0.37.0",
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
     license="BSD",
@@ -27,6 +27,7 @@ setup(
         ]
     },
     install_requires=[
+        "imap_tools>=0,<1",
         "markdown2>=2,<3",
         "newsapi-python>=0,<1",
         "airtable-python-wrapper>=0,<1",
@@ -35,11 +36,11 @@ setup(
         "pysftp>=0,<1",
         "htmlbuilder>=0,<1",
         "vaderSentiment>=3,<4",
-        "chardet>=3,<4",
+        "chardet>=3,<5",
         "Cython>=0,<1",
         "idna>=2,<3",
         "inflection>=0,<1",
-        "joblib>=0,<1",
+        "joblib>=0,<2",
         "more-itertools>=8,<9",
         "numpy>=1,<2",
         "ipython>=7,<8",
@@ -59,7 +60,7 @@ setup(
         "six>=1,<2",
         "statsmodels>=0,<1",
         "urllib3>=1,<2",
-        "xlrd>=1,<2",
+        "xlrd>=1,<3",
         "pymongo>=3,<4",
         "pysftp>=0,<1",
         "md2pdf>=0,<1",

@@ -113,8 +113,9 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
-    def is_user_active(self, user):
+    def is_user_active(self, username):
         self.check_connect()
+        user = self.get_user(username)
         servers = user.get("servers")
         keys = servers.keys()
         if len(keys) > 0:
@@ -122,8 +123,9 @@ class Jupyter(InDriver, OutDriver):
         else:
             return False
 
-    def get_server_uptime(self, user):
+    def get_server_uptime(self, username):
         self.check_connect()
+        user = self.get_user(username)
         servers = user.get("servers")
         keys = servers.keys()
         all_duration = None
@@ -162,7 +164,6 @@ class Jupyter(InDriver, OutDriver):
 
     def restart_user(self, username):
         self.check_connect()
-        user = self.get_user(username)
-        if user and self.is_user_active(user):
+        if self.is_user_active(username):
             self.stop_user(username)
             self.start_user(username)
