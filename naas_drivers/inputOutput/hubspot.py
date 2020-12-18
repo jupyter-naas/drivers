@@ -1,3 +1,4 @@
+
 from naas_drivers.driver import InDriver, OutDriver
 from datetime import datetime
 from .__crud import CRUD
@@ -69,7 +70,8 @@ class HSCRUD(CRUD):
                 params["after"] = data["paging"]["next"]["after"]
             else:
                 more_page = False
-
+        params.pop('after')
+        self.params = params
         df = pd.DataFrame(items).reset_index(drop=True)
         return df
 
