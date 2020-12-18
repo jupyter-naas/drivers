@@ -16,6 +16,7 @@ class Notion(InDriver, OutDriver):
         password: str,
     ):
         self.client = NotionClient(token_v2=self.__token_v2(email,password)) 
+        self.connected = True
         return self
     
     def __token_v2(
@@ -30,6 +31,7 @@ class Notion(InDriver, OutDriver):
         self,
         url:str,
     ):
+        self.check_connect()
         cv = self.client.get_collection_view(url)
         data = [block_row.get_all_properties() for block_row in cv.collection.get_rows()]
         return pd.DataFrame(data)
