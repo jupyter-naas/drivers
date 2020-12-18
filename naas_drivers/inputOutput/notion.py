@@ -6,6 +6,9 @@ from notion.collection import *
 import asyncio
 
 class Notion(InDriver, OutDriver):
+
+    def __init__(self):
+        self.auth_proxy = os.getenv("NAAS_AUTH_PROXY")
         
     def connect(
         self,
@@ -20,7 +23,7 @@ class Notion(InDriver, OutDriver):
         email:str,
         password:str,
     ):
-        cookie_response = requests.get('http://naas-auth-proxy:3000/token?url=https://www.notion.so/login&filter=token_v2&email='+email+'&password='+password)    
+        cookie_response = requests.get(self.auth_proxy+'/token?url=https://www.notion.so/login&filter=token_v2&email='+email+'&password='+password)    
         return cookie_response.json()['cookies'][0]['value']
 
     def get(
