@@ -38,11 +38,8 @@ class HSCRUD(CRUD):
                         value = str(int(value.timestamp())) + "000"
                     except ValueError:
                         error_text = f"Close date '{value}' is in wrong format.\n, Please change it to %d/%m/%Y."
-                        if self.raise_error:
-                            raise ValueError(error_text)
-                        else:
-                            print(error_text)
-                            return
+                        self.print_error(error_text)
+                        return None
                 elif key == "amount":
                     value = value.replace(".", "")
                 # Change value in dict

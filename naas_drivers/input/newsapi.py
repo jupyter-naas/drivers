@@ -33,11 +33,8 @@ class Newsapi(InDriver):
                     new_formated["date"] = element["publishedAt"]
                 else:
                     error_text = f"Unknow parameter {field}"
-                    if self.raise_error:
-                        raise ValueError(error_text)
-                    else:
-                        print(error_text)
-                        return
+                    self.print_error(error_text)
+                    return None
             news.append(new_formated)
 
         if limit and isinstance(limit, int) and limit > 0:

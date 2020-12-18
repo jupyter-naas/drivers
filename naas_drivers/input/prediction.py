@@ -55,11 +55,8 @@ class Prediction:
             self.input_df = dataset
         else:
             error_text = f"The dataset should either be a Dataframe or Series, not {dataset.__name__}"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         # the column name to be used as the date column
         self.date_column = date_column
@@ -69,11 +66,7 @@ class Prediction:
             self.label = label
         else:
             error_text = "The label should a column name of the dataset."
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
         # the number of data points in the future to be predicted, max 1000
         self.data_points = data_points
 
@@ -109,11 +102,8 @@ class Prediction:
             error_text = (
                 "Please specify an prediction_type as arima OR linear OR svr or all"
             )
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
         return model, [df[self.label].iloc[-1], *predicted_values]
 
     def __transform_output(self, data_df, predicted_values, predicted_col):

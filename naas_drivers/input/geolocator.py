@@ -27,11 +27,8 @@ class Geolocator(InDriver):
     ):
         if min_delay_seconds < 1:
             error_text = f"Minimum 1 second delay is required not {min_delay_seconds}"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
         if mode == "google":
             from geopy.geocoders import GoogleV3
 
@@ -48,31 +45,20 @@ class Geolocator(InDriver):
             )
         else:
             error_text = "mode should be osm or google"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
         self.connected = True
         return self
 
     def check_connect(self):
         if not self.client:
             error_text = "Please set the map service using connect method"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
+            self.print_error(error_text)
 
     def get(self, df: pd.DataFrame, column: str, limit=50) -> pd.DataFrame:
         self.check_connect()
         if df.shape[0] > limit:
             error_text = f"Dataset number of rows is more than the set limit of {limit}"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
         df["_location"] = df[column].apply(self.client)
         df["LATITUDE"] = df["_location"].apply(
             lambda loc: loc.latitude if loc else None

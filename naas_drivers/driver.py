@@ -12,6 +12,12 @@ class ConnectDriver:
     key = None
     raise_error = False
 
+    def print_error(self, error):
+        if self.raise_error:
+            raise ValueError(key_text)
+        else:
+            print(key_text)
+
     def raise_for_error(self, raise_error=True):
         self.raise_error = raise_error
 
@@ -20,19 +26,12 @@ class ConnectDriver:
         if self.key:
             self.connected = True
         else:
-            if self.raise_error:
-                raise ValueError(key_text)
-            else:
-                print(key_text)
+            self.print_error(key_text)
         return self
 
     def check_connect(self):
         if not self.connected:
-            if self.raise_error:
-                raise ValueError(connect_error)
-            else:
-                print(connect_error)
-                return
+            self.print_error(connect_error)
 
 
 class InDriver(ConnectDriver):
@@ -41,18 +40,11 @@ class InDriver(ConnectDriver):
 
     def get(self, *args, **kwargs) -> pd.DataFrame:
         self.check_connect()
-        if self.raise_error:
-            raise ValueError(basic_error)
-        else:
-            print(basic_text, *args, **kwargs)
-            return
+        self.print_error(basic_error)
 
 
 class OutDriver(ConnectDriver):
     def send(self, *args, **kwargs):
         self.check_connect()
-        if self.raise_error:
-            raise ValueError(basic_error)
-        else:
-            print(basic_text, *args, **kwargs)
+        self.print_error(basic_error)
         return basic_error

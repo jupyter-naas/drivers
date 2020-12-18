@@ -237,11 +237,8 @@ class Html(InDriver):
             table_arr = data
         else:
             error_text = f"Table should be array, not {data.__name__}"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
         for row in table_arr:
             res = []
             if isinstance(row, list):
@@ -430,11 +427,7 @@ class Html(InDriver):
             json["pdf"] = {"width": "20.5cm", "height": "36.5cm"}
         else:
             error_text = f"extension {filename.split('.')[1]} not suported for now"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
         json["output"] = output
         req = requests.post(
             url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render",
@@ -459,11 +452,7 @@ class Html(InDriver):
             return markdown2.markdown(data_read)
         else:
             error_text = f"{input_type} not supported for now"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
 
     def export(self, html, filenames, css=None):
         """ create html export and add css to it"""

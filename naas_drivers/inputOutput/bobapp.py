@@ -139,19 +139,13 @@ class Users(CRUDBOB):
         # -> role
         if role not in ["user", "admin"]:
             error_text = f"Role {role} not recognized in Bobapp"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         if not self.validate_email(email):
             error_text = f"User {email} not valid"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         # Init user info
         new_user = {
@@ -187,20 +181,14 @@ class Users(CRUDBOB):
 
         if not self.validate_email(email):
             error_text = f"User {email} not valid"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         user = self.get_by_email(email)
         if not user:
             error_text = f"User {email} does not exist in Bobapp"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         # Init workspace info
         workspace_param = {
@@ -228,11 +216,8 @@ class Users(CRUDBOB):
             )
         elif user["workspaces"].get(workspace_id, None):
             error_text = f"Workspace already exists for user {email}"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         # Set workspace default
         if set_default:
@@ -250,30 +235,21 @@ class Users(CRUDBOB):
             error_text = (
                 f"Service {serv} does not exist. Please change it to {serv_list}"
             )
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         # -> email
         email = email.strip().lower()
         if not self.validate_email(email):
             error_text = f"User {email} not valid"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         user = self.get_by_email(email)
         if not user:
             error_text = f"User {email} does not exist in Bobapp"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
         # Init service
         service = {
             "authMethod": serv,
@@ -292,11 +268,8 @@ class Users(CRUDBOB):
             print(f"Service {serv} Added to user", email)
         else:
             error_text = f"Service already exists in Bobapp for {email}"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
     def create_service(self, serv, email, password, token):
 
@@ -304,11 +277,8 @@ class Users(CRUDBOB):
         email = email.strip().lower()
         if not self.validate_email(email):
             error_text = f"User {email} not valid"
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         login = {
             "username": email,
@@ -321,11 +291,8 @@ class Users(CRUDBOB):
             error_text = (
                 f"Service {serv} does not exist. Please change it to {serv_list}"
             )
-            if self.raise_error:
-                raise ValueError(error_text)
-            else:
-                print(error_text)
-                return
+            self.print_error(error_text)
+            return None
 
         if serv == "ftp":
             # Variable FTP

@@ -46,10 +46,7 @@ class Cityfalcon(InDriver):
                     new_formated["date"] = element["publishTime"]
                 else:
                     error_text = f"Unknow parameter {field}"
-                    if self.raise_error:
-                        raise ValueError(error_text)
-                    else:
-                        print(error_text)
+                    self.print_error(error_text)
             news.append(new_formated)
         if limit and isinstance(limit, int) and limit > 0:
             news = news[:limit]
