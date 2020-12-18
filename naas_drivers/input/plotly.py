@@ -13,6 +13,7 @@ class Plotly(InDriver):
         html_filename = f"{filename.split('.')[0]}.html"
         html_exist = os.path.exists(html_filename)
         chart.write_html(html_filename)
+        selector = None
         html_map = None
         if css is None:
             css = self.__css_base
@@ -20,6 +21,8 @@ class Plotly(InDriver):
             css = css + self.__css_base
         with open(html_filename) as f:
             html_map = f.read()
+            if html_map.find(' cartesianlayer') != -1:
+                selector = ".cartesianlayer"
             result = html_map.replace(
                 "</head>", f'<style id="naas_css">{css}</style></head>'
             )
@@ -35,8 +38,10 @@ class Plotly(InDriver):
                 "emulateScreenMedia": True,
                 "ignoreHttpsErrors": True,
                 "scrollPage": False,
-                "screenshot": {"type": extension, "selector": ".cartesianlayer"},
+                "screenshot": {"type": extension},
             }
+            if selector:
+                json["screenshot"]["selector"] = selector
             req = requests.post(
                 url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render",
                 json=json,

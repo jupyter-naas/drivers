@@ -68,13 +68,12 @@ class Canny(InDriver, OutDriver):
 
     base_url = os.environ.get("CANNY_URL", "https://canny.io")
     api_url = None
-    token = None
 
     def __init__(self):
         self.api_url = f"{self.base_url}/api/v1"
 
     def connect(self, api_token):
-        self.token = api_token
+        self.key = api_token
         self.connected = True
-        self.users = Users(self.api_url, "users", self.token)
+        self.users = Users(self.api_url, "users", self.key)
         return self

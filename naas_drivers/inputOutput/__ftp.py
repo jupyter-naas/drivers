@@ -88,9 +88,3 @@ class Ftpbase:
 
     def __exit__(self, *krgs):
         self.ftp.close()
-
-    def help(self):
-        print(f"=== {type(self).__name__} === \n")
-        print(".get_file(path) => get file from ftp path\n")
-        print(".send_file(path, dest_path) => send file to ftp path\n")
-        print(".list_directory(path) => do ls in ftp in path\n")
