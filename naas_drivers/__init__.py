@@ -30,7 +30,7 @@ from naas_drivers.inputOutput.thinkific import Thinkific
 import requests
 import os
 
-__version__ = "0.38.0b0"
+__version__ = "0.38.0b1"
 
 __github_repo = "jupyter-naas/drivers"
 
