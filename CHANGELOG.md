@@ -1,3 +1,65 @@
+## 0.38.0b5 (2021-01-05)
+
+### Fix
+
+- ci script
+
+## 0.38.0b4 (2021-01-05)
+
+### Fix
+
+- tensorflow version
+
+## 0.38.0b3 (2021-01-05)
+
+### Fix
+
+- remove useless build command
+
+## 0.38.0b2 (2021-01-05)
+
+### Fix
+
+- lint errors
+
+## 0.38.0b1 (2021-01-05)
+
+### Fix
+
+- remove dup code
+
+## 0.38.0b0 (2021-01-05)
+
+### Feat
+
+- add sessions endpoint
+- **notion**: add notion driver updated notion driver
+- **notion**: notion driver added notion driver to get collection view
+- use crud everywhere
+- add raise_for_error everywhere
+- add raise_for_error
+- refactor with api and use dataframe
+- add get attachement
+- add get email from email box
+
+### Fix
+
+- get hubspot from main
+- lint use function for error
+- **notion**: notion driver updated notion driver fix
+- **notion**: notion driver fixed env
+- **thinkific**: merge main into thinkific branch
+- **thinkific**: change thinkific name in import module
+- **thinkific**: add thinkific to __init__
+- **hubspot**: reinit self.param after get_all
+- jup use username everywhere
+- except catch
+- apply pycodestyle
+- **ci**: switch to conventional-pr-title-action
+- **ci**: pr script
+- export screenshotmap
+- update thinkific driver
+
 ## 0.38.0b4 (2021-01-05)
 
 ### Fix
