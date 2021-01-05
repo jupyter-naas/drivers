@@ -33,7 +33,7 @@ setup(
         "airtable-python-wrapper>=0,<1",
         "notion>0,<1",
         "pyjwt>=1,<2",
-        "tensorflow",
+        "tensorflow>=2,<3",
         "pysftp>=0,<1",
         "htmlbuilder>=0,<1",
         "vaderSentiment>=3,<4",
