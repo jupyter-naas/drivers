@@ -76,8 +76,8 @@ class Linkedin(InDriver, OutDriver):
                  'LK_URL': link.replace('\n',''),
                  'LK_FIRST_NAME': profile_data['data']['firstName'],
                  'LK_LAST_NAME': profile_data['data']['lastName'],
-                 'LK_HEADLINE': profile_data['data']['headline'] and profile_data['data']['headline'] or 'NA',
-                 'LK_EMAIL': contact_data['data']['emailAddress'] and contact_data['data']['emailAddress'] or 'NA',
+                 'LK_HEADLINE': profile_data['data']['headline']  or 'NA',
+                 'LK_EMAIL': contact_data['data']['emailAddress'] or 'NA',
                  'LK_PHONE': contact_data['data']['phoneNumbers'] and contact_data['data']['phoneNumbers'][0]['number'] or 'NA',
                  'LK_TWITTER':contact_data['data']['twitterHandles'] and contact_data['data']['twitterHandles'][0]['name'] or 'NA',
                 }
