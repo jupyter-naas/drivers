@@ -12,7 +12,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-version: '3.x'
+        python-version: '3.8'
     - uses: actions/cache@v2
       with:
         path: ~/.cache/pip
@@ -21,11 +21,17 @@ jobs:
           ${{ runner.os }}-pip-
     - name: Install dependencies
       run: |
-        python -m pip install -U pip
-        pip3 install --use-feature=2020-resolver -e '.[dev]'
+        python3 -m pip install -U pip
+        python3 -m pip install -e '.[dev]'
     - name: Run tests and linters
       run: |
         python3 -m black naas_drivers
         python3 -m flake8 naas_drivers
-    - name: Validate PR title with commitizen
-      uses: CashStory/commitizen-action-pr@1.0.1
+    - uses: aslafy-z/conventional-pr-title-action@master
+      with:
+        success-state: Title follows the specification.
+        failure-state: Title does not follow the specification.
+        context-name: conventional-pr-title
+        preset: conventional-changelog-angular@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
