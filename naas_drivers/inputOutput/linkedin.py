@@ -8,7 +8,7 @@ class Linkedin(InDriver, OutDriver):
     def __init__(self):
         self.auth_proxy = os.getenv("NAAS_AUTH_PROXY")
         
-     def connect(
+    def connect(
         self,
         email: str,
         password: str,
