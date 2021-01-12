@@ -21,7 +21,7 @@ class Plotly(InDriver):
             css = css + self.__css_base
         with open(html_filename) as f:
             html_map = f.read()
-            if html_map.find(' cartesianlayer') != -1:
+            if html_map.find(" cartesianlayer") != -1:
                 selector = ".cartesianlayer"
             result = html_map.replace(
                 "</head>", f'<style id="naas_css">{css}</style></head>'

@@ -12,20 +12,17 @@ class Organizations:
         self.base_url = os.environ.get(
             "QONTO_API_URL", "https://thirdparty.qonto.eu/v2"
         )
-        self.req_headers = {
-            "authorization": f'{user_id}:{api_key}'
-        }
+        self.req_headers = {"authorization": f"{user_id}:{api_key}"}
         self.url = f"{self.base_url}/organizations"
         self.user_id = user_id
 
     def get(self):
         try:
             req = requests.get(
-                url=f"{self.url}/{self.user_id}",
-                headers=self.req_headers
+                url=f"{self.url}/{self.user_id}", headers=self.req_headers
             )
             req.raise_for_status()
-            items = req.json()['organization']['bank_accounts']
+            items = req.json()["organization"]["bank_accounts"]
             df = pd.DataFrame.from_records(items)
 
             # Formating CS
@@ -48,20 +45,20 @@ class Transactions(Organizations):
         # For each bank account, get all transactions
         df_transaction = pd.DataFrame()
         for _, row in df_organisations.iterrows():
-            iban = row['IBAN']
+            iban = row["IBAN"]
 
             # Get transactions
             current_page = "1"
             has_more = True
             while has_more:
                 req = requests.get(
-                    url=f'{self.base_url}/transactions?current_page={current_page}?per_page=100&iban={iban}',
-                    headers=self.req_headers
+                    url=f"{self.base_url}/transactions?current_page={current_page}?per_page=100&iban={iban}",
+                    headers=self.req_headers,
                 )
                 items = req.json()
-                transactions = items['transactions']
+                transactions = items["transactions"]
                 df = pd.DataFrame.from_records(transactions)
-                df['iban'] = iban
+                df["iban"] = iban
                 df_transaction = pd.concat([df_transaction, df], axis=0)
                 # Check if next page exists
                 next_page = items["meta"]["next_page"]
@@ -71,19 +68,23 @@ class Transactions(Organizations):
                     current_page = str(next_page)
         # Formatting
         to_keep = [
-           "iban",
-           "settled_at",
-           "emitted_at",
-           "transaction_id",
-           "label",
-           "reference",
-           "operation_type",
-           "side",
-           "amount",
-           "currency"
-           ]
-        df_transaction = df_transaction[to_keep].reset_index(drop=True).fillna("Not affected")
-        df_transaction.loc[df_transaction['side'] == 'debit', 'amount'] = df_transaction['amount'] * (-1)
+            "iban",
+            "settled_at",
+            "emitted_at",
+            "transaction_id",
+            "label",
+            "reference",
+            "operation_type",
+            "side",
+            "amount",
+            "currency",
+        ]
+        df_transaction = (
+            df_transaction[to_keep].reset_index(drop=True).fillna("Not affected")
+        )
+        df_transaction.loc[
+            df_transaction["side"] == "debit", "amount"
+        ] = df_transaction["amount"] * (-1)
         df_transaction.columns = df_transaction.columns.str.upper()
         return df_transaction
 
@@ -110,48 +111,52 @@ class Statements(Transactions):
     def detailed(self, date_from=None, date_to=None):
         df = self.get_all()
         df = df.rename(columns={"EMITTED_AT": "DATE"})
-        df["DATE"] = pd.to_datetime(df["DATE"], format='%Y-%m-%dT%H:%M:%S.%fZ').dt.strftime(DATE_FORMAT)
+        df["DATE"] = pd.to_datetime(
+            df["DATE"], format="%Y-%m-%dT%H:%M:%S.%fZ"
+        ).dt.strftime(DATE_FORMAT)
 
         # Calc positions
-        to_sort = ['IBAN', 'DATE']
+        to_sort = ["IBAN", "DATE"]
         df = df.sort_values(by=to_sort).reset_index(drop=True)
-        to_group = ['IBAN']
-        df['POSITION'] = df.groupby(to_group, as_index=True).agg({'AMOUNT': 'cumsum'})
+        to_group = ["IBAN"]
+        df["POSITION"] = df.groupby(to_group, as_index=True).agg({"AMOUNT": "cumsum"})
         to_keep = [
-           "IBAN",
-           "DATE",
-           "TRANSACTION_ID",
-           "LABEL",
-           "REFERENCE",
-           "OPERATION_TYPE",
-           "AMOUNT",
-           "POSITION",
-           "CURRENCY",
-           ]
+            "IBAN",
+            "DATE",
+            "TRANSACTION_ID",
+            "LABEL",
+            "REFERENCE",
+            "OPERATION_TYPE",
+            "AMOUNT",
+            "POSITION",
+            "CURRENCY",
+        ]
         df = df[to_keep]
         return self.__filter_dates(df, date_from, date_to)
 
     def aggregated(self, date_from=None, date_to=None):
         df = self.get_all()
         df = df.rename(columns={"EMITTED_AT": "DATE"})
-        df["DATE"] = pd.to_datetime(df["DATE"], format='%Y-%m-%dT%H:%M:%S.%fZ').dt.strftime(DATE_FORMAT)
+        df["DATE"] = pd.to_datetime(
+            df["DATE"], format="%Y-%m-%dT%H:%M:%S.%fZ"
+        ).dt.strftime(DATE_FORMAT)
 
         # Aggregation
         to_group = ["IBAN", "DATE", "CURRENCY"]
         df = df.groupby(to_group, as_index=False).agg({"AMOUNT": "sum"})
 
         # Calc positions
-        to_sort = ['IBAN', 'DATE']
+        to_sort = ["IBAN", "DATE"]
         df = df.sort_values(by=to_sort).reset_index(drop=True)
-        to_group = ['IBAN']
-        df['POSITION'] = df.groupby(to_group, as_index=True).agg({'AMOUNT': 'cumsum'})
+        to_group = ["IBAN"]
+        df["POSITION"] = df.groupby(to_group, as_index=True).agg({"AMOUNT": "cumsum"})
         to_keep = [
-           "IBAN",
-           "DATE",
-           "AMOUNT",
-           "POSITION",
-           "CURRENCY",
-           ]
+            "IBAN",
+            "DATE",
+            "AMOUNT",
+            "POSITION",
+            "CURRENCY",
+        ]
         df = df[to_keep]
         return self.__filter_dates(df, date_from, date_to)
 

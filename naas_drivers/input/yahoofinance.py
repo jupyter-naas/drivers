@@ -18,13 +18,17 @@ class Yahoofinance(InDriver):
         if isinstance(date_from, int) and date_from < 0:
             date_from = dt.datetime.today() + dt.timedelta(days=date_from)
         else:
-            raise ValueError(f"date_from ({date_from}) cannot be positive")
+            error_text = f"date_from ({date_from}) cannot be positive"
+            self.print_error(error_text)
+            return None
         if isinstance(date_to, int) and date_to > 0:
             date_to = dt.datetime.today() + dt.timedelta(days=date_to)
         if isinstance(date_to, str) and date_to == "today":
             date_to = dt.datetime.today()
         else:
-            raise ValueError(f"date_to ({date_to}) cannot be negative")
+            error_text = f"date_to ({date_to}) cannot be negative"
+            self.print_error(error_text)
+            return None
         stocks = None
         period1 = date_from.strftime("%s")
         period2 = date_to.strftime("%s")

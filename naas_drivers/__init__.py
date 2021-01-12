@@ -23,13 +23,15 @@ from naas_drivers.inputOutput.git import Git
 from naas_drivers.inputOutput.gsheet import Gsheet
 from naas_drivers.inputOutput.mongo import Mongo
 from naas_drivers.inputOutput.toucan import Toucan
+from naas_drivers.inputOutput.linkedin import Linkedin
+from naas_drivers.inputOutput.notion import Notion
 from naas_drivers.inputOutput.hubspot import Hubspot
 from naas_drivers.inputOutput.thinkific import Thinkific
 
 import requests
 import os
 
-__version__ = "0.37.0"
+__version__ = "0.38.0b7"
 
 __github_repo = "jupyter-naas/drivers"
 
@@ -64,8 +66,10 @@ jupyter = Jupyter()
 ftp = Ftp()
 git = Git()
 gsheet = Gsheet()
+notion = Notion()
 mongo = Mongo()
 toucan = Toucan()
+linkedin = Linkedin()
 hubspot = Hubspot()
 thinkific = Thinkific()
 
