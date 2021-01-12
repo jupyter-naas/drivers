@@ -76,16 +76,16 @@ class Jupyter(InDriver, OutDriver):
         return r.json()
 
     def get_me(self):
-        self.connect(os.environ.get("JUPYTERHUB_API_TOKEN"))
         return self.get_user(os.environ.get("JUPYTERHUB_USER"))
 
+    def get_me_session(self):
+        return self.get_user_session(os.environ.get("JUPYTERHUB_USER"))
+
     def get_me_uptime(self):
-        self.connect(os.environ.get("JUPYTERHUB_API_TOKEN"))
         me = self.get_user(os.environ.get("JUPYTERHUB_USER"))
         return self.get_server_uptime(me)
 
     def restart_me(self):
-        self.connect(os.environ.get("JUPYTERHUB_API_TOKEN"))
         username = os.environ.get("JUPYTERHUB_USER")
         return self.stop_user(username)
 
@@ -113,8 +113,21 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
-    def is_user_active(self, user):
+    def get_user_session(self, username):
         self.check_connect()
+        r = requests.get(
+            f"{self.base_url}/user/{username}/api/sessions",
+            headers={
+                "Authorization": f"token {self.token}",
+            },
+        )
+
+        r.raise_for_status()
+        return r.json()
+
+    def is_user_active(self, username):
+        self.check_connect()
+        user = self.get_user(username)
         servers = user.get("servers")
         keys = servers.keys()
         if len(keys) > 0:
@@ -122,8 +135,9 @@ class Jupyter(InDriver, OutDriver):
         else:
             return False
 
-    def get_server_uptime(self, user):
+    def get_server_uptime(self, username):
         self.check_connect()
+        user = self.get_user(username)
         servers = user.get("servers")
         keys = servers.keys()
         all_duration = None
@@ -162,7 +176,6 @@ class Jupyter(InDriver, OutDriver):
 
     def restart_user(self, username):
         self.check_connect()
-        user = self.get_user(username)
-        if user and self.is_user_active(user):
+        if self.is_user_active(username):
             self.stop_user(username)
             self.start_user(username)

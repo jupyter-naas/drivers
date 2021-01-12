@@ -27,7 +27,7 @@ Each driver try to return dataframe to strandardise the output.
 
 ##install
 
-`pip install naas_drivers`
+`python -m pip install naas_drivers`
 
 Few drivers need specific env var set, that will be notified in the documentation:
 
@@ -41,7 +41,7 @@ Few drivers need specific env var set, that will be notified in the documentatio
 
 ## Install 
 
-`pip install -e .`
+`python -m pip install -e .`
 
 ## Check lint
 
