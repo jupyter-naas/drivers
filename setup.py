@@ -39,7 +39,7 @@ setup(
         "vaderSentiment>=3,<4",
         "chardet>=3,<5",
         "Cython>=0,<1",
-        "idna>=2,<3",
+        "idna>=2,<4",
         "inflection>=0,<1",
         "joblib>=0,<2",
         "more-itertools>=8,<9",
