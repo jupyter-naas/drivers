@@ -32,7 +32,7 @@ setup(
         "newsapi-python>=0,<1",
         "airtable-python-wrapper>=0,<1",
         "notion>0,<1",
-        "pyjwt>=1,<2",
+        "pyjwt>=1,<3",
         "tensorflow>=2,<3",
         "pysftp>=0,<1",
         "htmlbuilder>=0,<1",
