@@ -1,3 +1,9 @@
+## 0.38.1 (2021-01-13)
+
+### Fix
+
+- update readme to deploy new release tag
+
 ## 0.38.0 (2021-01-13)
 
 ### Fix
