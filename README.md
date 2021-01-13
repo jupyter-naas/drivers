@@ -51,7 +51,7 @@ Few drivers need specific env var set, that will be notified in the documentatio
 
 ## Publish
 
-this auto publish by github action on main branch
+this auto publish on pypip by github action on main branch
 
 ### Authors:
 * [Martin donadieu](https://github.com/riderx)
