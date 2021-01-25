@@ -28,6 +28,7 @@ setup(
     },
     install_requires=[
         "imap_tools>=0,<1",
+        "pdfkit>=0,<1",
         "markdown2>=2,<3",
         "newsapi-python>=0,<1",
         "airtable-python-wrapper>=0,<1",

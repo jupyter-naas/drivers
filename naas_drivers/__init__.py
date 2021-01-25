@@ -27,6 +27,7 @@ from naas_drivers.inputOutput.linkedin import Linkedin
 from naas_drivers.inputOutput.notion import Notion
 from naas_drivers.inputOutput.hubspot import Hubspot
 from naas_drivers.inputOutput.thinkific import Thinkific
+from naas_drivers.input.markdown import Markdown
 
 import requests
 import os
@@ -49,6 +50,7 @@ yahoofinance = Yahoofinance()
 pdf = Pdf()
 plotly = Plotly()
 html = Html()
+markdown = Markdown()
 qonto = Qonto()
 
 # Out drivers
