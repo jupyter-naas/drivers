@@ -1,3 +1,9 @@
+## 0.40.0 (2021-01-25)
+
+### Feat
+
+- add slack to send messages
+
 ## 0.39.0 (2021-01-25)
 
 ### Feat
