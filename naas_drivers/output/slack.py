@@ -1,6 +1,7 @@
 from naas_drivers.driver import OutDriver
 from slack import WebClient
 from slack.errors import SlackApiError
+import json
 
 
 class Slack(OutDriver):
@@ -12,10 +13,33 @@ class Slack(OutDriver):
         self.connected = True
         return self
 
-    def send(self, channel, text):
+    def __open_or_read(self, data):
+        read_data = data
+        if "." in data:
+            try:
+                read_data = self.__upload_file(data)
+            except OSError:
+                pass
+        return self.__pureimg(read_data)
+
+    def __pureimg(self, data1):
+        data1 = '[{"text": "", "image_url": "' + data1 + '"}]'
+        data1 = [json.loads(data1[1:-1])]
+        return data1
+
+    def __upload_file(self, path):
+        response = self.client.files_upload(channel="#theta", file=path)
+        return response["file"]["permalink"]
+
+    def send(self, channel, text, image=None):
         self.check_connect()
         try:
-            response = self.client.chat_postMessage(channel=channel, text=text)
+            attachments = None
+            if image:
+                attachments = self.__open_or_read(image)
+            response = self.client.chat_postMessage(
+                channel=channel, text=text, attachments=attachments
+            )
             assert response["message"]["text"] == text
             print("Message send")
         except SlackApiError as e:
