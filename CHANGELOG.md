@@ -1,3 +1,15 @@
+## 0.41.0 (2021-01-25)
+
+### Feat
+
+- add image upload
+- allow send image in teams
+- add teams connector
+
+### Fix
+
+- add missing module
+
 ## 0.40.0 (2021-01-25)
 
 ### Feat
