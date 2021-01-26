@@ -7,7 +7,7 @@ from naas_drivers.input.sentiment import Sentiment
 from naas_drivers.input.optimise import Optimise
 from naas_drivers.input.pdf import Pdf
 from naas_drivers.input.plotly import Plotly
-from naas_drivers.input.html import Html
+from naas_drivers.input.emailbuilder import EmailBuilder
 from naas_drivers.input.qonto import Qonto
 from naas_drivers.output.slack import Slack
 from naas_drivers.output.teams import Teams
@@ -51,7 +51,8 @@ sentiment = Sentiment()
 yahoofinance = Yahoofinance()
 pdf = Pdf()
 plotly = Plotly()
-html = Html()
+emailBuilder = EmailBuilder()
+html = EmailBuilder(True)
 markdown = Markdown()
 teams = Teams()
 slack = Slack()

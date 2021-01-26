@@ -5,6 +5,7 @@ import pandas as pd
 import requests
 import uuid
 import os
+import warnings
 
 #  https://litmus.com/community/templates/31-accessible-product-announcement-email
 # https://github.com/rodriguezcommaj/accessible-emails
@@ -107,8 +108,20 @@ table_ie9_close = """
 """
 
 
-class Html(InDriver):
-    """ HTML generator lib"""
+class EmailBuilder(InDriver):
+    """ EmailBuilder generator lib"""
+
+    deprecated = False
+
+    def __init__(self, deprecated=False):
+        self.deprecated = deprecated
+
+    def deprecatedPrint(self):
+        # TODO remove this in june 2021
+        if self.deprecated:
+            warnings.warn(
+                "[Warning], naas.api is deprecated,\n use naas.webhook instead it will be remove in 1 june 2021"
+            )
 
     def __align(self, mode):
         margin = "0 auto 0 0"
@@ -150,6 +163,7 @@ class Html(InDriver):
             return self.text(*args) if isinstance(data, str) else data
 
     def address(self, title, content):
+        self.deprecatedPrint()
         return tags.Address(
             attributes.InlineStyle(
                 font_size="16px",
@@ -162,6 +176,7 @@ class Html(InDriver):
         )
 
     def link(self, link, title="Open", color="#B200FD"):
+        self.deprecatedPrint()
         return tags.A(
             attributes.Href(link),
             attributes.InlineStyle(color=color, text_decoration="underline"),
@@ -176,6 +191,7 @@ class Html(InDriver):
         color="white",
         background_color="black",
     ):
+        self.deprecatedPrint()
         return tags.Center(
             tags.Div(
                 attributes.InlineStyle(margin="48px 0"),
@@ -205,6 +221,7 @@ class Html(InDriver):
         )
 
     def info(self, *elems):
+        self.deprecatedPrint()
         return tags.Div(
             attributes.InlineStyle(
                 background_color="ghostwhite",
@@ -215,12 +232,15 @@ class Html(InDriver):
         )
 
     def space(self):
+        self.deprecatedPrint()
         return tags.Br()
 
     def separator(self):
+        self.deprecatedPrint()
         return tags.hr()
 
     def table(self, data, border=True):
+        self.deprecatedPrint()
         elems = []
         table_arr = None
         row_link = False
@@ -273,11 +293,13 @@ class Html(InDriver):
         return tags.P(tab)
 
     def logo(self, src, link=None, name="Logo", align="center", size="80px"):
+        self.deprecatedPrint()
         return self.image(src, link, name, width=size, height=size, align=align)
 
     def image(
         self, src, link=None, name="Cover", align="left", width="100%", height="80%"
     ):
+        self.deprecatedPrint()
         if src is None:
             return None
         elems_img = [
@@ -298,6 +320,7 @@ class Html(InDriver):
             return tags.Img(elems_img)
 
     def title(self, title, heading=None):
+        self.deprecatedPrint()
         return tags.H1(
             attributes.InlineStyle(
                 color="#000000",
@@ -322,6 +345,7 @@ class Html(InDriver):
         )
 
     def heading(self, text):
+        self.deprecatedPrint()
         return tags.H2(
             attributes.InlineStyle(
                 color="#000000",
@@ -335,9 +359,11 @@ class Html(InDriver):
         )
 
     def subheading(self, text):
+        self.deprecatedPrint()
         return self.text(text, font_size="24px")
 
     def text(self, text, font_size="18px"):
+        self.deprecatedPrint()
         return tags.P(
             tags.Text(text),
             attributes.InlineStyle(
@@ -346,9 +372,11 @@ class Html(InDriver):
         )
 
     def header(self, *elems):
+        self.deprecatedPrint()
         return tags.Header(*elems)
 
     def footer(self, text, first=None, *elems):
+        self.deprecatedPrint()
         one = [
             attributes.InlineStyle(
                 font_size="16px",
@@ -365,6 +393,7 @@ class Html(InDriver):
         self,
         **kwargs,
     ):
+        self.deprecatedPrint()
         items = []
         for key, value in kwargs.items():
             items.append(self.__convert(value, key))
@@ -438,6 +467,7 @@ class Html(InDriver):
 
     def export(self, html, filenames, css=None):
         """ create html export and add css to it"""
+        self.deprecatedPrint()
         if isinstance(filenames, list):
             for filename in filenames:
                 self.__export(html, filename, css)
@@ -445,6 +475,7 @@ class Html(InDriver):
             self.__export(html, filenames, css)
 
     def generate(self, title, logo=None, display="embed", footer=None, **kwargs):
+        self.deprecatedPrint()
         gen_html = tags.Html(
             attributes.Lang("en"),
             tags.Head(
