@@ -1,3 +1,9 @@
+## 0.41.2 (2021-01-26)
+
+### Refactor
+
+- **html**: :boom: rename html in emailBuilder since it's used for that
+
 ## 0.41.1 (2021-01-25)
 
 ### Fix
