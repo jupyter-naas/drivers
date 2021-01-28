@@ -1,3 +1,9 @@
+## 0.41.5 (2021-01-28)
+
+### Fix
+
+- refactore Zappier and integromat make it work like all
+
 ## 0.41.4 (2021-01-28)
 
 ### Fix
