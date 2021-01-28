@@ -43,9 +43,13 @@ class Gsheet(InDriver, OutDriver):
 
     def send(self, data, sheet_name: str):
         self.check_connect()
+        data_formated = data
+        if isinstance(data, pd.DataFrame):
+            data_formated = data.to_dict("records")
+
         resp = requests.post(
             urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
-            data=data,
+            json=data_formated,
         )
         resp.raise_for_status()
         return resp.json()
