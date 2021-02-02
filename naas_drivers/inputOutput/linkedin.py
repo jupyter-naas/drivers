@@ -1,118 +1,126 @@
 from naas_drivers.driver import InDriver, OutDriver
 import pandas as pd
 import requests
-import os
 
 
-class Linkedin(InDriver, OutDriver):
-    def __init__(self):
-        self.auth_proxy = os.getenv("NAAS_AUTH_PROXY")
+class LinkedIn(InDriver, OutDriver):
+    def connect(self, li_at: str, jessionid: str):
+        # Init lk attribute
+        self.li_at = li_at
+        self.jessionid = jessionid
 
-    def connect(
-        self,
-        email: str,
-        password: str,
-    ):
-        tokens = self.__get_li_cookies(email, password)
-        li_at = next(token for token in tokens if token["name"] == "li_at")
-        JSESSIONID = next(token for token in tokens if token["name"] == "JSESSIONID")
-        self.cookies = {"li_at": li_at, "JSESSIONID": JSESSIONID}
+        # Init cookies
+        self.cookies = {"li_at": self.li_at, "JSESSIONID": f'"{self.jessionid}"'}
+
+        # Init headers
         self.headers = {
             "X-Li-Lang": "en_US",
             "Accept": "application/vnd.linkedin.normalized+json+2.1",
             "Cache-Control": "no-cache",
-            "csrf-Token": self.cookies["JSESSIONID"].replace('"', ""),
+            "csrf-Token": self.jessionid.replace('"', ""),
             "X-Requested-With": "XMLHttpRequest",
             "X-Restli-Protocol-Version": "2.0.0",
         }
+
+        # Set connexion to active
+        self.connected = True
         return self
 
-    def __get_li_cookies(
-        self,
-        email: str,
-        password: str,
-    ):
-        cookie_response = requests.get(
-            self.auth_proxy
-            + "/token?url=https://www.linkedin.com/login&email="
-            + email
-            + "&password="
-            + password
+    def get_identity(self, username: str):
+        data = requests.get(
+            "https://www.linkedin.com/voyager/api/identity/profiles/"
+            + username.replace("\n", ""),
+            cookies=self.cookies,
+            headers=self.headers,
         )
-        return cookie_response.json()["cookies"]
+        return data.json()
 
-    def connections_count(
-        self,
-        username: str,
-    ):
-
-        profile_data = requests.get(
+    def get_network(self, username: str):
+        data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
             + username
             + "/networkinfo",
             cookies=self.cookies,
             headers=self.headers,
         )
-        return profile_data.json()["data"]["followersCount"]
+        return data.json()
 
-    def get_conn_count(self, file):
-        links = open(file, "r").readlines()
-        followers_df = pd.DataFrame(columns=list(["LK_URL", "LK_FOLLOWERS"]))
-        for link in links:
-            username = link.rsplit("/")[-1]
-            followers_df = followers_df.append(
-                {
-                    "LK_URL": link.replace("\n", ""),
-                    "LK_FOLLOWERS": self.connections_count(username.replace("\n", "")),
-                },
-                ignore_index=True,
-            )
-        return followers_df
-
-    def profile_details(self, file):
-        links = open(file, "r").readlines()
-        profiles_df = pd.DataFrame(
-            columns=list(
-                [
-                    "LK_URL",
-                    "LK_FIRST_NAME",
-                    "LK_LAST_NAME",
-                    "LK_HEADLINE",
-                    "LK_EMAIL",
-                    "LK_PHONE",
-                    "LK_TWITTER",
-                ]
-            )
+    def get_contact(self, username: str):
+        data = requests.get(
+            "https://www.linkedin.com/voyager/api/identity/profiles/"
+            + username.replace("\n", "")
+            + "/profileContactInfo",
+            cookies=self.cookies,
+            headers=self.headers,
         )
-        for link in links:
-            username = link.rsplit("/")[-1]
-            contact_data = requests.get(
-                "https://www.linkedin.com/voyager/api/identity/profiles/"
-                + username.replace("\n", "")
-                + "/profileContactInfo",
-                cookies=self.cookies,
-                headers=self.headers,
-            ).json()
-            profile_data = requests.get(
-                "https://www.linkedin.com/voyager/api/identity/profiles/"
-                + username.replace("\n", ""),
-                cookies=self.cookies,
-                headers=self.headers,
-            ).json()
-            profiles_df = profiles_df.append(
-                {
-                    "LK_URL": link.replace("\n", ""),
-                    "LK_FIRST_NAME": profile_data["data"]["firstName"],
-                    "LK_LAST_NAME": profile_data["data"]["lastName"],
-                    "LK_HEADLINE": profile_data["data"]["headline"] or "NA",
-                    "LK_EMAIL": contact_data["data"]["emailAddress"] or "NA",
-                    "LK_PHONE": contact_data["data"]["phoneNumbers"]
-                    and contact_data["data"]["phoneNumbers"][0]["number"]
-                    or "NA",
-                    "LK_TWITTER": contact_data["data"]["twitterHandles"]
-                    and contact_data["data"]["twitterHandles"][0]["name"]
-                    or "NA",
-                },
-                ignore_index=True,
-            )
-        return profiles_df
+        return data.json()
+
+    def get_profil(self, username: str, output="dataframe"):
+        # Get data from identity
+        profil = self.get_identity(username)
+        network = self.get_network(username)
+        contact = self.get_contact(username)
+
+        # Get profil info
+        pf = profil["data"]
+        firstname = pf["firstName"]
+        lastname = pf["lastName"].upper()
+        bd_day = None
+        bd_month = None
+        bd_year = None
+        bd = None
+        if pf["birthDate"] is not None:
+            bd_day = pf["birthDate"]["day"]
+            bd_month = pf["birthDate"]["month"]
+            bd_year = pf["birthDate"]["year"]
+            bd = f"{bd_day}/{bd_month}/{bd_year}"
+        country = pf["geoCountryName"]
+        adress = pf["geoLocationName"]
+        lk_headline = pf["headline"]
+        lk_industry = pf["industryName"]
+
+        # Get network info
+        nw = network["data"]
+        lk_followers = nw["followersCount"]
+
+        # Get contact info
+        ct = contact["data"]
+        lk_phone = None
+        lk_phones = ct["phoneNumbers"]
+        if lk_phones is not None:
+            for rows in lk_phones:
+                if rows["type"] == "MOBILE":
+                    lk_phone = rows["number"]
+                    break
+        lk_email = ct["emailAddress"]
+        lk_twiter = None
+        lk_twiters = ct["twitterHandles"]
+        if lk_twiters is not None:
+            for rows in lk_twiters:
+                lk_twiter = rows["name"]
+                break
+
+        # Profile dict
+        lk_profile = {
+            "FIRSTNAME": firstname,
+            "LASTNAME": lastname,
+            "BIRTHDATE_DAY": bd_day,
+            "BIRTHDATE_MONTH": bd_month,
+            "BIRTHDATE_YEAR": bd_year,
+            "BIRTHDATE": bd,
+            "COUNTRY": country,
+            "ADRESS": adress,
+            "LK_HEADLINE": lk_headline,
+            "LK_SECTOR": lk_industry,
+            "LK_FOLLOWERS": lk_followers,
+            "LK_PHONE": lk_phone,
+            "LK_EMAIL": lk_email,
+            "LK_TWITER": lk_twiter,
+        }
+
+        if output == "json":
+            return lk_profile
+
+        if output == "dataframe":
+            df = pd.DataFrame.from_records([lk_profile])
+            return df
