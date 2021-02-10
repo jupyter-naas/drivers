@@ -25,7 +25,7 @@ from naas_drivers.inputOutput.git import Git
 from naas_drivers.inputOutput.gsheet import Gsheet
 from naas_drivers.inputOutput.mongo import Mongo
 from naas_drivers.inputOutput.toucan import Toucan
-from naas_drivers.inputOutput.linkedin import Linkedin
+from naas_drivers.inputOutput.linkedin import LinkedIn
 from naas_drivers.inputOutput.notion import Notion
 from naas_drivers.inputOutput.hubspot import Hubspot
 from naas_drivers.inputOutput.thinkific import Thinkific
@@ -76,7 +76,7 @@ gsheet = Gsheet()
 notion = Notion()
 mongo = Mongo()
 toucan = Toucan()
-linkedin = Linkedin()
+linkedin = LinkedIn()
 hubspot = Hubspot()
 thinkific = Thinkific()
 
