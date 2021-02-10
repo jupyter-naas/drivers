@@ -54,7 +54,7 @@ setup(
         "pmdarima>=1,<2",
         "python-dateutil>=2,<3",
         "python-dotenv>=0,<1",
-        "pytz>=2020,<2021",
+        "pytz>=2020,<2022",
         "plotly>=4,<5",
         "kaleido",
         "Quandl>=3,<4",
