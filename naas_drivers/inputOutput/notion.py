@@ -11,14 +11,16 @@ class Notion(InDriver, OutDriver):
 
     def connect(
         self,
-        email: str,
-        password: str,
         token: str = None,
+        email: str = None,
+        password: str = None,
     ):
         if token:
             self.client = NotionClient(token)
-        else:
+        elif email and password:
             self.client = NotionClient(token_v2=self.__token_v2(email, password))
+        else:
+            self.print_error("You should provide, token or email/pasword")
         self.connected = True
         return self
 
