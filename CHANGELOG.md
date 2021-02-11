@@ -1,3 +1,9 @@
+## 0.42.5 (2021-02-11)
+
+### Fix
+
+- missing function from gilson merge :/
+
 ## 0.42.4 (2021-02-10)
 
 ### Fix
