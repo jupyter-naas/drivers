@@ -41,12 +41,22 @@ class Gsheet(InDriver, OutDriver):
         df = pd.DataFrame(data=data["data"], columns=data["columns"])
         return df
 
-    def send(self, data, sheet_name: str):
+    def send(
+        self, 
+        data, 
+        sheet_name: str, 
+        append: bool = True
+    ) -> str:
         self.check_connect()
         data_formated = data
         if isinstance(data, pd.DataFrame):
             data_formated = data.to_dict("records")
-
+        
+        if not append:
+            cur_data = requests.get(urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"))
+            row_count = cur_data.json().get('data')[0].get('rowNumber')
+            requests.delete(urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"), json=list(range(1,row_count+1)))
+            
         resp = requests.post(
             urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
             json=data_formated,
