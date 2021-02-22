@@ -1,3 +1,4 @@
+from naas_drivers.input.awesomenotebook import AwesomeNotebooks
 from naas_drivers.input.yahoofinance import Yahoofinance
 from naas_drivers.input.cityfalcon import Cityfalcon
 from naas_drivers.input.geolocator import Geolocator
@@ -52,6 +53,7 @@ yahoofinance = Yahoofinance()
 pdf = Pdf()
 plotly = Plotly()
 emailBuilder = EmailBuilder()
+awesomeNotebooks = AwesomeNotebooks()
 html = EmailBuilder(True)
 markdown = Markdown()
 teams = Teams()
