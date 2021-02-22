@@ -33,7 +33,7 @@ class Pdf(InDriver):
         elif html:
             json["html"] = html
 
-        r = requests.get(
+        r = requests.post(
             url=f"{self.api_url}/api/render",
             json=json,
         )
