@@ -12,6 +12,17 @@ class ConnectDriver:
     key = None
     raise_error = False
 
+    def open_or_read(self, data):
+        read_data = data
+        if "." in data:
+            try:
+                read_data = open(data, "r").read()
+            except OSError:
+                pass
+        if type(data) == list:
+            read_data = ".".join(data)
+        return read_data
+
     def print_error(self, error):
         if self.raise_error:
             raise ValueError(key_text)

@@ -13,7 +13,7 @@ class Slack(OutDriver):
         self.connected = True
         return self
 
-    def __open_or_read(self, data):
+    def __upload_or_link(self, data):
         read_data = data
         if "." in data:
             try:
@@ -36,7 +36,7 @@ class Slack(OutDriver):
         try:
             attachments = None
             if image:
-                attachments = self.__open_or_read(image)
+                attachments = self.__upload_or_link(image)
             response = self.client.chat_postMessage(
                 channel=channel, text=text, attachments=attachments
             )

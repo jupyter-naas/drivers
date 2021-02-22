@@ -1,9 +1,10 @@
+from naas_drivers.driver import InDriver
 import requests
 import urllib.parse
 import traceback
 
 
-class AwesomeNotebooks:
+class AwesomeNotebooks(InDriver):
 
     __branch = "master"
     __repo = "jupyter-naas/awesome-notebooks"
@@ -74,7 +75,13 @@ class AwesomeNotebooks:
             traceback.print_exc()
         return files_list
 
+    def connect(self, repo):
+        self.__repo = repo if repo else self.__repo
+        self.connected = True
+        return self
+
     def get(self, md=True, open_in_naas=True):
+        self.check_connect()
         if not md:
             return self.__get_file_list()
         else:
