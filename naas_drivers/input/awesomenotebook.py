@@ -36,7 +36,7 @@ class AwesomeNotebooks(InDriver):
                 f"{indent} {self.__TOC_LIST_PREFIX} [{md_filename}]({open_url})\n"
             )
 
-        return md_lines
+        return "".join(md_lines)
 
     def __get_file_list(self):
         url = self.__api_url.replace("{REPO}", self.__repo).replace(
