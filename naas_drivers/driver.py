@@ -14,13 +14,10 @@ class ConnectDriver:
 
     def open_or_read(self, data):
         read_data = data
-        if "." in data:
-            try:
-                read_data = open(data, "r").read()
-            except OSError:
-                pass
-        if type(data) == list:
-            read_data = ".".join(data)
+        try:
+            read_data = open(data, "r").read()
+        except OSError:
+            pass
         return read_data
 
     def print_error(self, error):
