@@ -1,3 +1,14 @@
+## 0.45.0 (2021-02-23)
+
+### Fix
+
+- awesomenotebook list return
+- open or read function
+
+### Feat
+
+- make __open_or_read generic
+
 ## 0.44.0 (2021-02-22)
 
 ### Feat
