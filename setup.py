@@ -60,6 +60,7 @@ setup(
         "Quandl>=3,<4",
         "requests>=2,<3",
         "scikit-learn>=0,<1",
+        "torch>=1,<2",
         "scipy>=1,<2",
         "six>=1,<2",
         "statsmodels>=0,<1",
