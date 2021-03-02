@@ -1,3 +1,9 @@
+## 0.46.1 (2021-03-02)
+
+### Fix
+
+- get_authorize_user and change_authorize_user
+
 ## 0.46.0 (2021-03-01)
 
 ### Feat
