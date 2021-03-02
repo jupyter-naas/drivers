@@ -33,7 +33,10 @@ class Jupyter(InDriver, OutDriver):
 
     def get_authorize_user(self, username):
         signup_url = f"{self.base_url}/hub/authorize/{username}"
-        headers = {"Authorization": f"token {self.token}"}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Content-type": "application/json",
+        }
         r = requests.get(signup_url, headers=headers)
         r.raise_for_status()
         return r.json()
@@ -42,7 +45,7 @@ class Jupyter(InDriver, OutDriver):
         signup_url = f"{self.base_url}/hub/authorize/{username}"
         headers = {"Authorization": f"token {self.token}"}
         data = {"is_authorized": is_authorized}
-        r = requests.put(signup_url, json=data, headers=headers)
+        r = requests.post(signup_url, data=data, headers=headers)
         r.raise_for_status()
         return r.json()
 
