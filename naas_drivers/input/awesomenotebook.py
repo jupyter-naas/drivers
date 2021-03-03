@@ -7,7 +7,6 @@ from IPython.core.display import display, Markdown
 
 class AwesomeNotebooks(InDriver):
 
-    __branch = "master"
     __repo = "jupyter-naas/awesome-notebooks"
     __naas_dl = "https://app.naas.ai/user-redirect/naas/downloader?url="
     __api_url = "https://api.github.com/repos/{REPO}/git/trees/{BRANCH}?recursive=1"
@@ -49,10 +48,8 @@ KIDx1c2UgaWQ9Im4iIHhsaW5rOmhyZWY9IiNzdHJpbmciLz4KPC9zdmc+Cg=="""
 
         return "".join(md_lines)
 
-    def __get_file_list(self):
-        url = self.__api_url.replace("{REPO}", self.__repo).replace(
-            "{BRANCH}", self.__branch
-        )
+    def __get_file_list(self, branch):
+        url = self.__api_url.replace("{REPO}", self.__repo).replace("{BRANCH}", branch)
         files_list = []
         try:
             r = requests.get(url)
@@ -65,7 +62,7 @@ KIDx1c2UgaWQ9Im4iIHhsaW5rOmhyZWY9IiNzdHJpbmciLz4KPC9zdmc+Cg=="""
                     and not path.endswith("generatereadme.ipynb")
                 ):
                     base = self.__base_url.replace("{REPO}", self.__repo).replace(
-                        "{BRANCH}", self.__branch
+                        "{BRANCH}", branch
                     )
                     good_url = f"{base}{urllib.parse.quote(path)}"
                     folders = path.split("/")
@@ -103,11 +100,11 @@ KIDx1c2UgaWQ9Im4iIHhsaW5rOmhyZWY9IiNzdHJpbmciLz4KPC9zdmc+Cg=="""
         display(Markdown(html_content))
         return html_content
 
-    def get(self, md=True, open_in_naas=True):
+    def get(self, md=True, open_in_naas=True, branch="master"):
         self.check_connect()
         if not md:
-            return self.__get_file_list()
+            return self.__get_file_list(branch)
         else:
-            arr = self.__get_file_list()
+            arr = self.__get_file_list(branch)
             text_md = self.__create_md(arr, open_in_naas)
             return text_md
