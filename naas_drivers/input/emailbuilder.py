@@ -165,7 +165,7 @@ class EmailBuilder(InDriver):
     def address(self, title, content):
         self.deprecatedPrint()
         return tags.Address([
-                attributes.InlineStyle(
+                attributes.Style(
                     font_size="16px",
                     font_style="normal",
                     font_weight="400",
@@ -180,7 +180,7 @@ class EmailBuilder(InDriver):
         self.deprecatedPrint()
         return tags.A([
                 attributes.Href(link),
-                attributes.InlineStyle(color=color, text_decoration="underline"),
+                attributes.Style(color=color, text_decoration="underline"),
             ],
             title,
         )
@@ -195,11 +195,11 @@ class EmailBuilder(InDriver):
     ):
         self.deprecatedPrint()
         return tags.Center([]
-            tags.Div([attributes.InlineStyle(margin="48px 0")],
+            tags.Div([attributes.Style(margin="48px 0")],
                 tags.A([
                     attributes.Class("button"),
                     attributes.Href(link),
-                    attributes.InlineStyle(
+                    attributes.Style(
                         background_color=background_color,
                         color=color,
                         border_radius="4px",
@@ -225,7 +225,7 @@ class EmailBuilder(InDriver):
     def info(self, *elems):
         self.deprecatedPrint()
         return tags.Div([
-                attributes.InlineStyle(
+                attributes.Style(
                     background_color="ghostwhite",
                     border_radius="4px",
                     padding="24px 48px",
@@ -288,7 +288,7 @@ class EmailBuilder(InDriver):
                 res.append(tags.Td([], row if isinstance(row, str) else row))
             elems.append(tags.Tr([], res))
         tab = tags.Table([
-                attributes.InlineStyle(width="100%"),
+                attributes.Style(width="100%"),
                 attributes.Class("table_border") if border else None,
             ],
             elems,
@@ -310,7 +310,7 @@ class EmailBuilder(InDriver):
             attributes.Height(height),
             attributes.Width(width),
             {"name": "border", "value": 0},
-            attributes.InlineStyle(
+            attributes.Style(
                 border_radius="4px",
                 margin=self.__align(align),
                 display="block",
@@ -325,7 +325,7 @@ class EmailBuilder(InDriver):
     def title(self, title, heading=None):
         self.deprecatedPrint()
         return tags.H1([
-                attributes.InlineStyle(
+                attributes.Style(
                     color="#000000",
                     font_size="32px",
                     font_weight="800",
@@ -338,7 +338,7 @@ class EmailBuilder(InDriver):
             tags.Br(),
             (
                 tags.Span([
-                        attributes.InlineStyle(
+                        attributes.Style(
                             font_size="24px", font_weight="600", color="darkgray"
                         ),
                     ],
@@ -352,7 +352,7 @@ class EmailBuilder(InDriver):
     def heading(self, text):
         self.deprecatedPrint()
         return tags.H2([
-                attributes.InlineStyle(
+                attributes.Style(
                     color="#000000",
                     font_size="28px",
                     font_weight="600",
@@ -371,7 +371,7 @@ class EmailBuilder(InDriver):
     def text(self, text, font_size="18px"):
         self.deprecatedPrint()
         return tags.P([
-                attributes.InlineStyle(
+                attributes.Style(
                     font_size=font_size, padding_left="10px", padding_right="10px"
                 ),
             ],
@@ -386,7 +386,7 @@ class EmailBuilder(InDriver):
         self.deprecatedPrint()
         one = [
             [
-                attributes.InlineStyle(
+                attributes.Style(
                     font_size="16px",
                     font_weight="400",
                     line_height="24px",
@@ -506,16 +506,16 @@ class EmailBuilder(InDriver):
                 tags.Style([], base_style),
                 tags.Title([], title),
             ),
-            tags.Body([attributes.InlineStyle(margin="0 !important", padding="0 !important")],
+            tags.Body([attributes.Style(margin="0 !important", padding="0 !important")],
                 tags.Div([
-                        attributes.InlineStyle(
+                        attributes.Style(
                             display="none", max_height="0", overflow="hidden"
                         ),
                     ],
                     title,
                 ),
                 tags.Div([
-                        attributes.InlineStyle(
+                        attributes.Style(
                             display="none", max_height="0", overflow="hidden"
                         ),
                     ],
@@ -525,7 +525,7 @@ class EmailBuilder(InDriver):
                 tags.Div([
                         attributes.Lang("en"),
                         attributes.Class("basic_font"),
-                        attributes.InlineStyle(
+                        attributes.Style(
                             background_color="white",
                             color="#2b2b2b",
                             font_size="18px",
