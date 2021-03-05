@@ -72,7 +72,7 @@ setup(
         "sendgrid>=6,<7",
         "escapism>=1,<2",
         "openpyxl>=3,<4",
-        "google-api-python-client>=1,<2",
+        "google-api-python-client>=1,<3",
         "google-auth-httplib2>=0,<1",
         "google-auth-oauthlib>=0,<1",
         "gspread>=3,<4",
