@@ -194,30 +194,32 @@ class EmailBuilder(InDriver):
         background_color="black",
     ):
         self.deprecatedPrint()
-        return tags.Center([]
-            tags.Div([attributes.Style(margin="48px 0")],
+        return tags.Center(
+            [],
+            tags.Div(
+                [attributes.Style(margin="48px 0")],
                 tags.A([
-                    attributes.Class("button"),
-                    attributes.Href(link),
-                    attributes.Style(
-                        background_color=background_color,
-                        color=color,
-                        border_radius="4px",
-                        display="inline-block",
-                        font_family="sans-serif",
-                        font_size="18px",
-                        font_weight="bold",
-                        line_height="60px",
-                        text_align="center",
-                        text_decoration="none",
-                        width=width,
-                        max_width="300px",
-                        padding_left="10px",
-                        padding_right="10px",
-                        _webkit_text_size_adjust="none",
-                    )
-                ],
-                text,
+                        attributes.Class("button"),
+                        attributes.Href(link),
+                        attributes.Style(
+                            background_color=background_color,
+                            color=color,
+                            border_radius="4px",
+                            display="inline-block",
+                            font_family="sans-serif",
+                            font_size="18px",
+                            font_weight="bold",
+                            line_height="60px",
+                            text_align="center",
+                            text_decoration="none",
+                            width=width,
+                            max_width="300px",
+                            padding_left="10px",
+                            padding_right="10px",
+                            _webkit_text_size_adjust="none",
+                        )
+                    ],
+                    text,
                 ),
             )
         )
@@ -272,8 +274,10 @@ class EmailBuilder(InDriver):
                             if col != "row_link":
                                 link = row[row_link_index]
                                 res.append(
-                                    tags.Td([],
-                                        tags.A([attributes.Href(link)],
+                                    tags.Td(
+                                        [],
+                                        tags.A(
+                                            [attributes.Href(link)],
                                             self.__convert(cell, col),
                                         )
                                     )
@@ -485,8 +489,10 @@ class EmailBuilder(InDriver):
 
     def generate(self, title, logo=None, display="embed", footer=None, **kwargs):
         self.deprecatedPrint()
-        gen_html = tags.Html([attributes.Lang("en")],
-            tags.Head([],
+        gen_html = tags.Html(
+            [attributes.Lang("en")],
+            tags.Head(
+                [],
                 tags.Meta([
                     attributes.HttpEquiv("Content-Type"),
                     attributes.Content("text/html; charset=utf-8"),
@@ -506,7 +512,8 @@ class EmailBuilder(InDriver):
                 tags.Style([], base_style),
                 tags.Title([], title),
             ),
-            tags.Body([attributes.Style(margin="0 !important", padding="0 !important")],
+            tags.Body(
+                [attributes.Style(margin="0 !important", padding="0 !important")],
                 tags.Div([
                         attributes.Style(
                             display="none", max_height="0", overflow="hidden"
