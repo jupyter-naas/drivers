@@ -172,8 +172,8 @@ class EmailBuilder(InDriver):
                     line_height="24px",
                 )
             ],
-            tags.Strong([], tags.Text(title)),
-            tags.Text(content),
+            tags.Strong([], title),
+            content,
         )
 
     def link(self, link, title="Open", color="#B200FD"):
@@ -182,7 +182,7 @@ class EmailBuilder(InDriver):
                 attributes.Href(link),
                 attributes.InlineStyle(color=color, text_decoration="underline"),
             ],
-            tags.Text(title),
+            title,
         )
 
     def button(
@@ -217,7 +217,7 @@ class EmailBuilder(InDriver):
                         _webkit_text_size_adjust="none",
                     )
                 ],
-                tags.Text(text),
+                text,
                 ),
             )
         )
@@ -282,10 +282,10 @@ class EmailBuilder(InDriver):
                             res.append(tags.Td([], self.__convert(cell, col)))
                     else:
                         res.append(
-                            tags.Td([], tags.Text(cell) if isinstance(cell, str) else cell)
+                            tags.Td([], cell if isinstance(cell, str) else cell)
                         )
             else:
-                res.append(tags.Td([], tags.Text(row) if isinstance(row, str) else row))
+                res.append(tags.Td([], row if isinstance(row, str) else row))
             elems.append(tags.Tr([], res))
         tab = tags.Table([
                 attributes.InlineStyle(width="100%"),
@@ -334,7 +334,7 @@ class EmailBuilder(InDriver):
                     text_align="center",
                 ),
             ],
-            tags.Text(title),
+            title,
             tags.Br(),
             (
                 tags.Span([
@@ -342,7 +342,7 @@ class EmailBuilder(InDriver):
                             font_size="24px", font_weight="600", color="darkgray"
                         ),
                     ],
-                    tags.Text(heading),
+                    heading,
                 )
                 if heading
                 else None
@@ -361,7 +361,7 @@ class EmailBuilder(InDriver):
                     text_align="center",
                 ),
             ],
-            tags.Text(text),
+            text,
         )
 
     def subheading(self, text):
@@ -375,7 +375,7 @@ class EmailBuilder(InDriver):
                     font_size=font_size, padding_left="10px", padding_right="10px"
                 ),
             ],
-            tags.Text(text),
+            text,
         )
 
     def header(self, *elems):
@@ -393,7 +393,7 @@ class EmailBuilder(InDriver):
                     margin_top="48px",
                 ),
             ],
-            tags.Text(text),
+            text,
             first,
         ]
         return tags.Footer([], tags.P([], *one), *elems)
@@ -503,8 +503,8 @@ class EmailBuilder(InDriver):
                     attributes.HttpEquiv("X-UA-Compatible"),
                     attributes.Content("IE=edge"),
                 ]),
-                tags.Style([], tags.Text(base_style)),
-                tags.Title([], tags.Text(title)),
+                tags.Style([], base_style),
+                tags.Title([], title),
             ),
             tags.Body([attributes.InlineStyle(margin="0 !important", padding="0 !important")],
                 tags.Div([
@@ -512,16 +512,16 @@ class EmailBuilder(InDriver):
                             display="none", max_height="0", overflow="hidden"
                         ),
                     ],
-                    tags.Text(title),
+                    title,
                 ),
                 tags.Div([
                         attributes.InlineStyle(
                             display="none", max_height="0", overflow="hidden"
                         ),
                     ],
-                    tags.Text("&nbsp;‌" * 240),
+                    "&nbsp;‌" * 240,
                 ),
-                tags.Text(table_ie9),
+                table_ie9,
                 tags.Div([
                         attributes.Lang("en"),
                         attributes.Class("basic_font"),
@@ -542,7 +542,7 @@ class EmailBuilder(InDriver):
                     self.main(**kwargs),
                     footer,
                 ),
-                tags.Text(table_ie9_close),
+                table_ie9_close,
             ),
         )
         res = gen_html.render()
