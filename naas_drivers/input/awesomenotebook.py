@@ -13,7 +13,7 @@ class AwesomeNotebooks(InDriver):
     __base_url = "https://github.com/{REPO}/blob/{BRANCH}/"
     __badge_base = "https://img.shields.io/static/v1?"
     __badge_appearance = "label=Naas&labelColor=000000&message=Download&color=success&style=for-the-badge"
-    __badge_link = "&link=https://naas.ai&link=https://app.dev.naas.ai/user-redirect/naas/downloader?url={DLURL}"
+    __badge_link = "&link=https://naas.ai&link=https://app.naas.ai/user-redirect/naas/downloader?url={DLURL}"
     __badge_logo = """&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB
 3aWR0aD0iMTAyNHB4IiBoZWlnaHQ9IjEwMjRweCIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwM
 DAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIj4KIDwhLS0gR2VuZXJhdGVkIGJ
