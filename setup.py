@@ -82,6 +82,10 @@ setup(
         "cson>=0,<1",
         "opencv-python>=4,<5",
         "pytesseract>=0,<1",
+        "wkhtmltopdf",
+        "tesseract-ocr",
+        "libtesseract-dev",
+        "libcairo2-dev",
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
