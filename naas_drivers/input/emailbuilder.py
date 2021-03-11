@@ -120,7 +120,8 @@ class EmailBuilder(InDriver):
         # TODO remove this in june 2021
         if self.deprecated:
             warnings.warn(
-                "[Warning], naas_drivers.html is deprecated,\n use naas_drivers.emailBuilder instead it will be remove in 1 june 2021"
+                """[Warning], naas_drivers.html or naas_drivers.emailBuilder is deprecated,
+                use naas_drivers.emailbuilder instead it will be remove in 1 june 2021"""
             )
 
     def __align(self, mode):
