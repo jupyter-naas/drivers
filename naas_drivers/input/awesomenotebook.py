@@ -107,4 +107,5 @@ KIDx1c2UgaWQ9Im4iIHhsaW5rOmhyZWY9IiNzdHJpbmciLz4KPC9zdmc+Cg=="""
         else:
             arr = self.__get_file_list(branch)
             text_md = self.__create_md(arr, open_in_naas)
-            return text_md
+            display(Markdown(text_md))
+            return
