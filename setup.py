@@ -38,7 +38,7 @@ setup(
         "pyjwt==2.0.1",
         "tensorflow==2.4.1",
         "pysftp==0.2.9",
-        "htmlbuilder==0.2.1",
+        "htmlbuilder==1.0.0",
         "vaderSentiment==3.3.2",
         "chardet==4.0.0",
         "Cython==0.29.17",
