@@ -38,7 +38,7 @@ setup(
         "pyjwt>=1,<3",
         "tensorflow>=2,<3",
         "pysftp>=0,<1",
-        "htmlbuilder>=0,<1",
+        "htmlbuilder>=1,<2",
         "vaderSentiment>=3,<4",
         "chardet>=3,<5",
         "Cython>=0,<1",

@@ -165,23 +165,25 @@ class EmailBuilder(InDriver):
 
     def address(self, title, content):
         self.deprecatedPrint()
-        return tags.Address(
-            attributes.InlineStyle(
-                font_size="16px",
-                font_style="normal",
-                font_weight="400",
-                line_height="24px",
-            ),
-            tags.Strong(tags.Text(title)),
-            tags.Text(content),
+        return tags.Address([
+                attributes.Style(
+                    font_size="16px",
+                    font_style="normal",
+                    font_weight="400",
+                    line_height="24px",
+                )
+            ],
+            tags.Strong([], title),
+            content,
         )
 
     def link(self, link, title="Open", color="#B200FD"):
         self.deprecatedPrint()
-        return tags.A(
-            attributes.Href(link),
-            attributes.InlineStyle(color=color, text_decoration="underline"),
-            tags.Text(title),
+        return tags.A([
+                attributes.Href(link),
+                attributes.Style(color=color, text_decoration="underline"),
+            ],
+            title,
         )
 
     def button(
@@ -194,41 +196,44 @@ class EmailBuilder(InDriver):
     ):
         self.deprecatedPrint()
         return tags.Center(
+            [],
             tags.Div(
-                attributes.InlineStyle(margin="48px 0"),
-                tags.A(
-                    attributes.Class("button"),
-                    attributes.Href(link),
-                    attributes.InlineStyle(
-                        background_color=background_color,
-                        color=color,
-                        border_radius="4px",
-                        display="inline-block",
-                        font_family="sans-serif",
-                        font_size="18px",
-                        font_weight="bold",
-                        line_height="60px",
-                        text_align="center",
-                        text_decoration="none",
-                        width=width,
-                        max_width="300px",
-                        padding_left="10px",
-                        padding_right="10px",
-                        _webkit_text_size_adjust="none",
-                    ),
-                    tags.Text(text),
+                [attributes.Style(margin="48px 0")],
+                tags.A([
+                        attributes.Class("button"),
+                        attributes.Href(link),
+                        attributes.Style(
+                            background_color=background_color,
+                            color=color,
+                            border_radius="4px",
+                            display="inline-block",
+                            font_family="sans-serif",
+                            font_size="18px",
+                            font_weight="bold",
+                            line_height="60px",
+                            text_align="center",
+                            text_decoration="none",
+                            width=width,
+                            max_width="300px",
+                            padding_left="10px",
+                            padding_right="10px",
+                            _webkit_text_size_adjust="none",
+                        )
+                    ],
+                    text,
                 ),
             )
         )
 
     def info(self, *elems):
         self.deprecatedPrint()
-        return tags.Div(
-            attributes.InlineStyle(
-                background_color="ghostwhite",
-                border_radius="4px",
-                padding="24px 48px",
-            ),
+        return tags.Div([
+                attributes.Style(
+                    background_color="ghostwhite",
+                    border_radius="4px",
+                    padding="24px 48px",
+                )
+            ],
             *elems,
         )
 
@@ -271,27 +276,29 @@ class EmailBuilder(InDriver):
                                 link = row[row_link_index]
                                 res.append(
                                     tags.Td(
+                                        [],
                                         tags.A(
-                                            attributes.Href(link),
+                                            [attributes.Href(link)],
                                             self.__convert(cell, col),
                                         )
                                     )
                                 )
                         else:
-                            res.append(tags.Td(self.__convert(cell, col)))
+                            res.append(tags.Td([], self.__convert(cell, col)))
                     else:
                         res.append(
-                            tags.Td(tags.Text(cell) if isinstance(cell, str) else cell)
+                            tags.Td([], cell if isinstance(cell, str) else cell)
                         )
             else:
-                res.append(tags.Td(tags.Text(row) if isinstance(row, str) else row))
-            elems.append(tags.Tr(res))
-        tab = tags.Table(
-            attributes.InlineStyle(width="100%"),
-            attributes.Class("table_border") if border else None,
+                res.append(tags.Td([], row if isinstance(row, str) else row))
+            elems.append(tags.Tr([], res))
+        tab = tags.Table([
+                attributes.Style(width="100%"),
+                attributes.Class("table_border") if border else None,
+            ],
             elems,
         )
-        return tags.P(tab)
+        return tags.P([], tab)
 
     def logo(self, src, link=None, name="Logo", align="center", size="80px"):
         self.deprecatedPrint()
@@ -303,12 +310,12 @@ class EmailBuilder(InDriver):
         self.deprecatedPrint()
         if src is None:
             return None
-        elems_img = [
+        attrs_img = [
             attributes.Src(f"{src}?naas_uid={str(uuid.uuid4())}"),
             attributes.Height(height),
             attributes.Width(width),
             {"name": "border", "value": 0},
-            attributes.InlineStyle(
+            attributes.Style(
                 border_radius="4px",
                 margin=self.__align(align),
                 display="block",
@@ -316,29 +323,31 @@ class EmailBuilder(InDriver):
             {"name": "alt", "value": name},
         ]
         if link:
-            return tags.A(attributes.Href(link), tags.Img(elems_img))
+            return tags.A([attributes.Href(link)], tags.Img([attrs_img]))
         else:
-            return tags.Img(elems_img)
+            return tags.Img([attrs_img])
 
     def title(self, title, heading=None):
         self.deprecatedPrint()
-        return tags.H1(
-            attributes.InlineStyle(
-                color="#000000",
-                font_size="32px",
-                font_weight="800",
-                line_height="32px",
-                margin="48px 0",
-                text_align="center",
-            ),
-            tags.Text(title),
+        return tags.H1([
+                attributes.Style(
+                    color="#000000",
+                    font_size="32px",
+                    font_weight="800",
+                    line_height="32px",
+                    margin="48px 0",
+                    text_align="center",
+                ),
+            ],
+            title,
             tags.Br(),
             (
-                tags.Span(
-                    attributes.InlineStyle(
-                        font_size="24px", font_weight="600", color="darkgray"
-                    ),
-                    tags.Text(heading),
+                tags.Span([
+                        attributes.Style(
+                            font_size="24px", font_weight="600", color="darkgray"
+                        ),
+                    ],
+                    heading,
                 )
                 if heading
                 else None
@@ -347,16 +356,17 @@ class EmailBuilder(InDriver):
 
     def heading(self, text):
         self.deprecatedPrint()
-        return tags.H2(
-            attributes.InlineStyle(
-                color="#000000",
-                font_size="28px",
-                font_weight="600",
-                line_height="32px",
-                margin="48px 0 24px 0",
-                text_align="center",
-            ),
-            tags.Text(text),
+        return tags.H2([
+                attributes.Style(
+                    color="#000000",
+                    font_size="28px",
+                    font_weight="600",
+                    line_height="32px",
+                    margin="48px 0 24px 0",
+                    text_align="center",
+                ),
+            ],
+            text,
         )
 
     def subheading(self, text):
@@ -365,30 +375,33 @@ class EmailBuilder(InDriver):
 
     def text(self, text, font_size="18px"):
         self.deprecatedPrint()
-        return tags.P(
-            tags.Text(text),
-            attributes.InlineStyle(
-                font_size=font_size, padding_left="10px", padding_right="10px"
-            ),
+        return tags.P([
+                attributes.Style(
+                    font_size=font_size, padding_left="10px", padding_right="10px"
+                ),
+            ],
+            text,
         )
 
     def header(self, *elems):
         self.deprecatedPrint()
-        return tags.Header(*elems)
+        return tags.Header([], *elems)
 
     def footer(self, text, first=None, *elems):
         self.deprecatedPrint()
         one = [
-            attributes.InlineStyle(
-                font_size="16px",
-                font_weight="400",
-                line_height="24px",
-                margin_top="48px",
-            ),
-            tags.Text(text),
+            [
+                attributes.Style(
+                    font_size="16px",
+                    font_weight="400",
+                    line_height="24px",
+                    margin_top="48px",
+                ),
+            ],
+            text,
             first,
         ]
-        return tags.Footer(tags.P(one), *elems)
+        return tags.Footer([], tags.P([], *one), *elems)
 
     def main(
         self,
@@ -398,7 +411,7 @@ class EmailBuilder(InDriver):
         items = []
         for key, value in kwargs.items():
             items.append(self.__convert(value, key))
-        return [tags.Main(items)]
+        return [tags.Main([], items)]
 
     def __display(self, content, mode):
         uid = uuid.uuid4().hex
@@ -478,62 +491,66 @@ class EmailBuilder(InDriver):
     def generate(self, title, logo=None, display="embed", footer=None, **kwargs):
         self.deprecatedPrint()
         gen_html = tags.Html(
-            attributes.Lang("en"),
+            [attributes.Lang("en")],
             tags.Head(
-                tags.Meta(
+                [],
+                tags.Meta([
                     attributes.HttpEquiv("Content-Type"),
                     attributes.Content("text/html; charset=utf-8"),
-                ),
-                tags.Meta(
+                ]),
+                tags.Meta([
                     attributes.HttpEquiv("Content-Type"),
                     attributes.Content("width=device-width, initial-scale=1"),
-                ),
-                tags.Meta(
+                ]),
+                tags.Meta([
                     attributes.Name("viewport"),
                     attributes.Content("width=device-width, initial-scale=1"),
-                ),
-                tags.Meta(
+                ]),
+                tags.Meta([
                     attributes.HttpEquiv("X-UA-Compatible"),
                     attributes.Content("IE=edge"),
-                ),
-                tags.Style(tags.Text(base_style)),
-                tags.Title(tags.Text(title)),
+                ]),
+                tags.Style([], base_style),
+                tags.Title([], title),
             ),
             tags.Body(
-                attributes.InlineStyle(margin="0 !important", padding="0 !important"),
-                tags.Div(
-                    attributes.InlineStyle(
-                        display="none", max_height="0", overflow="hidden"
-                    ),
-                    tags.Text(title),
+                [attributes.Style(margin="0 !important", padding="0 !important")],
+                tags.Div([
+                        attributes.Style(
+                            display="none", max_height="0", overflow="hidden"
+                        ),
+                    ],
+                    title,
                 ),
-                tags.Div(
-                    attributes.InlineStyle(
-                        display="none", max_height="0", overflow="hidden"
-                    ),
-                    tags.Text("&nbsp;‌" * 240),
+                tags.Div([
+                        attributes.Style(
+                            display="none", max_height="0", overflow="hidden"
+                        ),
+                    ],
+                    "&nbsp;‌" * 240,
                 ),
-                tags.Text(table_ie9),
-                tags.Div(
+                table_ie9,
+                tags.Div([
+                        attributes.Lang("en"),
+                        attributes.Class("basic_font"),
+                        attributes.Style(
+                            background_color="white",
+                            color="#2b2b2b",
+                            font_size="18px",
+                            font_weight="400",
+                            line_height="28px",
+                            margin="0 auto",
+                            max_width="720px",
+                            padding="40px 20px 40px 20px",
+                        ),
+                    ],
                     {"name": "role", "value": "article"},
                     {"name": "aria-label", "value": title},
-                    attributes.Lang("en"),
-                    attributes.Class("basic_font"),
-                    attributes.InlineStyle(
-                        background_color="white",
-                        color="#2b2b2b",
-                        font_size="18px",
-                        font_weight="400",
-                        line_height="28px",
-                        margin="0 auto",
-                        max_width="720px",
-                        padding="40px 20px 40px 20px",
-                    ),
                     self.header(logo, self.title(title)),
                     self.main(**kwargs),
                     footer,
                 ),
-                tags.Text(table_ie9_close),
+                table_ie9_close,
             ),
         )
         res = gen_html.render()
