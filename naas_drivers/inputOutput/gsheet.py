@@ -26,6 +26,20 @@ class Gsheet(InDriver, OutDriver):
         self.connected = True
         return self
 
+    def delete(
+        self,
+        sheet_name: str,
+        rows: list= [],
+    ):
+        self.check_connect()
+        resp = requests.delete(
+            urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
+            json=rows
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data
+    
     def get(
         self,
         sheet_name: str,
@@ -51,15 +65,19 @@ class Gsheet(InDriver, OutDriver):
             data_formated = data.to_dict(orient="records")
 
         if not append:
-            cur_data = requests.get(
-                urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}")
+            resp = requests.get(
+                urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
+                params={"perPage": BIG_NUM_TO_GETALL},
             )
-            row_count = cur_data.json().get("data")[0].get("rowNumber")
+            resp.raise_for_status()
+            data = resp.json()
+            row_count = data.get("data")[0].get("rowNumber")
+            df = pd.DataFrame(data=data["data"], columns=data["columns"])
+            row_count = len(df)
             requests.delete(
                 urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
-                json=list(range(1, row_count + 1)),
+                json=list(range(1, row_count + 2)),
             )
-
         resp = requests.post(
             urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
             json=data_formated,
