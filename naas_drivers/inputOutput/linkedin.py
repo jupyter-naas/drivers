@@ -78,11 +78,11 @@ class LinkedIn(InDriver, OutDriver):
         bd_year = None
         
         pf = profil.get('data')
-        if pf != None:
+        if pf is not None:
             firstname = pf.get('firstName')
             lastname = pf.get('lastName').upper()
             birthdate = pf.get("birthDate")
-            if birthdate != None:
+            if birthdate is not None:
                 bd_day = birthdate.get("day", "Day Unknown")
                 bd_month = birthdate.get("month", "Month Unknown")
                 bd_year = birthdate.get("year", "Year Unknown")
@@ -95,7 +95,7 @@ class LinkedIn(InDriver, OutDriver):
         # Get network info
         nw = network.get('data')
         lk_followers = None
-        if nw != None:
+        if nw is not None:
             lk_followers = nw.get("followersCount")
 
         # Get contact info
@@ -103,10 +103,10 @@ class LinkedIn(InDriver, OutDriver):
         lk_phone = None
         lk_email = None
         lk_twiter = None
-        if ct != None:
+        if ct is not None:
             lk_phone = None
             lk_phones = ct.get("phoneNumbers")
-            if lk_phones != None:
+            if lk_phones is not None:
                 for rows in lk_phones:
                     if rows["type"] == "MOBILE":
                         lk_phone = rows["number"]
@@ -114,10 +114,28 @@ class LinkedIn(InDriver, OutDriver):
             lk_email = ct.get("emailAddress")
             lk_twiter = None
             lk_twiters = ct.get("twitterHandles")
-            if lk_twiters != None:
+            if lk_twiters is not None:
                 for rows in lk_twiters:
                     lk_twiter = rows["name"]
                     break
+
+        # Profile dict
+        lk_profile = {
+            "FIRSTNAME": firstname,
+            "LASTNAME": lastname,
+            "BIRTHDATE_DAY": bd_day,
+            "BIRTHDATE_MONTH": bd_month,
+            "BIRTHDATE_YEAR": bd_year,
+            "BIRTHDATE": bd,
+            "COUNTRY": country,
+            "ADRESS": adress,
+            "LK_HEADLINE": lk_headline,
+            "LK_SECTOR": lk_industry,
+            "LK_FOLLOWERS": lk_followers,
+            "LK_PHONE": lk_phone,
+            "LK_EMAIL": lk_email,
+            "LK_TWITER": lk_twiter,
+        }
 
         if output == "json":
             return lk_profile
@@ -132,17 +150,17 @@ class LinkedIn(InDriver, OutDriver):
                             headers=self.headers)
         return data.json()
 
-    def get_message(self):
+    def get_messages(self):
         # Get lk conversation
         message = self.get_conversations()
 
         # Transform conversation
-        messages = message["included"]
+        messages = message.get("included")
         lk_profile = []
         lk_conversation = []
         lk_event = []
         for m in messages:
-            lk_type = m['$type']
+            lk_type = m.get('$type')
             if lk_type == 'com.linkedin.voyager.identity.shared.MiniProfile':
                 # Init variable
                 firstname = None
@@ -152,11 +170,11 @@ class LinkedIn(InDriver, OutDriver):
                 profile_id = None
 
                 # Get variable from dict
-                firstname = m["firstName"]
-                lastname = m["lastName"]
-                occupation = m["occupation"]
-                publicidentifier = m["publicIdentifier"]
-                profile_id = m["entityUrn"]
+                firstname = m.get("firstName")
+                lastname = m.get("lastName")
+                occupation = m.get("occupation")
+                publicidentifier = m.get("publicIdentifier")
+                profile_id = m.get("entityUrn")
                 profile_id = profile_id.rsplit("urn:li:fs_miniProfile:")[-1]
 
                 # Create profile dict
@@ -179,14 +197,14 @@ class LinkedIn(InDriver, OutDriver):
                 lastreadat = None
 
                 # Get variable from dict
-                profile_id = m['*participants']
-                message_id = m['entityUrn']
+                profile_id = m.get('*participants')
+                message_id = m.get('entityUrn')
                 message_id = message_id.rsplit("urn:li:fs_conversation:")[-1]
-                lastactivityat = m["lastActivityAt"]
-                lastreadat = m["lastReadAt"]
-                if lastactivityat != None:
+                lastactivityat = m.get("lastActivityAt")
+                lastreadat = m.get("lastReadAt")
+                if lastactivityat is not None:
                     lastactivityat = datetime.fromtimestamp(lastactivityat/1000.)
-                if lastreadat != None:
+                if lastreadat is not None:
                     lastreadat = datetime.fromtimestamp(lastreadat/1000.)
 
                 # Create conversation dict
@@ -208,13 +226,13 @@ class LinkedIn(InDriver, OutDriver):
                 message_text = None
 
                 # Get variable from dict
-                message_id = m["entityUrn"]
+                message_id = m.get("entityUrn")
                 message_id = message_id.rsplit("urn:li:fs_event:(")[-1].rsplit(',')[0]
-                message_type = m['subtype']
+                message_type = m.get('subtype')
                 if message_type != 'SPONSORED_INMAIL':
-                    for key in m["eventContent"]:
+                    for key in m.get("eventContent"):
                         if key == "attributedBody":
-                            message_text = m["eventContent"][key]["text"]
+                            message_text = m.get("eventContent").get(key).get("text")
                             break
 
                 # Create event dict
@@ -242,5 +260,6 @@ class LinkedIn(InDriver, OutDriver):
                               on="MESSAGE_ID",
                               how="left")
         # Cleaning
-        df_message = df_message.drop("MESSAGE_ID", axis=1)
+        to_drop = ["MESSAGE_ID", "PROFILE_ID"]
+        df_message = df_message.drop(to_drop, axis=1)
         return df_message.reset_index(drop=True)
