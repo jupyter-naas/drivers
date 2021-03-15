@@ -1,3 +1,9 @@
+## 0.49.0 (2021-03-15)
+
+### Feat
+
+- add delete method in gsheet + fix append
+
 ## 0.48.12 (2021-03-12)
 
 ### Fix
