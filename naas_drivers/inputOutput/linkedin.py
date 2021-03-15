@@ -55,7 +55,7 @@ class LinkedIn(InDriver, OutDriver):
         )
         return data.json()
 
-    def get_profil(self, username:str, output="dataframe"):
+    def get_profil(self, username: str, output="dataframe"):
         # Get data from identity
         time.sleep(2)
         profil = self.get_identity(username)
