@@ -51,13 +51,6 @@ jobs:
         with:
           username: ${{ secrets.PYPIP_USERNAME }} 
           password: ${{ secrets.PYPIP_PASSWORD }}
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          repository: ${{ github.repository }}
-          event-type: pypip-deployed
-          client-payload: '{"ref": "refs/heads/latest"}'
       - name: Repository Dispatch Naas
         uses: peter-evans/repository-dispatch@v1
         with:
@@ -65,3 +58,11 @@ jobs:
           repository: jupyter-naas/naas
           event-type: pypip-deployed
           client-payload: '{"ref": "refs/heads/latest"}'
+      - name: Slack notification
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Naas # Optional. (defaults to webhook app)
+          SLACK_CHANNEL: naas-ci # Optional. (defaults to webhook)
+          SLACK_AVATAR: repository
+          SLACK_CUSTOM_PAYLOAD: '{"attachments":[{"color":"#47dd82","blocks":[{"type":"section","block_id":"section567","text":{"type":"mrkdwn","text":"<https://github.com/jupyter-naas/drivers|Naas> \n Doors had too many axe holes, guest in room 237 was far too rowdy, whole place felt stuck in the 1920s."},"accessory":{"type":"image","image_url":"https://github.com/jupyter-naas/naas/raw/main/custom/naas-fav.png","alt_text":"Naas logo"}},{"type":"section","block_id":"section789","fields":[{"type":"mrkdwn","text":"*Version*\n${{ github.event.client_payload.ref }}"}]}]}]}'
+        uses: Ilshidur/action-slack@2.0.2
