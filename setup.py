@@ -72,6 +72,7 @@ setup(
         "sendgrid==6.6.0",
         "escapism==1.0.1",
         "openpyxl==3.0.7",
+        "google==3.0.0",
         "google-api-python-client==2.0.2",
         "google-auth-httplib2==0.1.0",
         "google-auth-oauthlib==0.4.3",
