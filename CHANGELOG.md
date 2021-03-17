@@ -1,3 +1,9 @@
+## 0.51.4 (2021-03-17)
+
+### Fix
+
+- make naas_drivers update naas
+
 ## 0.51.3 (2021-03-16)
 
 ### Fix
