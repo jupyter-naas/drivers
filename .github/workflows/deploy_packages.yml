@@ -51,6 +51,25 @@ jobs:
         with:
           username: ${{ secrets.PYPIP_USERNAME }} 
           password: ${{ secrets.PYPIP_PASSWORD }}
+      - uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: regex-match
+        with:
+          text: ${{ steps.get-latest-tag.outputs.tag }}
+          regex: '^\d*\.\d*\.\d*$'
+      - name: Checkout Target Repository
+        if: ${{ steps.regex-match.outputs.match != '' }}
+        uses: actions/checkout@v2
+        with:
+          repository: jupyter-naas/naas
+          path: naas_repo
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
+      - id: get_version
+        uses: battila7/get-version-action@v2
+      - run: echo ${{ steps.get_version.outputs.version }}
+      - run: sed -i 's/NDV = ".*"/NDV = "${{ steps.get-latest-tag.outputs.tag }}"/' naas_repo/setup.py
+      - run: 'cd naas_repo && git add setup.py && git commit -m "chore: update naas_drivers ${{ steps.get_version.outputs.version }}" && git push'
       - name: Repository Dispatch Naas
         uses: peter-evans/repository-dispatch@v1
         with:
@@ -58,9 +77,6 @@ jobs:
           repository: jupyter-naas/naas
           event-type: pypip-deployed
           client-payload: '{"ref": "refs/heads/latest"}'
-      - id: get_version
-        uses: battila7/get-version-action@v2
-      - run: echo ${{ steps.get_version.outputs.version }}
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
