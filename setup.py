@@ -33,7 +33,7 @@ setup(
         "pdfkit==0.6.1",
         "markdown2==2.4.0",
         "newsapi-python==0.2.6",
-        "airtable-python-wrapper==0.15.1",
+        "airtable-python-wrapper==0.15.2",
         "notion==0.0.28",
         "pyjwt==2.0.1",
         "tensorflow==2.4.1",
