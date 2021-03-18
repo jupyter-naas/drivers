@@ -65,11 +65,16 @@ jobs:
           repository: jupyter-naas/naas
           path: naas_repo
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
-      - id: get_version
-        uses: battila7/get-version-action@v2
-      - run: echo ${{ steps.get_version.outputs.version }}
-      - run: sed -i 's/NDV = ".*"/NDV = "${{ steps.get-latest-tag.outputs.tag }}"/' naas_repo/setup.py
-      - run: 'cd naas_repo && git add setup.py && git commit -m "chore: update naas_drivers ${{ steps.get_version.outputs.version }}" && git push'
+      - run: echo ${{ steps.get-latest-tag.outputs.tag }}
+      - name: Update naas file
+        if: ${{ steps.regex-match.outputs.match != '' }}  
+        run: sed -i 's/NDV = ".*"/NDV = "${{ steps.get-latest-tag.outputs.tag }}"/' naas_repo/setup.py
+      - name: Setup github user
+        if: ${{ steps.regex-match.outputs.match != '' }}
+        run: git config --global user.name "actions-user" && git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Push naas file
+        if: ${{ steps.regex-match.outputs.match != '' }}
+        run: 'cd naas_repo && git add setup.py && git commit -m "chore: update naas_drivers ${{ steps.get-latest-tag.outputs.tag }}" && git push'
       - name: Repository Dispatch Naas
         uses: peter-evans/repository-dispatch@v1
         with:
@@ -83,5 +88,5 @@ jobs:
           SLACK_USERNAME: Naas_drivers # Optional. (defaults to webhook app)
           SLACK_CHANNEL: naas-ci # Optional. (defaults to webhook)
           SLACK_AVATAR: repository
-          SLACK_CUSTOM_PAYLOAD: '{"attachments":[{"color":"#47dd82","blocks":[{"type":"section","block_id":"section567","text":{"type":"mrkdwn","text":"<https://github.com/{{ GITHUB_REPOSITORY }}|{{ GITHUB_REPOSITORY }}>\nAvailable to pip.\n*Version*\n${{ steps.get_version.outputs.version }}"},"accessory":{"type":"image","image_url":"https://github.com/jupyter-naas/naas/raw/main/custom/naas-fav.png","alt_text":"Naas logo"}}]}]}'
+          SLACK_CUSTOM_PAYLOAD: '{"attachments":[{"color":"#47dd82","blocks":[{"type":"section","block_id":"section567","text":{"type":"mrkdwn","text":"<https://github.com/{{ GITHUB_REPOSITORY }}|{{ GITHUB_REPOSITORY }}>\nAvailable to pip.\n*Version*\n${{ steps.get-latest-tag.outputs.tag }}"},"accessory":{"type":"image","image_url":"https://github.com/jupyter-naas/naas/raw/main/custom/naas-fav.png","alt_text":"Naas logo"}}]}]}'
         uses: Ilshidur/action-slack@2.0.2
