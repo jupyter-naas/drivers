@@ -74,7 +74,7 @@ jobs:
         run: git config --global user.name "actions-user" && git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Push naas file
         if: ${{ steps.regex-match.outputs.match != '' }}
-        run: cd naas_repo && git add setup.py && git commit -m "chore&#58; update naas_drivers ${{ steps.get-latest-tag.outputs.tag }}" && git push
+        run: 'cd naas_repo && git add setup.py && git commit -m "chore: update naas_drivers ${{ steps.get-latest-tag.outputs.tag }}" && git push'
       - name: Repository Dispatch Naas
         uses: peter-evans/repository-dispatch@v1
         with:
