@@ -1,3 +1,9 @@
+## 0.52.2 (2021-03-22)
+
+### Fix
+
+- google sheet display error
+
 ## 0.52.1 (2021-03-18)
 
 ### Fix
