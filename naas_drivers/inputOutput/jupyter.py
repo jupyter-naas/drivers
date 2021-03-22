@@ -116,6 +116,42 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
+    def delete_user_terminal(self, username, termId):
+        self.check_connect()
+        r = requests.delete(
+            f"{self.base_url}/user/{username}/api/terminals/{termId}",
+            headers={
+                "Authorization": f"token {self.token}",
+            },
+        )
+
+        r.raise_for_status()
+        return r.json()
+
+    def get_user_terminal(self, username):
+        self.check_connect()
+        r = requests.get(
+            f"{self.base_url}/user/{username}/api/terminals",
+            headers={
+                "Authorization": f"token {self.token}",
+            },
+        )
+
+        r.raise_for_status()
+        return r.json()
+
+    def delete_user_session(self, username, sessionId):
+        self.check_connect()
+        r = requests.delete(
+            f"{self.base_url}/user/{username}/api/sessions/{sessionId}",
+            headers={
+                "Authorization": f"token {self.token}",
+            },
+        )
+
+        r.raise_for_status()
+        return r.json()
+
     def get_user_session(self, username):
         self.check_connect()
         r = requests.get(
