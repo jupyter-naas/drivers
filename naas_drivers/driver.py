@@ -22,9 +22,9 @@ class ConnectDriver:
 
     def print_error(self, error):
         if self.raise_error:
-            raise ValueError(key_text)
+            raise ValueError(error)
         else:
-            print(key_text)
+            print(error)
 
     def raise_for_error(self, raise_error=True):
         self.raise_error = raise_error

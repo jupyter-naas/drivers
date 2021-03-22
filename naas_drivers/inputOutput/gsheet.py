@@ -29,17 +29,17 @@ class Gsheet(InDriver, OutDriver):
     def delete(
         self,
         sheet_name: str,
-        rows: list= [],
+        rows: list = [],
     ):
         self.check_connect()
         resp = requests.delete(
-            urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
-            json=rows
+            urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"), json=rows
         )
-        resp.raise_for_status()
         data = resp.json()
+        if data.get("error"):
+            self.print_error(data.get("error"))
         return data
-    
+
     def get(
         self,
         sheet_name: str,
@@ -50,8 +50,9 @@ class Gsheet(InDriver, OutDriver):
             urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
             params={"perPage": items_per_page},
         )
-        resp.raise_for_status()
         data = resp.json()
+        if data.get("error"):
+            self.print_error(data.get("error"))
         df = pd.DataFrame(data=data["data"], columns=data["columns"])
         return df
 
@@ -65,22 +66,28 @@ class Gsheet(InDriver, OutDriver):
             data_formated = data.to_dict(orient="records")
 
         if not append:
-            resp = requests.get(
-                urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
-                params={"perPage": BIG_NUM_TO_GETALL},
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            row_count = data.get("data")[0].get("rowNumber")
-            df = pd.DataFrame(data=data["data"], columns=data["columns"])
-            row_count = len(df)
-            requests.delete(
-                urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
-                json=list(range(1, row_count + 2)),
-            )
+            try:
+                resp = requests.get(
+                    urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
+                    params={"perPage": BIG_NUM_TO_GETALL},
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                if data.get("data"):
+                    row_count = data.get("data")[0].get("rowNumber")
+                    df = pd.DataFrame(data=data["data"], columns=data["columns"])
+                    row_count = len(df)
+                    requests.delete(
+                        urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
+                        json=list(range(1, row_count + 2)),
+                    )
+            except Exception:
+                pass
         resp = requests.post(
             urljoin(self.sheets_api, f"{self.spreadsheet_id}/{sheet_name}"),
             json=data_formated,
         )
-        resp.raise_for_status()
-        return resp.json()
+        data = resp.json()
+        if data.get("error"):
+            self.print_error(data.get("error"))
+        return data
