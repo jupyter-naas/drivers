@@ -35,7 +35,7 @@ from naas_drivers.input.markdown import Markdown
 import requests
 import os
 
-__version__ = "0.52.2"
+__version__ = "0.53.0"
 
 __github_repo = "jupyter-naas/drivers"
 
