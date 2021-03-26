@@ -32,10 +32,16 @@ class Airtable(InDriver, OutDriver):
 
     def send(self, data):
         self.check_connect()
-        if isinstance(data, list):
+        data_formated = data
+        if isinstance(data, pd.DataFrame):
+            for column in data:
+                if data[column].dtypes == "datetime64[ns]":
+                    data[column] = data[column].astype(str)
+            data_formated = data.to_dict(orient="records")
+        if isinstance(data_formated, list):
             return self._airtable.batch_insert(data)
         else:
-            return self._airtable.insert(data)
+            return self._airtable.insert(data_formated)
 
     def search(
         self,
