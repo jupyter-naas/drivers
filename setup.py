@@ -19,7 +19,7 @@ setup(
             "pytest==6.2.2",
             "pytest-mock==3.5.1",
             "requests-mock==1.8.0",
-            "twine==3.3.0",
+            "twine==3.4.1",
             "flake8==3.9.0",
             "black==20.8b1",
             "commitizen==2.16.0",
@@ -28,7 +28,7 @@ setup(
     },
     install_requires=[
         "pyppeteer==0.2.5",
-        "imap_tools==0.38.1",
+        "imap_tools==0.39.0",
         "slackclient==2.9.3",
         "pymsteams==0.1.14",
         "pdfkit==0.6.1",
