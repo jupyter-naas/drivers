@@ -61,7 +61,7 @@ setup(
         "Quandl==3.6.1",
         "requests==2.25.1",
         "scikit-learn==0.24.1",
-        "torch==1.8.0",
+        "torch==1.8.1",
         "scipy==1.6.1",
         "six==1.15.0",
         "statsmodels==0.12.2",
