@@ -48,7 +48,7 @@ setup(
         "joblib==1.0.1",
         "more-itertools==8.7.0",
         "numpy==1.20.1",
-        "ipython==7.21.0",
+        "ipython==7.22.0",
         "pandas==1.2.3",
         "pandas-datareader==0.9.0",
         "patsy==0.5.1",
