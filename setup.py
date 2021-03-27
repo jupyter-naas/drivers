@@ -65,7 +65,7 @@ setup(
         "scipy==1.6.1",
         "six==1.15.0",
         "statsmodels==0.12.2",
-        "urllib3==1.26.3",
+        "urllib3==1.26.4",
         "xlrd==2.0.1",
         "pymongo==3.11.3",
         "pysftp==0.2.9",
