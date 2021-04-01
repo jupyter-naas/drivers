@@ -54,7 +54,7 @@ setup(
         "patsy==0.5.1",
         "pmdarima==1.8.0",
         "python-dateutil==2.8.1",
-        "python-dotenv==0.15.0",
+        "python-dotenv==0.16.0",
         "pytz==2021.1",
         "plotly==4.14.3",
         "kaleido==0.2.1",
