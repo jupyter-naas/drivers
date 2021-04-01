@@ -35,7 +35,7 @@ Each driver try to return dataframe to strandardise the output.
 # Issue
 If you found a bug or need a new feature go there : https://naas.canny.io/
 
-##install
+## Install
 
 `python -m pip install naas_drivers`
 
