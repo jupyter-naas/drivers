@@ -43,7 +43,7 @@ setup(
         "vaderSentiment==3.3.2",
         "chardet==3.0.4",
         "Cython==0.29.17",
-        "idna==3.1",
+        "idna==2.9",
         "inflection==0.5.1",
         "joblib==1.0.1",
         "more-itertools==8.7.0",
