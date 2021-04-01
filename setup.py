@@ -42,7 +42,7 @@ setup(
         "htmlbuilder==0.1.2",
         "vaderSentiment==3.3.2",
         "chardet==3.0.4",
-        "Cython==0.29.22",
+        "Cython==0.29.17",
         "idna==3.1",
         "inflection==0.5.1",
         "joblib==1.0.1",
