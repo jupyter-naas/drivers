@@ -76,7 +76,7 @@ setup(
         "google==3.0.0",
         "google-api-python-client==2.1.0",
         "google-auth-httplib2==0.1.0",
-        "google-auth-oauthlib==0.4.3",
+        "google-auth-oauthlib==0.4.4",
         "gspread==3.7.0",
         "oauth2client==4.1.3",
         "geopy==2.1.0",
