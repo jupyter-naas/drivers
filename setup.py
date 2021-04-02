@@ -41,7 +41,7 @@ setup(
         "pysftp==0.2.9",
         "htmlbuilder==0.1.2",
         "vaderSentiment==3.3.2",
-        "chardet==3.0.4",
+        "chardet==4.0.0",
         "Cython==0.29.17",
         "idna==2.9",
         "inflection==0.5.1",
