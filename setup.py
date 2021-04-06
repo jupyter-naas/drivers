@@ -16,13 +16,13 @@ setup(
     packages=find_packages(exclude=["tests"]),
     extras_require={
         "dev": [
-            "pytest==6.2.2",
+            "pytest==6.2.3",
             "pytest-mock==3.5.1",
             "requests-mock==1.8.0",
             "twine==3.4.1",
             "flake8==3.9.0",
             "black==20.8b1",
-            "commitizen==2.16.0",
+            "commitizen==2.17.0",
             "pytest-cov==2.11.1",
         ]
     },
@@ -54,7 +54,7 @@ setup(
         "patsy==0.5.1",
         "pmdarima==1.8.0",
         "python-dateutil==2.8.1",
-        "python-dotenv==0.16.0",
+        "python-dotenv==0.17.0",
         "pytz==2021.1",
         "plotly==4.14.3",
         "kaleido==0.2.1",
