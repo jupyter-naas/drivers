@@ -16,7 +16,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     extras_require={
         "dev": [
-            "pytest==6.2.2",
+            "pytest==6.2.3",
             "pytest-mock==3.5.1",
             "requests-mock==1.8.0",
             "twine==3.4.1",
