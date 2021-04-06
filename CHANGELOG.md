@@ -1,3 +1,9 @@
+## 0.54.6 (2021-04-06)
+
+### Fix
+
+- use fixed get-changelog version
+
 ## 0.54.5 (2021-04-06)
 
 ### Fix
