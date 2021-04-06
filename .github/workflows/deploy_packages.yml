@@ -77,7 +77,7 @@ jobs:
         run: 'cd naas_repo && git add setup.py && git commit -m "fix(dependency): update naas_drivers ${{ steps.get-latest-tag.outputs.tag }}" && git push'
       - name: Get the last version change
         id: lastchanges
-        uses: jupyter-naas/get-chagelog-diff@v1.0.7
+        uses: jupyter-naas/get-chagelog-diff@v1.0.0
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
