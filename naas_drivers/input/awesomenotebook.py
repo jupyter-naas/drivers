@@ -11,9 +11,9 @@ class AwesomeNotebooks(InDriver):
     __naas_dl = "https://app.naas.ai/user-redirect/naas/downloader?url="
     __api_url = "https://api.github.com/repos/{REPO}/git/trees/{BRANCH}?recursive=1"
     __base_url = "https://github.com/{REPO}/blob/{BRANCH}/"
-    __badge_base = "https://img.shields.io/static/v1?"
-    __badge_appearance = "label=Naas&labelColor=000000&message=Download&color=success&style=for-the-badge"
-    __badge_link = "&link=https://naas.ai&link=https://app.naas.ai/user-redirect/naas/downloader?url={DLURL}"
+    __badge_base = "https://img.shields.io/badge/"
+    __badge_appearance = "-Open%20in%20Naas-success?labelColor=000000"
+    __badge_link = "https://naas.ai&link=https://app.naas.ai/user-redirect/naas/downloader?url={DLURL}"
     __badge_logo = """&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB
 3aWR0aD0iMTAyNHB4IiBoZWlnaHQ9IjEwMjRweCIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwM
 DAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIj4KIDwhLS0gR2VuZXJhdGVkIGJ
@@ -92,11 +92,10 @@ KIDx1c2UgaWQ9Im4iIHhsaW5rOmhyZWY9IiNzdHJpbmciLz4KPC9zdmc+Cg=="""
         badge_url = (
             self.__badge_base
             + self.__badge_appearance
-            + self.__badge_link.replace("{DLURL}", url)
             + self.__badge_logo
         )
-        html_content = f"""<iframe style="border: 0; overflow: hidden;" frameBorder="0" height="30px" width="100%"
-        src="{badge_url}"></iframe>"""
+        redirect_url = self.__badge_link.replace("{DLURL}", url)
+        html_content = f"""<a href="{redirect_url}" target="_parent">\n<img src="{badge_url}"/>\n</a>"""
         display(Markdown(html_content))
         return html_content
 
