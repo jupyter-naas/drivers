@@ -1,3 +1,9 @@
+## 0.54.7 (2021-04-26)
+
+### Refactor
+
+- badge is now github friendly
+
 ## 0.54.6 (2021-04-06)
 
 ### Fix
