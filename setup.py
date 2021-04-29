@@ -70,7 +70,7 @@ setup(
         "pymongo==3.11.3",
         "pysftp==0.2.9",
         "md2pdf==0.5",
-        "sendgrid==6.6.0",
+        "sendgrid==6.7.0",
         "escapism==1.0.1",
         "openpyxl==3.0.7",
         "google==3.0.0",
