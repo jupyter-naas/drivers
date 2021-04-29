@@ -57,7 +57,7 @@ setup(
         "python-dotenv==0.17.0",
         "pytz==2021.1",
         "plotly==4.14.3",
-        "kaleido==0.2.1",
+        "kaleido==0.2.1.post1",
         "Quandl==3.6.1",
         "requests==2.25.1",
         "scikit-learn==0.24.2",
