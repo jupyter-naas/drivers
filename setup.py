@@ -60,7 +60,7 @@ setup(
         "kaleido==0.2.1",
         "Quandl==3.6.1",
         "requests==2.25.1",
-        "scikit-learn==0.24.1",
+        "scikit-learn==0.24.2",
         "torch==1.8.1",
         "scipy==1.6.3",
         "six==1.15.0",
