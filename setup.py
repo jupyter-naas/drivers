@@ -22,7 +22,7 @@ setup(
             "twine==3.4.1",
             "flake8==3.9.0",
             "black==20.8b1",
-            "commitizen==2.17.0",
+            "commitizen==2.17.4",
             "pytest-cov==2.11.1",
         ]
     },
