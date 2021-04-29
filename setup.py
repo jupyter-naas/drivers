@@ -49,7 +49,7 @@ setup(
         "more-itertools==8.7.0",
         "numpy==1.19.5",
         "ipython==7.22.0",
-        "pandas==1.2.3",
+        "pandas==1.2.4",
         "pandas-datareader==0.9.0",
         "patsy==0.5.1",
         "pmdarima==1.8.2",
