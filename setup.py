@@ -17,7 +17,7 @@ setup(
     extras_require={
         "dev": [
             "pytest==6.2.3",
-            "pytest-mock==3.5.1",
+            "pytest-mock==3.6.0",
             "requests-mock==1.8.0",
             "twine==3.4.1",
             "flake8==3.9.0",
