@@ -292,7 +292,7 @@ class EmailBuilder(InDriver):
                         )
             else:
                 res.append(tags.Td(tags.Text(row) if isinstance(row, str) else row))
-            if index == 0 and header == True:
+            if index == 0 and header is True:
                 elems.append(tags.Tr(res, attributes.Class("table_header")))
             else:
                 elems.append(tags.Tr(res))
