@@ -58,8 +58,14 @@ td, th {
     padding: 10px;
 }
 
+tr.table_header {
+    color: white;
+    background-color: black;
+}
+
 table * {
     margin: 18px 0 !important;
+    font-size: 18px;
 }
 
 .table_border {
@@ -262,7 +268,6 @@ class EmailBuilder(InDriver):
             return None
         for row in table_arr:
             res = []
-            style = {}
             if isinstance(row, list):
                 for i in range(len(row)):
                     cell = row[i]
@@ -288,11 +293,9 @@ class EmailBuilder(InDriver):
             else:
                 res.append(tags.Td(tags.Text(row) if isinstance(row, str) else row))
             if index == 0 and header == True:
-                style = {
-                    'background_color': 'black',
-                    'color': 'white'
-                }
-            elems.append(tags.Tr(res, attributes.InlineStyle(**style)))
+                elems.append(tags.Tr(res, attributes.Class("table_header")))
+            else:
+                elems.append(tags.Tr(res))
             index += 1
         tab = tags.Table(
             attributes.InlineStyle(width="100%"),
