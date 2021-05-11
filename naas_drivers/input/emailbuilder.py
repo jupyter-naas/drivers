@@ -240,12 +240,13 @@ class EmailBuilder(InDriver):
         self.deprecatedPrint()
         return tags.hr()
 
-    def table(self, data, border=True):
+    def table(self, data, border=True, header=True):
         self.deprecatedPrint()
         elems = []
         table_arr = None
         row_link = False
         row_link_index = -1
+        index = 0
         if isinstance(data, pd.DataFrame):
             table_arr = list(data.values.tolist())
             row_link = True if "row_link" in data.columns else False
@@ -261,6 +262,7 @@ class EmailBuilder(InDriver):
             return None
         for row in table_arr:
             res = []
+            style = {}
             if isinstance(row, list):
                 for i in range(len(row)):
                     cell = row[i]
@@ -285,7 +287,13 @@ class EmailBuilder(InDriver):
                         )
             else:
                 res.append(tags.Td(tags.Text(row) if isinstance(row, str) else row))
-            elems.append(tags.Tr(res))
+            if index == 0 and header == True:
+                style = {
+                    'background_color': 'black',
+                    'color': 'white'
+                }
+            elems.append(tags.Tr(res, attributes.InlineStyle(**style)))
+            index += 1
         tab = tags.Table(
             attributes.InlineStyle(width="100%"),
             attributes.Class("table_border") if border else None,
