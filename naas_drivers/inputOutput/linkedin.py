@@ -272,3 +272,60 @@ class LinkedIn(InDriver, OutDriver):
         to_drop = ["MESSAGE_ID", "PROFILE_ID"]
         df_message = df_message.drop(to_drop, axis=1)
         return df_message.reset_index(drop=True)
+    
+    def get_post(self, url):
+        activity_id = url.split("-activity-")[-1].split("-")[0];
+        data = requests.get(f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
+                            cookies=self.cookies,
+                            headers=self.headers)
+        return data.json()
+    
+    def get_post_data(self, url):
+        # Get lk conversation
+        post = self.get_post(url)
+    
+        # Parse json
+        posts = post.get("included")
+        for p in posts:
+            lk_type = p.get('$type')
+            if lk_type == "com.linkedin.voyager.feed.shared.SocialActivityCounts":
+                uid = p.get('entityUrn')
+                if "urn:li:fs_socialActivityCounts:urn:li:activity:" in uid:
+                    tot_likes = p.get("numLikes")
+                    tot_views = p.get("numViews")
+                    tot_comments = p.get("numComments")
+                    likes = p.get("reactionTypeCounts")
+                    for like in likes:
+                        reaction = like.get("reactionType")
+                        if reaction == "LIKE":
+                            num_lik = like.get("count")
+                        if reaction == "PRAISE":
+                            num_pra = like.get("count")
+                        if reaction == "INTEREST":
+                            num_int = like.get("count")
+                        if reaction == "APPRECIATION":
+                            num_app = like.get("count")
+                        if reaction == "EMPATHY":
+                            num_emp = like.get("count")
+            if lk_type == "com.linkedin.voyager.feed.render.UpdateV2":
+                commentary = p.get("commentary").get("text").get("text")
+                title = commentary.rsplit("\n")[0]
+                datepost = p.get("actor").get("subDescription").get("accessibilityText")
+            
+        # Data
+        data = {
+            "TITLE": title,
+            "DATE": datepost,
+            "VIEWS": tot_views,
+            "COMMENTS": tot_comments,
+            "LIKES": tot_likes,
+            "LIKES_LIKE": num_lik,
+            "LIKES_PRAISE": num_pra,
+            "LIKES_INTEREST": num_int,
+            "LIKES_APPRECIATION": num_app,
+            "LIKES_EMPATHY": num_emp,
+        }
+        
+        # DataFrame
+        df = pd.DataFrame([data])
+        return df
