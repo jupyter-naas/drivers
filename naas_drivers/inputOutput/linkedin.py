@@ -5,6 +5,11 @@ import time
 from datetime import datetime
 
 class LinkedIn(InDriver, OutDriver):
+    # Get LK info from LK
+    def __get_id(self, url):
+        url = url.rsplit("in/")[-1].rsplit("/")[0]
+        return url
+    
     def connect(self, li_at: str, jessionid: str):
         # Init lk attribute
         self.li_at = li_at
@@ -28,6 +33,7 @@ class LinkedIn(InDriver, OutDriver):
         return self
 
     def get_identity(self, username: str):
+        username = self.__get_id(username)
         data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
             + username.replace("\n", ""),
@@ -37,6 +43,7 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
 
     def get_network(self, username: str):
+        username = self.__get_id(username)
         data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
             + username
@@ -47,6 +54,7 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
 
     def get_contact(self, username: str):
+        username = self.__get_id(username)
         data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
             + username.replace("\n", "")
@@ -57,6 +65,7 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
 
     def get_profil(self, username: str, output="dataframe"):
+        username = self.__get_id(username)
         # Get data from identity
         time.sleep(2)
         profil = self.get_identity(username)
