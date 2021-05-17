@@ -281,39 +281,57 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
     
     def get_post_data(self, url):
+        activity_id = url.split("-activity-")[-1].split("-")[0];
         # Get lk conversation
         post = self.get_post(url)
-    
+        
+        # Init var
+        title = None
+        datepost = None
+        tot_views = 0
+        tot_comments = 0
+        tot_likes = 0
+        num_lik = 0
+        num_pra = 0
+        num_int = 0
+        num_app = 0
+        num_emp = 0
+        
         # Parse json
         posts = post.get("included")
-        for p in posts:
-            lk_type = p.get('$type')
-            if lk_type == "com.linkedin.voyager.feed.shared.SocialActivityCounts":
-                uid = p.get('entityUrn')
-                if "urn:li:fs_socialActivityCounts:urn:li:activity:" in uid:
-                    tot_likes = p.get("numLikes")
-                    tot_views = p.get("numViews")
-                    tot_comments = p.get("numComments")
-                    likes = p.get("reactionTypeCounts")
-                    for like in likes:
-                        reaction = like.get("reactionType")
-                        if reaction == "LIKE":
-                            num_lik = like.get("count")
-                        if reaction == "PRAISE":
-                            num_pra = like.get("count")
-                        if reaction == "INTEREST":
-                            num_int = like.get("count")
-                        if reaction == "APPRECIATION":
-                            num_app = like.get("count")
-                        if reaction == "EMPATHY":
-                            num_emp = like.get("count")
-            if lk_type == "com.linkedin.voyager.feed.render.UpdateV2":
-                commentary = p.get("commentary").get("text").get("text")
-                title = commentary.rsplit("\n")[0]
-                datepost = p.get("actor").get("subDescription").get("accessibilityText")
+        if posts is not None:
+            for p in posts:
+                lk_type = p.get('$type')
+                if lk_type == "com.linkedin.voyager.feed.shared.SocialActivityCounts":
+                    uid = p.get('entityUrn')
+                    if (uid  == f"urn:li:fs_socialActivityCounts:urn:li:activity:{activity_id}" or 
+                        "urn:li:fs_socialActivityCounts:urn:li:ugcPost" in uid):
+                        tot_likes = p.get("numLikes")
+                        tot_views = p.get("numViews")
+                        tot_comments = p.get("numComments")
+                        likes = p.get("reactionTypeCounts")
+                        if likes is not None:
+                            for like in likes:
+                                reaction = like.get("reactionType")
+                                if reaction == "LIKE":
+                                    num_lik = like.get("count")
+                                if reaction == "PRAISE":
+                                    num_pra = like.get("count")
+                                if reaction == "INTEREST":
+                                    num_int = like.get("count")
+                                if reaction == "APPRECIATION":
+                                    num_app = like.get("count")
+                                if reaction == "EMPATHY":
+                                    num_emp = like.get("count")
+                if lk_type == "com.linkedin.voyager.feed.render.UpdateV2":
+                    commentary = p.get("commentary")
+                    if commentary is not None:
+                        title = commentary.get("text").get("text").rsplit("\n")[0]
+                    datepost = p.get("actor").get("subDescription").get("accessibilityText")
             
         # Data
         data = {
+            "URL": url,
             "TITLE": title,
             "DATE": datepost,
             "VIEWS": tot_views,
