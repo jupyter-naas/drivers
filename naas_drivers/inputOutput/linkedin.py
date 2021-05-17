@@ -5,6 +5,11 @@ import time
 from datetime import datetime
 
 class LinkedIn(InDriver, OutDriver):
+    # Get LK info from LK
+    def __get_id(self, url):
+        url = url.rsplit("in/")[-1].rsplit("/")[0]
+        return url
+    
     def connect(self, li_at: str, jessionid: str):
         # Init lk attribute
         self.li_at = li_at
@@ -28,6 +33,7 @@ class LinkedIn(InDriver, OutDriver):
         return self
 
     def get_identity(self, username: str):
+        username = self.__get_id(username)
         data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
             + username.replace("\n", ""),
@@ -37,6 +43,7 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
 
     def get_network(self, username: str):
+        username = self.__get_id(username)
         data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
             + username
@@ -47,6 +54,7 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
 
     def get_contact(self, username: str):
+        username = self.__get_id(username)
         data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
             + username.replace("\n", "")
@@ -57,6 +65,7 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
 
     def get_profil(self, username: str, output="dataframe"):
+        username = self.__get_id(username)
         # Get data from identity
         time.sleep(2)
         profil = self.get_identity(username)
@@ -128,7 +137,7 @@ class LinkedIn(InDriver, OutDriver):
             "BIRTHDATE_YEAR": bd_year,
             "BIRTHDATE": bd,
             "COUNTRY": country,
-            "ADRESS": adress,
+            "ADDRESS": adress,
             "LK_HEADLINE": lk_headline,
             "LK_SECTOR": lk_industry,
             "LK_FOLLOWERS": lk_followers,
@@ -263,3 +272,78 @@ class LinkedIn(InDriver, OutDriver):
         to_drop = ["MESSAGE_ID", "PROFILE_ID"]
         df_message = df_message.drop(to_drop, axis=1)
         return df_message.reset_index(drop=True)
+    
+    def get_post(self, url):
+        activity_id = url.split("activity-")[-1].split("-")[0];
+        data = requests.get(f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
+                            cookies=self.cookies,
+                            headers=self.headers)
+        return data.json()
+    
+    def get_post_data(self, url):
+        activity_id = url.split("activity-")[-1].split("-")[0];
+        # Get lk conversation
+        post = self.get_post(url)
+        
+        # Init var
+        title = None
+        datepost = None
+        tot_views = 0
+        tot_comments = 0
+        tot_likes = 0
+        num_lik = 0
+        num_pra = 0
+        num_int = 0
+        num_app = 0
+        num_emp = 0
+        
+        # Parse json
+        posts = post.get("included")
+        if posts is not None:
+            for p in posts:
+                lk_type = p.get('$type')
+                if lk_type == "com.linkedin.voyager.feed.shared.SocialActivityCounts":
+                    uid = p.get('entityUrn')
+                    if (uid  == f"urn:li:fs_socialActivityCounts:urn:li:activity:{activity_id}" or 
+                        "urn:li:fs_socialActivityCounts:urn:li:ugcPost" in uid):
+                        tot_likes = p.get("numLikes")
+                        tot_views = p.get("numViews")
+                        tot_comments = p.get("numComments")
+                        likes = p.get("reactionTypeCounts")
+                        if likes is not None:
+                            for like in likes:
+                                reaction = like.get("reactionType")
+                                if reaction == "LIKE":
+                                    num_lik = like.get("count")
+                                if reaction == "PRAISE":
+                                    num_pra = like.get("count")
+                                if reaction == "INTEREST":
+                                    num_int = like.get("count")
+                                if reaction == "APPRECIATION":
+                                    num_app = like.get("count")
+                                if reaction == "EMPATHY":
+                                    num_emp = like.get("count")
+                if lk_type == "com.linkedin.voyager.feed.render.UpdateV2":
+                    commentary = p.get("commentary")
+                    if commentary is not None:
+                        title = commentary.get("text").get("text").rsplit("\n")[0]
+                    datepost = p.get("actor").get("subDescription").get("accessibilityText")
+            
+        # Data
+        data = {
+            "URL": url,
+            "TITLE": title,
+            "DATE": datepost,
+            "VIEWS": tot_views,
+            "COMMENTS": tot_comments,
+            "LIKES": tot_likes,
+            "LIKES_LIKE": num_lik,
+            "LIKES_PRAISE": num_pra,
+            "LIKES_INTEREST": num_int,
+            "LIKES_APPRECIATION": num_app,
+            "LIKES_EMPATHY": num_emp,
+        }
+        
+        # DataFrame
+        df = pd.DataFrame([data])
+        return df
