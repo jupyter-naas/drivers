@@ -137,7 +137,7 @@ class LinkedIn(InDriver, OutDriver):
             "BIRTHDATE_YEAR": bd_year,
             "BIRTHDATE": bd,
             "COUNTRY": country,
-            "ADRESS": adress,
+            "ADDRESS": adress,
             "LK_HEADLINE": lk_headline,
             "LK_SECTOR": lk_industry,
             "LK_FOLLOWERS": lk_followers,
