@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="naas-drivers",
-    version="0.54.8",
+    version="0.55.0",
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
     license="BSD",

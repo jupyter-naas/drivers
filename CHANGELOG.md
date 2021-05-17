@@ -1,3 +1,11 @@
+## 0.55.0 (2021-05-17)
+
+### Fix
+
+- rename ADDRESS in dataframe get profile
+- get activity from url
+- update get post data
+
 ## 0.54.8 (2021-04-29)
 
 ### Fix
