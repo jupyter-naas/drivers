@@ -274,14 +274,14 @@ class LinkedIn(InDriver, OutDriver):
         return df_message.reset_index(drop=True)
     
     def get_post(self, url):
-        activity_id = url.split("-activity-")[-1].split("-")[0];
+        activity_id = url.split("activity-")[-1].split("-")[0];
         data = requests.get(f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
                             cookies=self.cookies,
                             headers=self.headers)
         return data.json()
     
     def get_post_data(self, url):
-        activity_id = url.split("-activity-")[-1].split("-")[0];
+        activity_id = url.split("activity-")[-1].split("-")[0];
         # Get lk conversation
         post = self.get_post(url)
         
