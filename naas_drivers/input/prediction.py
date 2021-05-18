@@ -37,6 +37,11 @@ class Prediction:
 
     def __init_class_vars(
             self,
+            prediction_type: str,
+            dataset: pd.DataFrame,
+            label: str,
+            date_column: str,
+            data_points: int,
     ):
 
         # either all to predict using all the models else one of arima, svr or linear
@@ -88,6 +93,7 @@ class Prediction:
             model.fit(X, y)
             x_predict = (
                 df[self.label]
+                    .to_numpy()
             )
             predicted_values = model.predict(x_predict)
         else:
