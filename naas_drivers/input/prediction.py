@@ -36,6 +36,7 @@ class Prediction:
     )
 
     def __init_class_vars(
+            self,
     ):
 
         # either all to predict using all the models else one of arima, svr or linear
