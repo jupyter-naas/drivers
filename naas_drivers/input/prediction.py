@@ -3,7 +3,6 @@ import numpy as np
 
 
 class Prediction:
-
     param_model_map = {"arima": "ARIMA", "linear": "LINEAR", "svr": "SVR"}
     # either all to predict using all the models else one of arima, svr or linear
     prediction_type = None
@@ -37,12 +36,6 @@ class Prediction:
     )
 
     def __init_class_vars(
-        self,
-        prediction_type: str,
-        dataset: pd.DataFrame,
-        label: str,
-        date_column: str,
-        data_points: int,
     ):
 
         # either all to predict using all the models else one of arima, svr or linear
@@ -94,8 +87,6 @@ class Prediction:
             model.fit(X, y)
             x_predict = (
                 df[self.label]
-                .to_numpy()
-                .reshape(-1, 1)[-self.data_points :]  # noqa: E203
             )
             predicted_values = model.predict(x_predict)
         else:
@@ -164,27 +155,16 @@ class Prediction:
         return predicted_cols, output_dfs
 
     def get(
-        self,
-        dataset: pd.DataFrame,
-        prediction_type: str = "COMPOUND",
-        label: str = "Close",
-        date_column: str = "Date",
-        data_points: int = 20,
-        concat_label=None,
     ):
         # initializes the class variables
         self.__init_class_vars(
             prediction_type=prediction_type,
             dataset=dataset,
-            label=label,
             date_column=date_column,
             data_points=data_points,
         )
 
         # modelling and making the predictions
-        output_dfs = None
-        predicted_cols = None
-        group = None
         if "Company" in dataset.columns:
             group = ["Date", "Company"]
             predicted_cols, output_dfs = self.__multi_company()
@@ -205,10 +185,8 @@ class Prediction:
         if concat_label is not None:
             if len(predicted_cols) > 1:
                 res[concat_label] = res["COMPOUND"].replace(np.nan, 0.000000) + res[
-                    label
                 ].replace(np.nan, 0.000000)
             else:
                 res[concat_label] = res[predicted_cols[0]].replace(
                     np.nan, 0.000000
-                ) + res[label].replace(np.nan, 0.000000)
         return res
