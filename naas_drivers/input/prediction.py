@@ -185,6 +185,9 @@ class Prediction:
         )
 
         # modelling and making the predictions
+        # output_dfs = None
+        # predicted_cols = None
+        # group = None
         if "Company" in dataset.columns:
             group = ["Date", "Company"]
             predicted_cols, output_dfs = self.__multi_company()
@@ -205,8 +208,10 @@ class Prediction:
         if concat_label is not None:
             if len(predicted_cols) > 1:
                 res[concat_label] = res["COMPOUND"].replace(np.nan, 0.000000) + res[
+                    column
                 ].replace(np.nan, 0.000000)
             else:
                 res[concat_label] = res[predicted_cols[0]].replace(
                     np.nan, 0.000000
+                ) + res[column].replace(np.nan, 0.000000)
         return res
