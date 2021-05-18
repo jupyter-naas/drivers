@@ -165,7 +165,7 @@ class Prediction:
     def get(
             self,
             dataset: pd.DataFrame,
-            column: str,
+            column: str = "Close",
             prediction_type: str = "COMPOUND",
             date_column: str = "Date",
             data_points: int = 20,
