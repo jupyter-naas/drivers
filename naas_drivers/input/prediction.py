@@ -94,6 +94,7 @@ class Prediction:
             x_predict = (
                 df[self.label]
                     .to_numpy()
+                    .reshape(-1, 1)[-self.data_points:]  # noqa: E203
             )
             predicted_values = model.predict(x_predict)
         else:
@@ -162,7 +163,18 @@ class Prediction:
         return predicted_cols, output_dfs
 
     def get(
+            self,
+            dataset: pd.DataFrame,
+            column: str,
+            prediction_type: str = "COMPOUND",
+            date_column: str = "Date",
+            data_points: int = 20,
+            concat_label=None,
     ):
+        # Fallback for columns
+        if column not in dataset.columns:
+            column = "Close"
+
         # initializes the class variables
         self.__init_class_vars(
             prediction_type=prediction_type,
