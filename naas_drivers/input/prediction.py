@@ -179,6 +179,7 @@ class Prediction:
         self.__init_class_vars(
             prediction_type=prediction_type,
             dataset=dataset,
+            label=column,
             date_column=date_column,
             data_points=data_points,
         )
