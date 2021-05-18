@@ -172,7 +172,7 @@ class Prediction:
             concat_label=None,
     ):
         # Fallback for columns
-        if column not in dataset.columns:
+        if column not in dataset.columns or column is None or column == "":
             column = "Close"
 
         # initializes the class variables
