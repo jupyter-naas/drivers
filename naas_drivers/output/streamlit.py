@@ -21,7 +21,7 @@ class Streamlit(BaseApp):
     def __init__(self, path, port=9999):
         super().__init__(port)
         self.path = path
-        self.run_app()
+        self.run()
 
     def run(self, debug=True):
         os.system(f"fuser -n tcp -k {self.port}")
