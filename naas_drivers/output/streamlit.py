@@ -13,7 +13,7 @@ class BaseApp:
         for tunnel in active_tunnels:
             public_url = tunnel.public_url
             ngrok.disconnect(public_url)
-        url = ngrok.connect(port=self.port, options={"bind_tls": True})
+        url = ngrok.connect(addr=self.port, options={"bind_tls": True})
         print(f'Web App can be accessed on: {url}')
 
 
