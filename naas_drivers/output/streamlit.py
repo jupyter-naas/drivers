@@ -17,7 +17,7 @@ class BaseApp:
         print(f'Web App can be accessed on: {url.public_url}')
 
 
-class StreamlitApp(BaseApp):
+class NaasStreamlit(BaseApp):
     def __init__(self, path, port=9999):
         super().__init__(port)
         self.path = path
