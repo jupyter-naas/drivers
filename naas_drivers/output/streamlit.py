@@ -34,7 +34,7 @@ class NaasStreamlit(BaseApp):
                 universal_newlines=True,
         ) as proc:
             print(cmd)
-            print(proc.stdout)
             for line in proc.stdout:
+                print(line)
                 if debug:
                     print(line, end="")
