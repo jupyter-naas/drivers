@@ -17,23 +17,22 @@ class BaseApp():
         print(f'Web App can be accessed on: {url.public_url}')
 
 
-class Streamlit(BaseApp):
+class StreamlitApp(BaseApp):
     def __init__(self, path, port=9999):
         super().__init__(port)
         self.path = path
-        run_app()
+        self.run_app()
 
-
-def run_app(self, debug=True):
-    os.system(f"fuser -n tcp -k {self.port}")
-    cmd = f'streamlit run {self.path} --server.port {self.port}'
-    with subprocess.Popen(
-            [cmd],
-            shell=True,
-            stdout=subprocess.PIPE,
-            bufsize=1,
-            universal_newlines=True,
-    ) as proc:
-        for line in proc.stdout:
-            if debug:
-                print(line, end="")
+    def run_app(self, debug=True):
+        os.system(f"fuser -n tcp -k {self.port}")
+        cmd = f'streamlit run {self.path} --server.port {self.port}'
+        with subprocess.Popen(
+                [cmd],
+                shell=True,
+                stdout=subprocess.PIPE,
+                bufsize=1,
+                universal_newlines=True,
+        ) as proc:
+            for line in proc.stdout:
+                if debug:
+                    print(line, end="")
