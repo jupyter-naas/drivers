@@ -215,27 +215,16 @@ class EmailBuilder(InDriver):
             style['color'] = color
         if font_size:
             style['font_size'] = f"{font_size}"
+        if text_align:
+            style['text_align'] = text_align
         if bold:
             style['font_weight'] = 'bold'
         if underline:
-            style['text-decoration'] = 'underline'
+            style['text_decoration'] = 'underline'
         if italic:
-            style['font-style'] = 'italic';
+            style['font_style'] = 'italic';
         return style
-        
-    def address(self, title, content):
-        self.deprecatedPrint()
-        return tags.Address(
-            attributes.InlineStyle(
-                font_size="16px",
-                font_style="normal",
-                font_weight="400",
-                line_height="24px",
-            ),
-            tags.Strong(tags.Text(title)),
-            tags.Text(content),
-        )
-    
+
     def __create_table_cell(self,
                             content,
                             header=False,
@@ -264,6 +253,19 @@ class EmailBuilder(InDriver):
         for col in df.columns:
             res.append(self.__create_table_cell(tags.Text(col), True, None, border, header_bg_color, header_ft_color))
         return res
+    
+    def address(self, title, content):
+        self.deprecatedPrint()
+        return tags.Address(
+            attributes.InlineStyle(
+                font_size="16px",
+                font_style="normal",
+                font_weight="400",
+                line_height="24px",
+            ),
+            tags.Strong(tags.Text(title)),
+            tags.Text(content),
+        )
 
     def link(self, link, title="Open", color="#B200FD"):
         self.deprecatedPrint()
@@ -474,7 +476,7 @@ class EmailBuilder(InDriver):
             'line_height': "32px",
             'margin': "48px 0"
         }
-        self.__text_style(style, color, font_size, text_align, bold, underline, italic)
+        style = self.__text_style(style, color, font_size, text_align, bold, underline, italic)
         return tags.H1(
             attributes.InlineStyle(**style),
             tags.Text(title),
@@ -506,7 +508,7 @@ class EmailBuilder(InDriver):
             'margin': "48px 0 24px 0",
             'text_align': text_align
         }
-        self.__text_style(style, color, font_size, text_align, bold, underline, italic)
+        style = self.__text_style(style, color, font_size, text_align, bold, underline, italic)
         return tags.H2(
             attributes.InlineStyle(**style),
             tags.Text(text),
@@ -536,7 +538,7 @@ class EmailBuilder(InDriver):
             'padding_left': "10px",
             'padding_right': "10px"
         }
-        self.__text_style(style, color, font_size, text_align, bold, underline, italic)
+        style = self.__text_style(style, color, font_size, text_align, bold, underline, italic)
         return tags.P(
             tags.Text(text),
             attributes.InlineStyle(**style),
