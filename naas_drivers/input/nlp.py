@@ -1,6 +1,6 @@
 from typing import Optional, Union, Dict, Any
 
-from transformers import PretrainedConfig, PreTrainedTokenizer, AutoConfig
+from transformers import PretrainedConfig, PreTrainedTokenizer, AutoConfig, AutoTokenizer
 
 from naas_drivers.driver import InDriver
 from transformers.pipelines.question_answering import QuestionAnsweringPipeline
@@ -105,6 +105,18 @@ class NLP(InDriver):
         if model is None:
             model = targeted_task["default"]["model"][framework]
 
+        if tokenizer is None:
+            if isinstance(model, str):
+                tokenizer = model
+            else:
+                # Impossible to guest what is the right tokenizer here
+                raise Exception(
+                    "Please provided a PretrainedTokenizer "
+                    "class or a path/identifier to a pretrained tokenizer."
+                )
+        if isinstance(tokenizer, (str, tuple)):
+            tokenizer = AutoTokenizer.from_pretrained(tokenizer)
+
         if isinstance(model, str):
             # Handle transparent TF/PT model conversion
             if framework == "pt" and model.endswith(".h5"):
@@ -129,4 +141,4 @@ class NLP(InDriver):
                 model, config=config, revision=revision, _from_pipeline=task, **model_kwargs
             )
 
-        return task_class(model=model, framework=framework, task=task, **kwargs)
+        return task_class(model=model, framework=framework, tokenizer=tokenizer, task=task, **kwargs)
