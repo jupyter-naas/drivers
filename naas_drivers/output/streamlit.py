@@ -3,7 +3,7 @@ import subprocess
 from pyngrok import ngrok
 
 
-class BaseApp():
+class BaseApp:
     def __init__(self, port=9999):
         self.port = port
         self._start_server()
