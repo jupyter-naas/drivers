@@ -5,6 +5,7 @@ from pyngrok import ngrok
 
 class BaseApp:
     def __init__(self, port=9999):
+        super().__init__(port)
         self.port = port
         self._start_server()
 
@@ -19,7 +20,6 @@ class BaseApp:
 
 class NaasStreamlit(BaseApp):
     def __init__(self, path, port=9999):
-        super().__init__(port)
         self.path = path
         self.run_app()
 
