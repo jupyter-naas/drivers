@@ -31,9 +31,9 @@ class NaasStreamlit():
         url = ngrok.connect(port=port, options={"bind_tls": True})
         print(f'Web App can be accessed on: {url}')
 
-    def run_app(self, debug=True):
-        os.system(f"fuser -n tcp -k {self.port}")
-        cmd = f'streamlit run {self.path} --server.port {self.port} >/dev/null'
+    def run_app(self, debug=True,port = 9999):
+        os.system(f"fuser -n tcp -k {port}")
+        cmd = f'streamlit run {self.path} --server.port {port} >/dev/null'
         print("done1")
         with subprocess.Popen(
                 [cmd],
