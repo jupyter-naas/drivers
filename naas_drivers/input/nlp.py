@@ -9,7 +9,7 @@ from transformers.pipelines.text_classification import TextClassificationPipelin
 from transformers.pipelines.text_generation import TextGenerationPipeline
 from transformers.file_utils import is_torch_available, is_tf_available
 from transformers.pipelines.fill_mask import FillMaskPipeline
-from transformers.pipelines.base import infer_framework_from_model
+from transformers.pipelines.base import infer_framework_from_model, Pipeline
 from transformers.utils import logging
 
 logger = logging.get_logger(__name__)
@@ -91,7 +91,7 @@ class NLP(InDriver):
             revision: Optional[str] = None,
             model_kwargs: Dict[str, Any] = {},
             **kwargs
-    ):
+    ) -> Pipeline:
         """
         Args:
         task (:obj:`str`):
@@ -102,8 +102,23 @@ class NLP(InDriver):
             - :obj:`"summarization"``
             - :obj:`"text-generation"`
             - :obj:`"text2text-generation"`
-
-
+        model (:obj:`str` or :obj:`~transformers.PreTrainedModel` or :obj:`~transformers.TFPreTrainedModel`, `optional`):
+            The model that will be used by the pipeline to make predictions.
+        config (:obj:`str` or :obj:`~transformers.PretrainedConfig`, `optional`):
+            The configuration that will be used by the pipeline to instantiate the model. This can be a model
+            identifier or an actual pretrained model configuration inheriting from
+            :class:`~transformers.PretrainedConfig`.
+        tokenizer (:obj:`str` or :obj:`~transformers.PreTrainedTokenizer`, `optional`):
+            The tokenizer that will be used by the pipeline to encode data for the model. This can be a model
+            identifier or an actual pretrained tokenizer inheriting from :class:`~transformers.PreTrainedTokenizer`.
+         framework (:obj:`str`, `optional`):
+            The framework to use, either :obj:`"pt"` for PyTorch or :obj:`"tf"` for TensorFlow. The specified framework
+            must be installed.
+         kwargs:
+            Additional keyword arguments passed along to the specific pipeline init (see the documentation for the
+            corresponding pipeline class for possible values).
+        Returns:
+            NLP Pipeline
         """
         if task not in TASKS:
             raise KeyError(
