@@ -20,7 +20,7 @@ class BaseApp:
 class NaasStreamlit():
     def __init__(self, path, port=9999):
         self.path = path
-        self.run_app()
+        self.run_app(port)
         self._start_server(port=port)
 
     def _start_server(self, port):
