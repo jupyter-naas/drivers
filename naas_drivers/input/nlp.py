@@ -1,0 +1,8 @@
+from naas_drivers.driver import InDriver
+
+from transformers.pipelines.question_answering import QuestionAnsweringArgumentHandler, QuestionAnsweringPipeline
+from transformers.pipelines.text2text_generation import SummarizationPipeline, Text2TextGenerationPipeline, TranslationPipeline
+from transformers.pipelines.text_classification import TextClassificationPipeline
+from transformers.pipelines.text_generation import TextGenerationPipeline
+
+
