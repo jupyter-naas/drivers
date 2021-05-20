@@ -102,6 +102,9 @@ class NLP(InDriver):
         if isinstance(config, str):
             config = AutoConfig.from_pretrained(config, revision=revision, _from_pipeline=task, **model_kwargs)
 
+        if model is None:
+            model = targeted_task["default"]["model"][framework]
+
         if isinstance(model, str):
             # Handle transparent TF/PT model conversion
             if framework == "pt" and model.endswith(".h5"):
