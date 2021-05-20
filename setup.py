@@ -85,6 +85,7 @@ setup(
         "opencv-python==4.5.1.48",
         "pytesseract==0.3.7",
         "wkhtmltopdf==0.2",
+        "transformers==4.6.0"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
