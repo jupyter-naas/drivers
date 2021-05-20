@@ -33,7 +33,7 @@ class NaasStreamlit():
 
     def run_app(self, debug=True,port = 9999):
         os.system(f"fuser -n tcp -k {port}")
-        cmd = f'streamlit run {self.path} --server.port {port} >/dev/null'
+        cmd = f'streamlit run {self.path} --server.port {port}'
         print("done1")
         with subprocess.Popen(
                 [cmd],
