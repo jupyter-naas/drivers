@@ -20,8 +20,8 @@ class BaseApp:
 class NaasStreamlit():
     def __init__(self, path, port=9999):
         self.path = path
-        self.run_app()
         self._start_server(port=port)
+        self.run_app()
 
     def _start_server(self,port):
         active_tunnels = ngrok.get_tunnels()
