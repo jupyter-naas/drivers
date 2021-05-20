@@ -8,6 +8,7 @@ from transformers.pipelines.text2text_generation import SummarizationPipeline, T
 from transformers.pipelines.text_classification import TextClassificationPipeline
 from transformers.pipelines.text_generation import TextGenerationPipeline
 from transformers.file_utils import is_torch_available, is_tf_available
+from transformers.pipelines.fill_mask import FillMaskPipeline
 from transformers.pipelines.base import infer_framework_from_model
 from transformers.utils import logging
 
@@ -19,8 +20,8 @@ if is_torch_available():
         AutoModelForSequenceClassification,
         AutoModelForSeq2SeqLM,
         AutoModelForCausalLM,
-        AutoModelForQuestionAnswering,
-    )
+        AutoModelForQuestionAnswering, AutoModelForMaskedLM,
+)
 
 if is_tf_available():
     import tensorflow as tf
@@ -28,8 +29,8 @@ if is_tf_available():
         TFAutoModelForSequenceClassification,
         TFAutoModelForSeq2SeqLM,
         TFAutoModelForCausalLM,
-        TFAutoModelForQuestionAnswering,
-    )
+        TFAutoModelForQuestionAnswering, TFAutoModelForMaskedLM,
+)
 
 TASKS = {
     "text-classification": {
@@ -69,6 +70,12 @@ TASKS = {
         "pt": AutoModelForSeq2SeqLM if is_torch_available() else None,
         "default": {"model": {"pt": "sshleifer/distilbart-cnn-12-6", "tf": "t5-small"}},
     },
+    "fill-mask": {
+        "impl": FillMaskPipeline,
+        "tf": TFAutoModelForMaskedLM if is_tf_available() else None,
+        "pt": AutoModelForMaskedLM if is_torch_available() else None,
+        "default": {"model": {"pt": "distilroberta-base", "tf": "distilroberta-base"}},
+    }
 
 }
 
@@ -85,6 +92,19 @@ class NLP(InDriver):
             model_kwargs: Dict[str, Any] = {},
             **kwargs
     ):
+        """
+        Args:
+        task (:obj:`str`):
+            The task defining which pipeline will be returned. Currently accepted tasks are:
+            - :obj:`"text-classification"`
+            - :obj:`"question-answering"`
+            - :obj:`"fill-mask"`
+            - :obj:`"summarization"``
+            - :obj:`"text-generation"`
+            - :obj:`"text2text-generation"`
+
+
+        """
         if task not in TASKS:
             raise KeyError(
                 "Unknown task {}, available tasks are {}".format(
