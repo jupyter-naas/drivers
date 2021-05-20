@@ -83,6 +83,7 @@ class NLP(InDriver):
             framework: Optional[str] = None,
             revision: Optional[str] = None,
             model_kwargs: Dict[str, Any] = {},
+            **kwargs
     ):
         if task not in TASKS:
             raise KeyError(
