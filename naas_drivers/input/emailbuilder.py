@@ -359,7 +359,7 @@ class EmailBuilder(InDriver):
             return None
         for row in table_arr:
             res = []
-            is_header = (index == 0 and header == True)
+            is_header = (index == 0 and header is True)
             if isinstance(row, list):
                 for i in range(len(row)):
                     align = col_align[i] if i in col_align else None
