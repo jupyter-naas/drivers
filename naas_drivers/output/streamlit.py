@@ -18,11 +18,6 @@ class BaseApp():
 
 
 class Streamlit(BaseApp):
-    def __init__(self, path, port=9999):
-        super().__init__(port)
-        self.path = path
-        self.run_app()
-
     def run_app(self, debug=True):
         os.system(f"fuser -n tcp -k {self.port}")
         cmd = f'streamlit run {self.path} --server.port {self.port}'
@@ -36,3 +31,8 @@ class Streamlit(BaseApp):
             for line in proc.stdout:
                 if debug:
                     print(line, end="")
+
+    def __init__(self, path, port=9999):
+        super().__init__(port)
+        self.path = path
+        self.run_app()
