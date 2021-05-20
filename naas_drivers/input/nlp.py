@@ -1,6 +1,6 @@
-from typing import Optional, Union
+from typing import Optional, Union, Dict, Any
 
-from transformers import PretrainedConfig, PreTrainedTokenizer
+from transformers import PretrainedConfig, PreTrainedTokenizer, AutoConfig
 
 from naas_drivers.driver import InDriver
 from transformers.pipelines.question_answering import QuestionAnsweringPipeline
@@ -8,6 +8,10 @@ from transformers.pipelines.text2text_generation import SummarizationPipeline, T
 from transformers.pipelines.text_classification import TextClassificationPipeline
 from transformers.pipelines.text_generation import TextGenerationPipeline
 from transformers.file_utils import is_torch_available, is_tf_available
+from transformers.pipelines.base import infer_framework_from_model
+from transformers.utils import logging
+
+logger = logging.get_logger(__name__)
 
 if is_torch_available():
     import torch
@@ -76,6 +80,9 @@ class NLP(InDriver):
             model: Optional = None,
             config: Optional[Union[str, PretrainedConfig]] = None,
             tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
+            framework: Optional[str] = None,
+            revision: Optional[str] = None,
+            model_kwargs: Dict[str, Any] = {},
     ):
         if task not in TASKS:
             raise KeyError(
@@ -83,3 +90,42 @@ class NLP(InDriver):
                     task, list(TASKS.keys())
                 )
             )
+
+        targeted_task = TASKS[task]
+        task_class = targeted_task["impl"]
+
+        if model is None:
+            model = targeted_task["default"]["model"]
+
+        if framework is None:
+            framework, model = infer_framework_from_model(model, targeted_task, revision=revision, task=task)
+
+        task_class, model_class = targeted_task["impl"], targeted_task[framework]
+        if isinstance(config, str):
+            config = AutoConfig.from_pretrained(config, revision=revision, _from_pipeline=task, **model_kwargs)
+
+        if isinstance(model, str):
+            # Handle transparent TF/PT model conversion
+            if framework == "pt" and model.endswith(".h5"):
+                model_kwargs["from_tf"] = True
+                logger.warning(
+                    "Model might be a TensorFlow model (ending with `.h5`) but TensorFlow is not available. "
+                    "Trying to load the model with PyTorch."
+                )
+            elif framework == "tf" and model.endswith(".bin"):
+                model_kwargs["from_pt"] = True
+                logger.warning(
+                    "Model might be a PyTorch model (ending with `.bin`) but PyTorch is not available. "
+                    "Trying to load the model with Tensorflow."
+                )
+
+            if model_class is None:
+                raise ValueError(
+                    f"Pipeline using {framework} framework, but this framework is not supported by this pipeline."
+                )
+
+            model = model_class.from_pretrained(
+                model, config=config, revision=revision, _from_pipeline=task, **model_kwargs
+            )
+
+        return task_class(model=model, framework=framework, task=task, **kwargs)
