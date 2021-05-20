@@ -42,7 +42,7 @@ class NaasStreamlit():
                 bufsize=1,
                 universal_newlines=True,
         ) as proc:
-            print("done2")
+            print(cmd)
             for line in proc.stdout:
                 if debug:
                     print(line, end="")
