@@ -32,6 +32,8 @@ from naas_drivers.inputOutput.hubspot import Hubspot
 from naas_drivers.inputOutput.thinkific import Thinkific
 from naas_drivers.input.markdown import Markdown
 
+from naas_drivers.output.streamlit import Streamlit
+
 import requests
 import os
 
@@ -68,6 +70,7 @@ healthcheck = Healthcheck()
 ifttt = Ifttt()
 integromat = Integromat()
 zappier = Zappier()
+streamlit = Streamlit()
 
 # InOut drivers
 bobapp = Bobapp()
