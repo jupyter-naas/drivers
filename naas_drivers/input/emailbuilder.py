@@ -567,7 +567,7 @@ class EmailBuilder(InDriver):
                        logo_width='6%',
                        logo_padding='5px',
                        logo_margin='0px 15px',
-                       logo_bg_color='white'
+                       logo_bg_color='white',
                        naas=False):
         net = []
         com = []
