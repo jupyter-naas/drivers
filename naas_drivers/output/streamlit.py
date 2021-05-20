@@ -23,7 +23,7 @@ class Streamlit(BaseApp):
         self.path = path
         self.run_app()
 
-    def run_app(self, debug=True):
+    def run(self, debug=True):
         os.system(f"fuser -n tcp -k {self.port}")
         cmd = f'streamlit run {self.path} --server.port {self.port}'
         with subprocess.Popen(
