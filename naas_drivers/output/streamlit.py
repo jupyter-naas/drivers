@@ -20,10 +20,10 @@ class BaseApp:
 class NaasStreamlit():
     def __init__(self, path, port=9999):
         self.path = path
-        self._start_server(port=port)
         self.run_app()
+        self._start_server(port=port)
 
-    def _start_server(self,port):
+    def _start_server(self, port):
         active_tunnels = ngrok.get_tunnels()
         for tunnel in active_tunnels:
             public_url = tunnel.public_url
@@ -31,10 +31,9 @@ class NaasStreamlit():
         url = ngrok.connect(port=port, options={"bind_tls": True})
         print(f'Web App can be accessed on: {url}')
 
-    def run_app(self, debug=True,port = 9999):
+    def run_app(self, debug=True, port=9999):
         os.system(f"fuser -n tcp -k {port}")
         cmd = f'streamlit run {self.path} --server.port {port}'
-        print("done1")
         with subprocess.Popen(
                 [cmd],
                 shell=True,
