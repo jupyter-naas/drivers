@@ -95,9 +95,6 @@ class NLP(InDriver):
         targeted_task = TASKS[task]
         task_class = targeted_task["impl"]
 
-        if model is None:
-            model = targeted_task["default"]["model"]
-
         if framework is None:
             framework, model = infer_framework_from_model(model, targeted_task, revision=revision, task=task)
 
