@@ -18,6 +18,9 @@ class BaseApp:
 
 
 class NaasStreamlit(BaseApp):
+    """
+    Naas Streamlit app
+    """
     def __init__(self, path="app.py", port=9999):
         super().__init__(port)
         self.path = path
