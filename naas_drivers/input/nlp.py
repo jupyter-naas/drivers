@@ -4,13 +4,21 @@ from transformers import PretrainedConfig, PreTrainedTokenizer, AutoConfig, Auto
 
 from naas_drivers.driver import InDriver
 from transformers.pipelines.question_answering import QuestionAnsweringPipeline
-from transformers.pipelines.text2text_generation import SummarizationPipeline, Text2TextGenerationPipeline
+from transformers.pipelines.text2text_generation import SummarizationPipeline, Text2TextGenerationPipeline, \
+    TranslationPipeline
 from transformers.pipelines.text_classification import TextClassificationPipeline
 from transformers.pipelines.text_generation import TextGenerationPipeline
-from transformers.file_utils import is_torch_available, is_tf_available
+from transformers.pipelines.feature_extraction import FeatureExtractionPipeline
+from transformers.pipelines.token_classification import TokenClassificationPipeline
 from transformers.pipelines.fill_mask import FillMaskPipeline
+from transformers.pipelines.table_question_answering import TableQuestionAnsweringPipeline
+from transformers.pipelines.zero_shot_classification import ZeroShotClassificationPipeline
+from transformers.pipelines.conversational import ConversationalPipeline
+from transformers.pipelines.image_classification import ImageClassificationPipeline
 from transformers.pipelines.base import infer_framework_from_model, Pipeline
 from transformers.utils import logging
+from transformers.file_utils import is_torch_available, is_tf_available
+
 
 logger = logging.get_logger(__name__)
 
@@ -20,7 +28,10 @@ if is_torch_available():
         AutoModelForSequenceClassification,
         AutoModelForSeq2SeqLM,
         AutoModelForCausalLM,
-        AutoModelForQuestionAnswering, AutoModelForMaskedLM,
+        AutoModelForQuestionAnswering,
+        AutoModelForMaskedLM,
+        AutoModel,
+        AutoModelForTokenClassification, AutoModelForTableQuestionAnswering, AutoModelForImageClassification,
 )
 
 if is_tf_available():
@@ -29,10 +40,16 @@ if is_tf_available():
         TFAutoModelForSequenceClassification,
         TFAutoModelForSeq2SeqLM,
         TFAutoModelForCausalLM,
-        TFAutoModelForQuestionAnswering, TFAutoModelForMaskedLM,
+        TFAutoModelForQuestionAnswering, TFAutoModelForMaskedLM, TFAutoModel, TFAutoModelForTokenClassification,
 )
 
 TASKS = {
+    "feature-extraction": {
+        "impl": FeatureExtractionPipeline,
+        "tf": TFAutoModel if is_tf_available() else None,
+        "pt": AutoModel if is_torch_available() else None,
+        "default": {"model": {"pt": "distilbert-base-cased", "tf": "distilbert-base-cased"}},
+    },
     "text-classification": {
         "impl": TextClassificationPipeline,
         "tf": TFAutoModelForSequenceClassification if is_tf_available() else None,
@@ -42,6 +59,60 @@ TASKS = {
                 "pt": "distilbert-base-uncased-finetuned-sst-2-english",
                 "tf": "distilbert-base-uncased-finetuned-sst-2-english",
             },
+        },
+    },
+    "token-classification": {
+        "impl": TokenClassificationPipeline,
+        "tf": TFAutoModelForTokenClassification if is_tf_available() else None,
+        "pt": AutoModelForTokenClassification if is_torch_available() else None,
+        "default": {
+            "model": {
+                "pt": "dbmdz/bert-large-cased-finetuned-conll03-english",
+                "tf": "dbmdz/bert-large-cased-finetuned-conll03-english",
+            },
+        },
+    },
+    "question-answering": {
+        "impl": QuestionAnsweringPipeline,
+        "tf": TFAutoModelForQuestionAnswering if is_tf_available() else None,
+        "pt": AutoModelForQuestionAnswering if is_torch_available() else None,
+        "default": {
+            "model": {"pt": "distilbert-base-cased-distilled-squad", "tf": "distilbert-base-cased-distilled-squad"},
+        },
+    },
+    "table-question-answering": {
+        "impl": TableQuestionAnsweringPipeline,
+        "pt": AutoModelForTableQuestionAnswering if is_torch_available() else None,
+        "tf": None,
+        "default": {
+            "model": {
+                "pt": "google/tapas-base-finetuned-wtq",
+                "tokenizer": "google/tapas-base-finetuned-wtq",
+                "tf": "google/tapas-base-finetuned-wtq",
+            },
+        },
+    },
+    "fill-mask": {
+        "impl": FillMaskPipeline,
+        "tf": TFAutoModelForMaskedLM if is_tf_available() else None,
+        "pt": AutoModelForMaskedLM if is_torch_available() else None,
+        "default": {"model": {"pt": "distilroberta-base", "tf": "distilroberta-base"}},
+    },
+    "summarization": {
+        "impl": SummarizationPipeline,
+        "tf": TFAutoModelForSeq2SeqLM if is_tf_available() else None,
+        "pt": AutoModelForSeq2SeqLM if is_torch_available() else None,
+        "default": {"model": {"pt": "sshleifer/distilbart-cnn-12-6", "tf": "t5-small"}},
+    },
+    # This task is a special case as it's parametrized by SRC, TGT languages.
+    "translation": {
+        "impl": TranslationPipeline,
+        "tf": TFAutoModelForSeq2SeqLM if is_tf_available() else None,
+        "pt": AutoModelForSeq2SeqLM if is_torch_available() else None,
+        "default": {
+            ("en", "fr"): {"model": {"pt": "t5-base", "tf": "t5-base"}},
+            ("en", "de"): {"model": {"pt": "t5-base", "tf": "t5-base"}},
+            ("en", "ro"): {"model": {"pt": "t5-base", "tf": "t5-base"}},
         },
     },
     "text2text-generation": {
@@ -56,27 +127,28 @@ TASKS = {
         "pt": AutoModelForCausalLM if is_torch_available() else None,
         "default": {"model": {"pt": "gpt2", "tf": "gpt2"}},
     },
-    "question-answering": {
-        "impl": QuestionAnsweringPipeline,
-        "tf": TFAutoModelForQuestionAnswering if is_tf_available() else None,
-        "pt": AutoModelForQuestionAnswering if is_torch_available() else None,
+    "zero-shot-classification": {
+        "impl": ZeroShotClassificationPipeline,
+        "tf": TFAutoModelForSequenceClassification if is_tf_available() else None,
+        "pt": AutoModelForSequenceClassification if is_torch_available() else None,
         "default": {
-            "model": {"pt": "distilbert-base-cased-distilled-squad", "tf": "distilbert-base-cased-distilled-squad"},
+            "model": {"pt": "facebook/bart-large-mnli", "tf": "roberta-large-mnli"},
+            "config": {"pt": "facebook/bart-large-mnli", "tf": "roberta-large-mnli"},
+            "tokenizer": {"pt": "facebook/bart-large-mnli", "tf": "roberta-large-mnli"},
         },
     },
-    "summarization": {
-        "impl": SummarizationPipeline,
-        "tf": TFAutoModelForSeq2SeqLM if is_tf_available() else None,
-        "pt": AutoModelForSeq2SeqLM if is_torch_available() else None,
-        "default": {"model": {"pt": "sshleifer/distilbart-cnn-12-6", "tf": "t5-small"}},
+    "conversational": {
+        "impl": ConversationalPipeline,
+        "tf": TFAutoModelForCausalLM if is_tf_available() else None,
+        "pt": AutoModelForCausalLM if is_torch_available() else None,
+        "default": {"model": {"pt": "microsoft/DialoGPT-medium", "tf": "microsoft/DialoGPT-medium"}},
     },
-    "fill-mask": {
-        "impl": FillMaskPipeline,
-        "tf": TFAutoModelForMaskedLM if is_tf_available() else None,
-        "pt": AutoModelForMaskedLM if is_torch_available() else None,
-        "default": {"model": {"pt": "distilroberta-base", "tf": "distilroberta-base"}},
-    }
-
+    "image-classification": {
+        "impl": ImageClassificationPipeline,
+        "tf": None,
+        "pt": AutoModelForImageClassification if is_torch_available() else None,
+        "default": {"model": {"pt": "google/vit-base-patch16-224"}},
+    },
 }
 
 
@@ -96,12 +168,18 @@ class NLP(InDriver):
         Args:
         task (:obj:`str`):
             The task defining which pipeline will be returned. Currently accepted tasks are:
+           - :obj:`"feature-extraction"`
             - :obj:`"text-classification"`
+            - :obj:`"sentiment-analysis"` (alias of :obj:`"text-classification")
+            - :obj:`"token-classification"`
+            - :obj:`"ner"` (alias of :obj:`"token-classification")
             - :obj:`"question-answering"`
             - :obj:`"fill-mask"`
-            - :obj:`"summarization"``
+            - :obj:`"summarization"`
+            - :obj:`"translation_xx_to_yy"`
+            - :obj:`"translation"`
             - :obj:`"text-generation"`
-            - :obj:`"text2text-generation"`
+            - :obj:`"conversational"`
         model (:obj:`str` or :obj:`~transformers.PreTrainedModel` or :obj:`~transformers.TFPreTrainedModel`, `optional`):
             The model that will be used by the pipeline to make predictions.
         config (:obj:`str` or :obj:`~transformers.PretrainedConfig`, `optional`):
