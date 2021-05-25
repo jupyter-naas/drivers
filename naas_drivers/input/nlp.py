@@ -168,18 +168,18 @@ class NLP(InDriver):
         Args:
         task (:obj:`str`):
             The task defining which pipeline will be returned. Currently accepted tasks are:
-           - :obj:`"feature-extraction"`
-            - :obj:`"text-classification"`
-            - :obj:`"sentiment-analysis"` (alias of :obj:`"text-classification")
-            - :obj:`"token-classification"`
-            - :obj:`"ner"` (alias of :obj:`"token-classification")
-            - :obj:`"question-answering"`
-            - :obj:`"fill-mask"`
-            - :obj:`"summarization"`
-            - :obj:`"translation_xx_to_yy"`
-            - :obj:`"translation"`
-            - :obj:`"text-generation"`
-            - :obj:`"conversational"`
+                - :obj:`"feature-extraction"`
+                - :obj:`"text-classification"`
+                - :obj:`"sentiment-analysis"` (alias of :obj:`"text-classification")
+                - :obj:`"token-classification"`
+                - :obj:`"ner"` (alias of :obj:`"token-classification")
+                - :obj:`"question-answering"`
+                - :obj:`"fill-mask"`
+                - :obj:`"summarization"`
+                - :obj:`"translation_xx_to_yy"`
+                - :obj:`"translation"`
+                - :obj:`"text-generation"`
+                - :obj:`"conversational"`
         model (:obj:`str` or :obj:`~transformers.PreTrainedModel` or :obj:`~transformers.TFPreTrainedModel`, `optional`):
             The model that will be used by the pipeline to make predictions.
         config (:obj:`str` or :obj:`~transformers.PretrainedConfig`, `optional`):
