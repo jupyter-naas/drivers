@@ -36,7 +36,7 @@ from naas_drivers.output.streamlit import NaasStreamlit
 import requests
 import os
 
-__version__ = "0.55.0"
+__version__ = "0.56.0"
 
 __github_repo = "jupyter-naas/drivers"
 
