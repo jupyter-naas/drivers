@@ -33,7 +33,9 @@ if is_torch_available():
         AutoModelForQuestionAnswering,
         AutoModelForMaskedLM,
         AutoModel,
-        AutoModelForTokenClassification, AutoModelForTableQuestionAnswering, AutoModelForImageClassification,
+        AutoModelForTokenClassification,
+        AutoModelForTableQuestionAnswering,
+        AutoModelForImageClassification,
 )
 
 if is_tf_available():
@@ -42,7 +44,10 @@ if is_tf_available():
         TFAutoModelForSequenceClassification,
         TFAutoModelForSeq2SeqLM,
         TFAutoModelForCausalLM,
-        TFAutoModelForQuestionAnswering, TFAutoModelForMaskedLM, TFAutoModel, TFAutoModelForTokenClassification,
+        TFAutoModelForQuestionAnswering,
+        TFAutoModelForMaskedLM,
+        TFAutoModel,
+        TFAutoModelForTokenClassification,
 )
 
 TASKS = {
@@ -153,6 +158,10 @@ TASKS = {
     },
 }
 
+TASK_ALIASES = {
+    "sentiment-analysis": "text-classification",
+    "ner": "token-classification",
+}
 
 class NLP(InDriver):
     def get(
@@ -206,6 +215,8 @@ class NLP(InDriver):
                     task, list(TASKS.keys())
                 )
             )
+        if task in TASK_ALIASES:
+            task = TASK_ALIASES[task]
 
         targeted_task = TASKS[task]
         task_class = targeted_task["impl"]
