@@ -83,6 +83,7 @@ toucan = Toucan()
 linkedin = LinkedIn()
 hubspot = Hubspot()
 thinkific = Thinkific()
+streamlit = NaasStreamlit()
 
 __doc_url = "https://naas.gitbook.io/drivers/"
 
