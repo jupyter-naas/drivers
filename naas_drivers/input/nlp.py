@@ -23,7 +23,7 @@ from transformers.file_utils import is_torch_available, is_tf_available
 logger = logging.get_logger(__name__)
 
 if is_torch_available():
-    import torch
+    import torch  # noqa: E401
     from transformers.models.auto.modeling_auto import (
         AutoModelForSequenceClassification,
         AutoModelForSeq2SeqLM,
@@ -35,7 +35,7 @@ if is_torch_available():
 )
 
 if is_tf_available():
-    import tensorflow as tf
+    import tensorflow as tf # noqa: E401
     from transformers.models.auto.modeling_tf_auto import (
         TFAutoModelForSequenceClassification,
         TFAutoModelForSeq2SeqLM,
