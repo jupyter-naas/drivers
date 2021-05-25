@@ -1,3 +1,5 @@
+# flake8: noqa
+
 from typing import Optional, Union, Dict, Any
 
 from transformers import PretrainedConfig, PreTrainedTokenizer, AutoConfig, AutoTokenizer
@@ -23,7 +25,7 @@ from transformers.file_utils import is_torch_available, is_tf_available
 logger = logging.get_logger(__name__)
 
 if is_torch_available():
-    import torch  # noqa: E401
+    import torch
     from transformers.models.auto.modeling_auto import (
         AutoModelForSequenceClassification,
         AutoModelForSeq2SeqLM,
@@ -35,7 +37,7 @@ if is_torch_available():
 )
 
 if is_tf_available():
-    import tensorflow as tf # noqa: E401
+    import tensorflow as tf
     from transformers.models.auto.modeling_tf_auto import (
         TFAutoModelForSequenceClassification,
         TFAutoModelForSeq2SeqLM,
