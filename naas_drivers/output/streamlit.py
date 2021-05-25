@@ -6,9 +6,8 @@ from pyngrok import ngrok
 class BaseApp:
     def __init__(self, port=9999):
         self.port = port
-        self._start_server()
 
-    def _start_server(self):
+    def start_server(self):
         active_tunnels = ngrok.get_tunnels()
         for tunnel in active_tunnels:
             public_url = tunnel.public_url
@@ -17,9 +16,11 @@ class BaseApp:
         print(f'Web App can be accessed on: {url}')
 
 
-class NaasStreamlit(BaseApp):
+class NaasStreamlit():
     def __init__(self, path, port=9999):
         super().__init__(port)
+        server = BaseApp()
+        server.start_server()
         self.path = path
         self.run_app()
 
