@@ -209,17 +209,18 @@ class NLP(InDriver):
         Returns:
             NLP Pipeline
         """
+        if task in TASK_ALIASES:
+            task = TASK_ALIASES[task]
+
+        targeted_task = TASKS[task]
+        task_class = targeted_task["impl"]
+
         if task not in TASKS:
             raise KeyError(
                 "Unknown task {}, available tasks are {}".format(
                     task, list(TASKS.keys())
                 )
             )
-        if task in TASK_ALIASES:
-            task = TASK_ALIASES[task]
-
-        targeted_task = TASKS[task]
-        task_class = targeted_task["impl"]
 
         if framework is None:
             framework, model = infer_framework_from_model(model, targeted_task, revision=revision, task=task)
