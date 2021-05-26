@@ -86,6 +86,8 @@ setup(
         "pytesseract==0.3.7",
         "wkhtmltopdf==0.2",
         "streamlit==0.82.0",
+        "transformers==4.6.1",
+        "pyngrok==5.0.5",
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
