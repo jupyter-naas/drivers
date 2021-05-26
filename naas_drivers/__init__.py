@@ -32,7 +32,6 @@ from naas_drivers.inputOutput.hubspot import Hubspot
 from naas_drivers.inputOutput.thinkific import Thinkific
 from naas_drivers.input.markdown import Markdown
 from naas_drivers.output.streamlit import NaasStreamlit
-from naas_drivers.input.nlp import NLP
 
 import requests
 import os
