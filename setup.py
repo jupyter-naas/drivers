@@ -18,7 +18,7 @@ setup(
         "dev": [
             "pytest==6.2.3",
             "pytest-mock==3.6.0",
-            "requests-mock==1.9.1",
+            "requests-mock==1.9.3",
             "twine==3.4.1",
             "flake8==3.9.1",
             "black==21.4b2",
