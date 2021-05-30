@@ -1,3 +1,20 @@
+## 0.58.0 (2021-05-30)
+
+### Fix
+
+- missing comma
+
+### Feat
+
+- update text style option
+- new email functions
+- the emailBuilder allow to set tables headers
+
+### Refactor
+
+- code lint fix
+- table text has the same size than others
+
 ## 0.57.1 (2021-05-26)
 
 ## 0.57.0 (2021-05-26)
