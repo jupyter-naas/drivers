@@ -88,10 +88,10 @@ class LinkedIn(InDriver, OutDriver):
         bd_month = None
         bd_year = None
 
-        pf = profil.get('data')
+        pf = profil.get("data")
         if pf is not None:
-            firstname = pf.get('firstName')
-            lastname = pf.get('lastName').upper()
+            firstname = pf.get("firstName")
+            lastname = pf.get("lastName").upper()
             birthdate = pf.get("birthDate")
             if birthdate is not None:
                 bd_day = birthdate.get("day", "Day Unknown")
@@ -104,13 +104,13 @@ class LinkedIn(InDriver, OutDriver):
             lk_industry = pf.get("industryName")
 
         # Get network info
-        nw = network.get('data')
+        nw = network.get("data")
         lk_followers = None
         if nw is not None:
             lk_followers = nw.get("followersCount")
 
         # Get contact info
-        ct = contact.get('data')
+        ct = contact.get("data")
         lk_phone = None
         lk_email = None
         lk_twiter = None
@@ -156,9 +156,11 @@ class LinkedIn(InDriver, OutDriver):
             return df
 
     def get_conversations(self):
-        data = requests.get('https://www.linkedin.com/voyager/api/messaging/conversations',
-                            cookies=self.cookies,
-                            headers=self.headers)
+        data = requests.get(
+            "https://www.linkedin.com/voyager/api/messaging/conversations",
+            cookies=self.cookies,
+            headers=self.headers,
+        )
         return data.json()
 
     def get_messages(self):
@@ -171,8 +173,8 @@ class LinkedIn(InDriver, OutDriver):
         lk_conversation = []
         lk_event = []
         for m in messages:
-            lk_type = m.get('$type')
-            if lk_type == 'com.linkedin.voyager.identity.shared.MiniProfile':
+            lk_type = m.get("$type")
+            if lk_type == "com.linkedin.voyager.identity.shared.MiniProfile":
                 # Init variable
                 firstname = None
                 lastname = None
@@ -200,7 +202,7 @@ class LinkedIn(InDriver, OutDriver):
                     }
                     lk_profile.append(tmp_dict)
 
-            if lk_type == 'com.linkedin.voyager.messaging.Conversation':
+            if lk_type == "com.linkedin.voyager.messaging.Conversation":
                 # Init variable
                 profile_id = None
                 message_id = None
@@ -208,15 +210,15 @@ class LinkedIn(InDriver, OutDriver):
                 lastreadat = None
 
                 # Get variable from dict
-                profile_id = m.get('*participants')
-                message_id = m.get('entityUrn')
+                profile_id = m.get("*participants")
+                message_id = m.get("entityUrn")
                 message_id = message_id.rsplit("urn:li:fs_conversation:")[-1]
                 lastactivityat = m.get("lastActivityAt")
                 lastreadat = m.get("lastReadAt")
                 if lastactivityat is not None:
-                    lastactivityat = datetime.fromtimestamp(lastactivityat/1000.)
+                    lastactivityat = datetime.fromtimestamp(lastactivityat / 1000.0)
                 if lastreadat is not None:
-                    lastreadat = datetime.fromtimestamp(lastreadat/1000.)
+                    lastreadat = datetime.fromtimestamp(lastreadat / 1000.0)
 
                 # Create conversation dict
                 profile_id = str(profile_id).rsplit(",")[-1].rsplit(")")[0]
@@ -230,7 +232,7 @@ class LinkedIn(InDriver, OutDriver):
                     }
                     lk_conversation.append(tmp_dict)
 
-            if lk_type == 'com.linkedin.voyager.messaging.Event':
+            if lk_type == "com.linkedin.voyager.messaging.Event":
                 # Init variable
                 message_id = None
                 message_type = None
@@ -238,9 +240,9 @@ class LinkedIn(InDriver, OutDriver):
 
                 # Get variable from dict
                 message_id = m.get("entityUrn")
-                message_id = message_id.rsplit("urn:li:fs_event:(")[-1].rsplit(',')[0]
-                message_type = m.get('subtype')
-                if message_type != 'SPONSORED_INMAIL':
+                message_id = message_id.rsplit("urn:li:fs_event:(")[-1].rsplit(",")[0]
+                message_type = m.get("subtype")
+                if message_type != "SPONSORED_INMAIL":
                     for key in m.get("eventContent"):
                         if key == "attributedBody":
                             message_text = m.get("eventContent").get(key).get("text")
@@ -261,29 +263,25 @@ class LinkedIn(InDriver, OutDriver):
         df_event = pd.DataFrame.from_records(lk_event)
 
         # Merge dataframe
-        df_message = pd.merge(df_profile,
-                              df_conversation,
-                              on="PROFILE_ID",
-                              how="left")
+        df_message = pd.merge(df_profile, df_conversation, on="PROFILE_ID", how="left")
 
-        df_message = pd.merge(df_message,
-                              df_event,
-                              on="MESSAGE_ID",
-                              how="left")
+        df_message = pd.merge(df_message, df_event, on="MESSAGE_ID", how="left")
         # Cleaning
         to_drop = ["MESSAGE_ID", "PROFILE_ID"]
         df_message = df_message.drop(to_drop, axis=1)
         return df_message.reset_index(drop=True)
 
     def get_post(self, url):
-        activity_id = url.split("activity-")[-1].split("-")[0];
-        data = requests.get(f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
-                            cookies=self.cookies,
-                            headers=self.headers)
+        activity_id = url.split("activity-")[-1].split("-")[0]
+        data = requests.get(
+            f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
+            cookies=self.cookies,
+            headers=self.headers,
+        )
         return data.json()
 
     def get_post_data(self, url):
-        activity_id = url.split("activity-")[-1].split("-")[0];
+        activity_id = url.split("activity-")[-1].split("-")[0]
         # Get lk conversation
         post = self.get_post(url)
 
@@ -303,11 +301,14 @@ class LinkedIn(InDriver, OutDriver):
         posts = post.get("included")
         if posts is not None:
             for p in posts:
-                lk_type = p.get('$type')
+                lk_type = p.get("$type")
                 if lk_type == "com.linkedin.voyager.feed.shared.SocialActivityCounts":
-                    uid = p.get('entityUrn')
-                    if (uid  == f"urn:li:fs_socialActivityCounts:urn:li:activity:{activity_id}" or 
-                        "urn:li:fs_socialActivityCounts:urn:li:ugcPost" in uid):
+                    uid = p.get("entityUrn")
+                    if (
+                        uid
+                        == f"urn:li:fs_socialActivityCounts:urn:li:activity:{activity_id}"
+                        or "urn:li:fs_socialActivityCounts:urn:li:ugcPost" in uid
+                    ):
                         tot_likes = p.get("numLikes")
                         tot_views = p.get("numViews")
                         tot_comments = p.get("numComments")
@@ -329,7 +330,9 @@ class LinkedIn(InDriver, OutDriver):
                     commentary = p.get("commentary")
                     if commentary is not None:
                         title = commentary.get("text").get("text").rsplit("\n")[0]
-                    datepost = p.get("actor").get("subDescription").get("accessibilityText")
+                    datepost = (
+                        p.get("actor").get("subDescription").get("accessibilityText")
+                    )
 
         # Data
         data = {
@@ -352,52 +355,56 @@ class LinkedIn(InDriver, OutDriver):
 
     def __get_post_urn(self, post_link):
         response = requests.get(post_link).text
-        urn_index = response.index('urn:li:activity:')
+        urn_index = response.index("urn:li:activity:")
         finish_index = response.index('"', urn_index)
         activity_urn = response[urn_index:finish_index]
         return activity_urn.rsplit("?")[0]
 
-    def get_post_likes(self,
-                       post_link=None,
-                       thread_urn=None,
-                       count=100,
-                       start=0):
+    def get_post_likes(self, post_link=None, thread_urn=None, count=100, start=0):
         if post_link:
-            thread_urn = urllib.parse.quote(
-                self.get_post_urn(post_link), safe='')
+            thread_urn = urllib.parse.quote(self.get_post_urn(post_link), safe="")
 
         if not thread_urn:
             print("Error, specify a 'post_link' or a 'thread_urn'")
             return None
 
-        user = {'URN_ID': [],
-                'PUBLIC_IDENTIFIER': [],
-                'FIRSTNAME': [],
-                'LASTNAME': [],
-                'JOB_TITLE': [],
-                }
+        user = {
+            "URN_ID": [],
+            "PUBLIC_IDENTIFIER": [],
+            "FIRSTNAME": [],
+            "LASTNAME": [],
+            "JOB_TITLE": [],
+        }
 
-        reacts = {'URN_ID': [],
-                  'REACTION_TYPE': []
-                  }
+        reacts = {"URN_ID": [], "REACTION_TYPE": []}
+        url = f"https://www.linkedin.com/voyager/api/feed/reactions?count={count}&q=reactionType&start={start}&threadUrn={thread_urn}"
         while True:
             try:
-                res = requests.get(f"https://www.linkedin.com/voyager/api/feed/reactions?count={count}&q=reactionType&start={start}&threadUrn={thread_urn}",
-                                   cookies=self.cookies,
-                                   headers=self.headers).json()
-                for elem in res.get('included'):
-                    if elem.get('$type') =='com.linkedin.voyager.identity.shared.MiniProfile':
-                        user['URN_ID'].append(elem.get('entityUrn').replace("urn:li:fs_miniProfile:", ""))
-                        user['PUBLIC_IDENTIFIER'].append(elem.get('publicIdentifier'))
-                        user['FIRSTNAME'].append(elem.get('firstName'))
-                        user['LASTNAME'].append(elem.get('lastName'))
-                        user['JOB_TITLE'].append(elem.get('occupation'))
-                    if elem.get("$type") == 'com.linkedin.voyager.feed.social.Reaction':
-                        reacts['URN_ID'].append(elem.get('actorUrn').replace("urn:li:fs_miniProfile:", ""))
-                        reacts['REACTION_TYPE'].append(elem['reactionType'])
-                if "paging" in res.get('data'):
+                res = requests.get(
+                    url,
+                    cookies=self.cookies,
+                    headers=self.headers,
+                ).json()
+                for elem in res.get("included"):
+                    if (
+                        elem.get("$type")
+                        == "com.linkedin.voyager.identity.shared.MiniProfile"
+                    ):
+                        user["URN_ID"].append(
+                            elem.get("entityUrn").replace("urn:li:fs_miniProfile:", "")
+                        )
+                        user["PUBLIC_IDENTIFIER"].append(elem.get("publicIdentifier"))
+                        user["FIRSTNAME"].append(elem.get("firstName"))
+                        user["LASTNAME"].append(elem.get("lastName"))
+                        user["JOB_TITLE"].append(elem.get("occupation"))
+                    if elem.get("$type") == "com.linkedin.voyager.feed.social.Reaction":
+                        reacts["URN_ID"].append(
+                            elem.get("actorUrn").replace("urn:li:fs_miniProfile:", "")
+                        )
+                        reacts["REACTION_TYPE"].append(elem["reactionType"])
+                if "paging" in res.get("data"):
                     start += count
-                    if (res.get('data').get('paging').get('total') < start):
+                    if res.get("data").get("paging").get("total") < start:
                         break
             except requests.exceptions.RequestException as e:
                 print(e)
