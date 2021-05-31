@@ -1,3 +1,14 @@
+## 0.59.0 (2021-05-31)
+
+### Fix
+
+- lint code
+- catch exception when request for post like
+
+### Feat
+
+- linkedin add get_post_likes()
+
 ## 0.58.1 (2021-05-31)
 
 ## 0.58.0 (2021-05-30)
