@@ -399,7 +399,8 @@ class LinkedIn(InDriver, OutDriver):
                     start += count
                     if (res.get('data').get('paging').get('total') < start):
                         break
-            except:
+            except requests.exceptions.RequestException as e:
+                print(e)
                 break
         df_user = pd.DataFrame(user)
         df_reacts = pd.DataFrame(reacts)
