@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 import string
 import json
+import re
 
 
 class HSCRUD:
