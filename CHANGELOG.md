@@ -1,3 +1,14 @@
+## 0.60.0 (2021-06-02)
+
+### Fix
+
+- hubspot lint
+- (hubspot) import re
+
+### Feat
+
+- create note in hubspot, get contacts / deals with multiples properties
+
 ## 0.59.0 (2021-05-31)
 
 ### Fix
