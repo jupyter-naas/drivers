@@ -424,7 +424,7 @@ class LinkedIn(InDriver, OutDriver):
                            headers=self.headers)
         return res.get('data', {}).get('entityUrn').replace("urn:li:fs_profile:", "")
 
-    def send_message(self, content, recipients_url=None, recipients_urn=[]):
+    def send_message(self, content, recipients_url=None, recipients_urn=None):
         params = {"action": "create"}
         message_event = {
             "eventCreate": {
@@ -441,6 +441,13 @@ class LinkedIn(InDriver, OutDriver):
                 }
             }
         }
+        if type(recipients_url) is not list and recipients_url is not None:
+            recipients_url = [recipients_url]
+        if recipients_urn is not list:
+            if recipients_urn is str:
+                recipients_urn = [recipients_urn]
+            else:
+                recipients_urn = []
         if recipients_url is not None:
             for recipient in recipients_url:
                 recipients_urn.append(self.get_user_urn(recipient))
