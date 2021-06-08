@@ -8,7 +8,18 @@ from datetime import datetime
 
 
 class LinkedIn(InDriver, OutDriver):
-    # Get LK info from LK
+    def get_profile_id(self, url):
+        url = url.rsplit("in/")[-1].rsplit("/")[0]
+        return url
+    
+    def get_birthdate(self, bd):
+        if bd is None:
+            return "No birthdate"
+        bd_day = bd.get("day", "Day Unknown")
+        bd_month = bd.get("month", "Month Unknown")
+        bd_year = bd.get("year", "Year Unknown")
+        return f"{bd_day}/{bd_month}/{bd_year}"
+
     def __get_id(self, url):
         url = url.rsplit("in/")[-1].rsplit("/")[0]
         return url
@@ -19,7 +30,8 @@ class LinkedIn(InDriver, OutDriver):
         self.jessionid = jessionid
 
         # Init cookies
-        self.cookies = {"li_at": self.li_at, "JSESSIONID": f'"{self.jessionid}"'}
+        self.cookies = {"li_at": self.li_at,
+                        "JSESSIONID": f'"{self.jessionid}"'}
 
         # Init headers
         self.headers = {
@@ -30,6 +42,15 @@ class LinkedIn(InDriver, OutDriver):
             "X-Requested-With": "XMLHttpRequest",
             "X-Restli-Protocol-Version": "2.0.0",
         }
+        
+        # Init end point
+        self.profile = Profile(self.cookies, self.headers)
+        self.network = Network(self.cookies, self.headers)
+        self.invitation = Invitation(self.cookies, self.headers)
+        self.message = Message(self.cookies, self.headers)
+        self.post = Post(self.cookies, self.headers)
+        self.event = Event(self.cookies, self.headers)
+        self.company = Company(self.cookies, self.headers)
 
         # Set connexion to active
         self.connected = True
@@ -465,3 +486,124 @@ class LinkedIn(InDriver, OutDriver):
             headers=self.headers
         )
         return res.status_code != 201
+
+
+class Profile(LinkedIn):
+    def __init__(self, cookies, headers):
+        LinkedIn.__init__(self)
+        self.cookies = cookies
+        self.headers = headers
+        
+    def get_identity(self, profile_id=None, profile_urn=None):
+        lk_id = self.get_profile_id(profile_id)
+        url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}"
+        res = requests.get(url,
+                           cookies=self.cookies,
+                           headers=self.headers).json()
+        # Parse json
+        data = res.get("data")
+        result = {
+            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_profile:", ""),
+            "PROFILE_ID": lk_id,
+            "FIRSTNAME": data.get("firstName"),
+            "LASTNAME": data.get("lastName"),
+            "SUMMARY": data.get("summary"),
+            "OCCUPATION": data.get("headline"),
+            "INDUSTRY_NAME": data.get("industryName"),
+            "ADRESS": data.get("address"),
+            "REGION": data.get("geoLocationName"),
+            "COUNTRY": data.get("geoCountryName"),
+            "LOCATION": data.get("locationName"),
+            "BIRTHDATE": self.get_birthdate(data.get('birthDateOn')),
+        }
+        return pd.DataFrame([result])
+
+    def get_network(self, profile_id=None, profile_urn=None):
+        lk_id = self.get_profile_id(profile_id)
+        url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/networkinfo"
+        res = requests.get(url,
+                           cookies=self.cookies,
+                           headers=self.headers).json()
+        # Parse json
+        data = res.get("data")
+        result = {
+            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_profileNetworkInfo:", ""),
+            "PROFILE_ID": lk_id,
+            "DISTANCE": data.get("distance").get("value"),
+            "FOLLOWING": data.get("following"),
+            "FOLLOWABLE": data.get("followable"),
+            "FOLLOWERS_COUNT": data.get("followersCount"),
+        }
+        return pd.DataFrame([result])
+    
+    def get_contact(self, profile_id=None, profile_urn=None):
+        lk_id = self.get_profile_id(profile_id)
+        url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/profileContactInfo"
+        res = requests.get(url,
+                           cookies=self.cookies,
+                           headers=self.headers).json()
+        # Parse json
+        data = res.get("data")
+        # Specific
+        lk_phone = None
+        lk_phones = data.get("phoneNumbers")
+        if lk_phones is not None:
+            for rows in lk_phones:
+                if rows["type"] == "MOBILE":
+                    lk_phone = rows["number"]
+                    break
+        lk_twiter = None
+        lk_twiters = data.get("twitterHandles")
+        if lk_twiters is not None:
+            for rows in lk_twiters:
+                lk_twiter = rows["name"]
+                break
+        result = {
+            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_contactinfo:", ""),
+            "PROFILE_ID": lk_id,
+            "EMAIL": data.get("emailAddress"),
+            "CONNECTED_AT": datetime.fromtimestamp(int(str(data.get("connectedAt"))[:-3])).strftime('%Y-%m-%d %H:%M:%S'),
+            "BIRTHDATE": self.get_birthdate(data.get('birthDateOn')),
+            "ADRESS": data.get("address"),
+            "TWITER": lk_twiter,
+            "PHONENUMBER": lk_phone,
+            "WEBSITES": data.get("websites"),
+            "INTERESTS": data.get("interests"),
+        }
+        return pd.DataFrame([result])
+
+
+class Network:
+    def __init__(self, cookies, headers):
+        self.cookies = cookies
+        self.headers = headers
+
+
+class Invitation:
+    def __init__(self, cookies, headers):
+        self.cookies = cookies
+        self.headers = headers
+
+
+class Message:
+    def __init__(self, cookies, headers):
+        self.cookies = cookies
+        self.headers = headers
+
+
+class Post:
+    def __init__(self, cookies, headers):
+        self.cookies = cookies
+        self.headers = headers
+
+
+class Event:
+    def __init__(self, cookies, headers):
+        self.cookies = cookies
+        self.headers = headers
+
+
+class Company:
+    def __init__(self, cookies, headers):
+        self.cookies = cookies
+        self.headers = headers
