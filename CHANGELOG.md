@@ -1,3 +1,13 @@
+## 0.61.0 (2021-06-08)
+
+### Refactor
+
+- allow user to target one user for message
+
+### Feat
+
+- Linkedin add send_message
+
 ## 0.60.0 (2021-06-02)
 
 ### Fix
