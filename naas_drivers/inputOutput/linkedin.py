@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import time
 import urllib
+import json
 from datetime import datetime
 
 
@@ -415,3 +416,52 @@ class LinkedIn(InDriver, OutDriver):
         df = pd.merge(df_user, df_reacts, on="URN_ID", how="left")
         df["POST_URL"] = post_link
         return df
+
+    def get_user_urn(self, user_url):
+        user_url = self.__get_id(user_url)
+        res = requests.get(f"https://www.linkedin.com/voyager/api/identity/profiles/{user_url}",
+                           cookies=self.cookies,
+                           headers=self.headers)
+        return res.get('data', {}).get('entityUrn').replace("urn:li:fs_profile:", "")
+
+    def send_message(self, content, recipients_url=None, recipients_urn=None):
+        params = {"action": "create"}
+        message_event = {
+            "eventCreate": {
+                "value": {
+                    "com.linkedin.voyager.messaging.create.MessageCreate": {
+                        "body": content,
+                        "attachments": [],
+                        "attributedBody": {
+                            "text": content,
+                            "attributes": [],
+                        },
+                        "mediaAttachments": [],
+                    }
+                }
+            }
+        }
+        if type(recipients_url) is not list and recipients_url is not None:
+            recipients_url = [recipients_url]
+        if recipients_urn is not list:
+            if recipients_urn is str:
+                recipients_urn = [recipients_urn]
+            else:
+                recipients_urn = []
+        if recipients_url is not None:
+            for recipient in recipients_url:
+                recipients_urn.append(self.get_user_urn(recipient))
+        message_event["recipients"] = recipients_urn
+        message_event["subtype"] = "MEMBER_TO_MEMBER"
+        payload = {
+            "keyVersion": "LEGACY_INBOX",
+            "conversationCreate": message_event,
+        }
+        res = requests.post(
+            "https://www.linkedin.com/voyager/api/messaging/conversations",
+            params=params,
+            data=json.dumps(payload),
+            cookies=self.cookies,
+            headers=self.headers
+        )
+        return res.status_code != 201
