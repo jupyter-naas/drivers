@@ -3,15 +3,46 @@ import pandas as pd
 import requests
 import time
 import urllib
-import json
 from datetime import datetime
 
+LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod/"
+RELEASE_MESSAGE = ("Feature not release yet."
+                   "Please create or comment issue on Jupyter Naas Github: "
+                   "https://github.com/orgs/jupyter-naas/projects/4")
 
 class LinkedIn(InDriver, OutDriver):
-    # Get LK info from LK
-    def __get_id(self, url):
-        url = url.rsplit("in/")[-1].rsplit("/")[0]
-        return url
+    def get_profile_id(self, url):
+        return url.rsplit("in/")[-1].rsplit("/")[0]
+    
+    def get_activity_id(self, url):
+        return url.split("activity-")[-1].split("-")[0]
+    
+    def get_profile_urn(self, url):
+        lk_id = self.get_profile_id(url)
+        res = requests.get(f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}",
+                           cookies=self.cookies,
+                           headers=self.headers)
+        # Check if requests is successful
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return e
+        else:
+            res_json = res.json()
+        return res_json.get('data', {}).get('entityUrn').replace("urn:li:fs_profile:", "")
+    
+    def get_birthdate(self, bd):
+        if bd is None:
+            return "No birthdate"
+        bd_day = bd.get("day", "Day Unknown")
+        bd_month = bd.get("month", "Month Unknown")
+        bd_year = bd.get("year", "Year Unknown")
+        return f"{bd_day}/{bd_month}/{bd_year}"
+
+    def clear_occupation(self, occupation):
+        if occupation is not None:
+            occupation = occupation.strip().replace("\n", " ")
+        return occupation
 
     def connect(self, li_at: str, jessionid: str):
         # Init lk attribute
@@ -19,7 +50,8 @@ class LinkedIn(InDriver, OutDriver):
         self.jessionid = jessionid
 
         # Init cookies
-        self.cookies = {"li_at": self.li_at, "JSESSIONID": f'"{self.jessionid}"'}
+        self.cookies = {"li_at": self.li_at,
+                        "JSESSIONID": f'"{self.jessionid}"'}
 
         # Init headers
         self.headers = {
@@ -30,10 +62,24 @@ class LinkedIn(InDriver, OutDriver):
             "X-Requested-With": "XMLHttpRequest",
             "X-Restli-Protocol-Version": "2.0.0",
         }
+        
+        # Init end point
+        self.profile = Profile(self.cookies, self.headers)
+        self.network = Network(self.cookies, self.headers)
+        self.invitation = Invitation(self.cookies, self.headers)
+        self.message = Message(self.cookies, self.headers)
+        self.post = Post(self.cookies, self.headers)
+        self.event = Event(self.cookies, self.headers)
+        self.company = Company(self.cookies, self.headers)
 
         # Set connexion to active
         self.connected = True
         return self
+    
+    # >>> Deprecated code to be remove
+    def __get_id(self, url):
+        url = url.rsplit("in/")[-1].rsplit("/")[0]
+        return url
 
     def get_identity(self, username: str):
         username = self.__get_id(username)
@@ -460,8 +506,317 @@ class LinkedIn(InDriver, OutDriver):
         res = requests.post(
             "https://www.linkedin.com/voyager/api/messaging/conversations",
             params=params,
-            data=json.dumps(payload),
+            json=payload,
             cookies=self.cookies,
             headers=self.headers
         )
         return res.status_code != 201
+
+
+class Profile(LinkedIn):
+    def __init__(self, cookies, headers):
+        LinkedIn.__init__(self)
+        self.cookies = cookies
+        self.headers = headers
+        
+    def get_identity(self, profile_id=None, profile_urn=None):
+        lk_id = self.get_profile_id(profile_id)
+        url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}"
+        res = requests.get(url,
+                           cookies=self.cookies,
+                           headers=self.headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
+        # Parse json
+        data = res_json.get("data")
+        result = {
+            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_profile:", ""),
+            "PROFILE_ID": lk_id,
+            "FIRSTNAME": data.get("firstName"),
+            "LASTNAME": data.get("lastName"),
+            "SUMMARY": data.get("summary"),
+            "OCCUPATION": data.get("headline"),
+            "INDUSTRY_NAME": data.get("industryName"),
+            "ADRESS": data.get("address"),
+            "REGION": data.get("geoLocationName"),
+            "COUNTRY": data.get("geoCountryName"),
+            "LOCATION": data.get("locationName"),
+            "BIRTHDATE": self.get_birthdate(data.get('birthDateOn')),
+        }
+        return pd.DataFrame([result])
+
+    def get_network(self, profile_id=None, profile_urn=None):
+        lk_id = self.get_profile_id(profile_id)
+        url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/networkinfo"
+        res = requests.get(url,
+                           cookies=self.cookies,
+                           headers=self.headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
+        # Parse json
+        data = res_json.get("data")
+        result = {
+            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_profileNetworkInfo:", ""),
+            "PROFILE_ID": lk_id,
+            "DISTANCE": data.get("distance").get("value"),
+            "FOLLOWING": data.get("following"),
+            "FOLLOWABLE": data.get("followable"),
+            "FOLLOWERS_COUNT": data.get("followersCount"),
+        }
+        return pd.DataFrame([result])
+    
+    def get_contact(self, profile_id=None, profile_urn=None):
+        lk_id = self.get_profile_id(profile_id)
+        url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/profileContactInfo"
+        res = requests.get(url,
+                           cookies=self.cookies,
+                           headers=self.headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
+        # Parse json
+        data = res_json.get("data")
+        # Specific
+        lk_phone = None
+        lk_phones = data.get("phoneNumbers")
+        if lk_phones is not None:
+            for rows in lk_phones:
+                if rows["type"] == "MOBILE":
+                    lk_phone = rows["number"]
+                    break
+        lk_twiter = None
+        lk_twiters = data.get("twitterHandles")
+        if lk_twiters is not None:
+            for rows in lk_twiters:
+                lk_twiter = rows["name"]
+                break
+        result = {
+            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_contactinfo:", ""),
+            "PROFILE_ID": lk_id,
+            "EMAIL": data.get("emailAddress"),
+            "CONNECTED_AT": datetime.fromtimestamp(int(str(data.get("connectedAt"))[:-3])).strftime('%Y-%m-%d %H:%M:%S'),
+            "BIRTHDATE": self.get_birthdate(data.get('birthDateOn')),
+            "ADRESS": data.get("address"),
+            "TWITER": lk_twiter,
+            "PHONENUMBER": lk_phone,
+            "WEBSITES": data.get("websites"),
+            "INTERESTS": data.get("interests"),
+        }
+        return pd.DataFrame([result])
+
+
+class Network(LinkedIn):
+    def __init__(self, cookies, headers):
+        LinkedIn.__init__(self)
+        self.cookies = cookies
+        self.headers = headers
+        
+    def get_followers(self,
+                      start=0,
+                      count=100,
+                      limit=-1):
+        url = f"{LINKEDIN_API}/network/getFollowers?start={start}&count={count}&limit={limit}"
+        headers = {
+          'Content-Type': 'application/json'
+        }
+        res = requests.post(url,
+                            json=self.cookies,
+                            headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
+        return pd.DataFrame(res_json)
+    
+    def get_connections(self,
+                        start=0,
+                        count=100,
+                        limit=-1):
+        url = f"{LINKEDIN_API}/network/getConnections?start={start}&count={count}&limit={limit}"
+        headers = {
+          'Content-Type': 'application/json'
+        }
+        res = requests.post(url,
+                            json=self.cookies,
+                            headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
+        return pd.DataFrame(res_json)
+
+
+class Invitation(LinkedIn):
+    def __init__(self, cookies, headers):
+        LinkedIn.__init__(self)
+        self.cookies = cookies
+        self.headers = headers
+
+
+class Message(LinkedIn):
+    def __init__(self, cookies, headers):
+        LinkedIn.__init__(self)
+        self.cookies = cookies
+        self.headers = headers
+        
+    def send(self, content, recipients_url=None, recipients_urn=None):
+        params = {"action": "create"}
+        message_event = {
+            "eventCreate": {
+                "value": {
+                    "com.linkedin.voyager.messaging.create.MessageCreate": {
+                        "body": content,
+                        "attachments": [],
+                        "attributedBody": {
+                            "text": content,
+                            "attributes": [],
+                        },
+                        "mediaAttachments": [],
+                    }
+                }
+            }
+        }
+        if type(recipients_url) is not list and recipients_url is not None:
+            recipients_url = [recipients_url]
+        if recipients_urn is not list:
+            if recipients_urn is str:
+                recipients_urn = [recipients_urn]
+            else:
+                recipients_urn = []
+        if recipients_url is not None:
+            for recipient in recipients_url:
+                recipients_urn.append(self.get_profile_urn(recipient))
+        message_event["recipients"] = recipients_urn
+        message_event["subtype"] = "MEMBER_TO_MEMBER"
+        payload = {
+            "keyVersion": "LEGACY_INBOX",
+            "conversationCreate": message_event,
+        }
+        res = requests.post(
+            "https://www.linkedin.com/voyager/api/messaging/conversations",
+            params=params,
+            json=payload,
+            cookies=self.cookies,
+            headers=self.headers
+        )
+        if res.status_code == 201:
+            print("Message successfully sent")
+        return res
+
+
+class Post(LinkedIn):
+    def __init__(self, cookies, headers):
+        LinkedIn.__init__(self)
+        self.cookies = cookies
+        self.headers = headers
+
+    def get_info(self, url):
+        activity_id = self.get_activity_id(url)
+        # Get lk conversation
+        res = requests.get(f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
+                           cookies=self.cookies,
+                           headers=self.headers,)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
+
+        # Init var
+        title = None
+        datepost = None
+        tot_views = 0
+        tot_comments = 0
+        tot_likes = 0
+        num_lik = 0
+        num_pra = 0
+        num_int = 0
+        num_app = 0
+        num_emp = 0
+
+        # Parse json
+        included = res_json.get("included")
+        if included is not None:
+            for include in included:
+                if include.get("$type") == "com.linkedin.voyager.feed.shared.SocialActivityCounts":
+                    uid = include.get("entityUrn")
+                    if (
+                        uid
+                        == f"urn:li:fs_socialActivityCounts:urn:li:activity:{activity_id}"
+                        or "urn:li:fs_socialActivityCounts:urn:li:ugcPost" in uid
+                    ):
+                        tot_likes = include.get("numLikes")
+                        tot_views = include.get("numViews")
+                        tot_comments = include.get("numComments")
+                        likes = include.get("reactionTypeCounts")
+                        if likes is not None:
+                            for like in likes:
+                                reaction = like.get("reactionType")
+                                if reaction == "LIKE":
+                                    num_lik = like.get("count")
+                                if reaction == "PRAISE":
+                                    num_pra = like.get("count")
+                                if reaction == "INTEREST":
+                                    num_int = like.get("count")
+                                if reaction == "APPRECIATION":
+                                    num_app = like.get("count")
+                                if reaction == "EMPATHY":
+                                    num_emp = like.get("count")
+                if include.get("$type") == "com.linkedin.voyager.feed.render.UpdateV2":
+                    commentary = include.get("commentary")
+                    if commentary is not None:
+                        title = commentary.get("text").get("text").rsplit("\n")[0]
+                    datepost = (
+                        include.get("actor").get("subDescription").get("accessibilityText")
+                    )
+
+        # Data
+        data = {
+            "URL": url,
+            "TITLE": title,
+            "DATE": datepost,
+            "VIEWS": tot_views,
+            "COMMENTS": tot_comments,
+            "LIKES": tot_likes,
+            "LIKES_LIKE": num_lik,
+            "LIKES_PRAISE": num_pra,
+            "LIKES_INTEREST": num_int,
+            "LIKES_APPRECIATION": num_app,
+            "LIKES_EMPATHY": num_emp,
+        }
+        return pd.DataFrame([data])
+    
+    def get_comments(self, post_url):
+        return RELEASE_MESSAGE
+    
+    def get_likes(self, post_url):
+        return RELEASE_MESSAGE
+
+class Event(LinkedIn):
+    def __init__(self, cookies, headers):
+        LinkedIn.__init__(self)
+        self.cookies = cookies
+        self.headers = headers
+
+
+class Company(LinkedIn):
+    def __init__(self, cookies, headers):
+        LinkedIn.__init__(self)
+        self.cookies = cookies
+        self.headers = headers
