@@ -519,10 +519,12 @@ class Profile(LinkedIn):
         self.cookies = cookies
         self.headers = headers
         
-    def get_identity(self, profile_id=None, profile_urn=None):
-        lk_id = self.get_profile_id(profile_id)
-        url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}"
-        res = requests.get(url,
+    def get_identity(self, url=None, urn=None):
+        res_json = {}
+        result = {}
+        lk_id = self.get_profile_id(url)
+        req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}"
+        res = requests.get(req_url,
                            cookies=self.cookies,
                            headers=self.headers)
         try:
@@ -541,7 +543,7 @@ class Profile(LinkedIn):
             "SUMMARY": data.get("summary"),
             "OCCUPATION": data.get("headline"),
             "INDUSTRY_NAME": data.get("industryName"),
-            "ADRESS": data.get("address"),
+            "ADDRESS": data.get("address"),
             "REGION": data.get("geoLocationName"),
             "COUNTRY": data.get("geoCountryName"),
             "LOCATION": data.get("locationName"),
@@ -549,10 +551,12 @@ class Profile(LinkedIn):
         }
         return pd.DataFrame([result])
 
-    def get_network(self, profile_id=None, profile_urn=None):
-        lk_id = self.get_profile_id(profile_id)
-        url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/networkinfo"
-        res = requests.get(url,
+    def get_network(self, url=None, urn=None):
+        res_json = {}
+        result = {}
+        lk_id = self.get_profile_id(url)
+        req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/networkinfo"
+        res = requests.get(req_url,
                            cookies=self.cookies,
                            headers=self.headers)
         try:
@@ -573,10 +577,12 @@ class Profile(LinkedIn):
         }
         return pd.DataFrame([result])
     
-    def get_contact(self, profile_id=None, profile_urn=None):
-        lk_id = self.get_profile_id(profile_id)
-        url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/profileContactInfo"
-        res = requests.get(url,
+    def get_contact(self, url=None, urn=None):
+        res_json = {}
+        result = {}
+        lk_id = self.get_profile_id(url)
+        req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/profileContactInfo"
+        res = requests.get(req_url,
                            cookies=self.cookies,
                            headers=self.headers)
         try:
@@ -588,6 +594,9 @@ class Profile(LinkedIn):
         # Parse json
         data = res_json.get("data")
         # Specific
+        connected_at = data.get("connectedAt")
+        if connected_at is not None:
+            connected_at = datetime.fromtimestamp(int(str(connected_at)[:-3])).strftime('%Y-%m-%d %H:%M:%S')
         lk_phone = None
         lk_phones = data.get("phoneNumbers")
         if lk_phones is not None:
@@ -605,9 +614,9 @@ class Profile(LinkedIn):
             "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_contactinfo:", ""),
             "PROFILE_ID": lk_id,
             "EMAIL": data.get("emailAddress"),
-            "CONNECTED_AT": datetime.fromtimestamp(int(str(data.get("connectedAt"))[:-3])).strftime('%Y-%m-%d %H:%M:%S'),
+            "CONNECTED_AT": connected_at,
             "BIRTHDATE": self.get_birthdate(data.get('birthDateOn')),
-            "ADRESS": data.get("address"),
+            "ADDRESS": data.get("address"),
             "TWITER": lk_twiter,
             "PHONENUMBER": lk_phone,
             "WEBSITES": data.get("websites"),
@@ -626,11 +635,12 @@ class Network(LinkedIn):
                       start=0,
                       count=100,
                       limit=-1):
-        url = f"{LINKEDIN_API}/network/getFollowers?start={start}&count={count}&limit={limit}"
+        res_json = {}
+        req_url = f"{LINKEDIN_API}/network/getFollowers?start={start}&count={count}&limit={limit}"
         headers = {
           'Content-Type': 'application/json'
         }
-        res = requests.post(url,
+        res = requests.post(req_url,
                             json=self.cookies,
                             headers=headers)
         try:
@@ -645,11 +655,12 @@ class Network(LinkedIn):
                         start=0,
                         count=100,
                         limit=-1):
-        url = f"{LINKEDIN_API}/network/getConnections?start={start}&count={count}&limit={limit}"
+        res_json = {}
+        req_url = f"{LINKEDIN_API}/network/getConnections?start={start}&count={count}&limit={limit}"
         headers = {
           'Content-Type': 'application/json'
         }
-        res = requests.post(url,
+        res = requests.post(req_url,
                             json=self.cookies,
                             headers=headers)
         try:
