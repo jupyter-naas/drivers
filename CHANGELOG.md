@@ -1,3 +1,12 @@
+## 0.61.1 (2021-06-14)
+
+### Fix
+
+- params json in requests
+- error lint linkedin driver
+- refacto linkedin function with heritage
+- refacto linkedin code profile
+
 ## 0.61.0 (2021-06-08)
 
 ### Refactor
