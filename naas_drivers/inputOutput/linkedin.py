@@ -28,8 +28,8 @@ class LinkedIn(InDriver, OutDriver):
         except requests.HTTPError as e:
             return e
         else:
-            json = res.json()
-        return json.get('data', {}).get('entityUrn').replace("urn:li:fs_profile:", "")
+            res_json = res.json()
+        return res_json.get('data', {}).get('entityUrn').replace("urn:li:fs_profile:", "")
     
     def get_birthdate(self, bd):
         if bd is None:
@@ -506,7 +506,7 @@ class LinkedIn(InDriver, OutDriver):
         res = requests.post(
             "https://www.linkedin.com/voyager/api/messaging/conversations",
             params=params,
-            data=json.dumps(payload),
+            json=payload,
             cookies=self.cookies,
             headers=self.headers
         )
