@@ -647,7 +647,7 @@ class Network(LinkedIn):
                                 headers=headers)
             try:
                 res.raise_for_status()
-            except requests.HTTPError as e:
+            except requests.HTTPError:
                 res_json = {}
             else:
                 res_json = res.json()
@@ -673,7 +673,7 @@ class Network(LinkedIn):
                                 headers=headers)
             try:
                 res.raise_for_status()
-            except requests.HTTPError as e:
+            except requests.HTTPError:
                 res_json = {}
             else:
                 res_json = res.json()
