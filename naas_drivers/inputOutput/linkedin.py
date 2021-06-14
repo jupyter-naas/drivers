@@ -10,6 +10,7 @@ RELEASE_MESSAGE = ("Feature not release yet."
                    "Please create or comment issue on Jupyter Naas Github: "
                    "https://github.com/orgs/jupyter-naas/projects/4")
 
+
 class LinkedIn(InDriver, OutDriver):
     def get_profile_id(self, url):
         return url.rsplit("in/")[-1].rsplit("/")[0]
@@ -634,42 +635,54 @@ class Network(LinkedIn):
     def get_followers(self,
                       start=0,
                       count=100,
-                      limit=-1):
-        res_json = {}
-        req_url = f"{LINKEDIN_API}/network/getFollowers?start={start}&count={count}&limit={limit}"
-        headers = {
-          'Content-Type': 'application/json'
-        }
-        res = requests.post(req_url,
-                            json=self.cookies,
-                            headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            print(e)
-        else:
-            res_json = res.json()
-        return pd.DataFrame(res_json)
+                      limit=1000):
+        df_followers = pd.DataFrame()
+        while True:
+            req_url = f"{LINKEDIN_API}/network/getFollowers?start={start}&count={count}&limit={limit}"
+            headers = {
+              'Content-Type': 'application/json'
+            }
+            res = requests.post(req_url,
+                                json=self.cookies,
+                                headers=headers)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError:
+                res_json = {}
+            else:
+                res_json = res.json()
+            df = pd.DataFrame(res_json)
+            df_followers = pd.concat([df_followers, df], axis=0)
+            start += limit
+            if len(df) == 0:
+                break
+        return df_followers.reset_index(drop=True)
     
     def get_connections(self,
                         start=0,
                         count=100,
-                        limit=-1):
-        res_json = {}
-        req_url = f"{LINKEDIN_API}/network/getConnections?start={start}&count={count}&limit={limit}"
-        headers = {
-          'Content-Type': 'application/json'
-        }
-        res = requests.post(req_url,
-                            json=self.cookies,
-                            headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            print(e)
-        else:
-            res_json = res.json()
-        return pd.DataFrame(res_json)
+                        limit=1000):
+        df_connections = pd.DataFrame()
+        while True:
+            req_url = f"{LINKEDIN_API}/network/getConnections?start={start}&count={count}&limit={limit}"
+            headers = {
+              'Content-Type': 'application/json'
+            }
+            res = requests.post(req_url,
+                                json=self.cookies,
+                                headers=headers)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError:
+                res_json = {}
+            else:
+                res_json = res.json()
+            df = pd.DataFrame(res_json)
+            df_connections = pd.concat([df_connections, df], axis=0)
+            start += limit
+            if len(df) == 0:
+                break
+        return df_connections.reset_index(drop=True)
 
 
 class Invitation(LinkedIn):
