@@ -6,7 +6,9 @@ import urllib
 from datetime import datetime
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod/"
-RELEASE_MESSAGE = "Feature not release yet. Please create or comment issue on Jupyter Naas Github if you are interested in => https://github.com/orgs/jupyter-naas/projects/4"
+RELEASE_MESSAGE = ("Feature not release yet."
+                   "Please create or comment issue on Jupyter Naas Github: "
+                   "https://github.com/orgs/jupyter-naas/projects/4")
 
 class LinkedIn(InDriver, OutDriver):
     def get_profile_id(self, url):
@@ -522,9 +524,15 @@ class Profile(LinkedIn):
         url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}"
         res = requests.get(url,
                            cookies=self.cookies,
-                           headers=self.headers).json()
+                           headers=self.headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
         # Parse json
-        data = res.get("data")
+        data = res_json.get("data")
         result = {
             "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_profile:", ""),
             "PROFILE_ID": lk_id,
@@ -546,9 +554,15 @@ class Profile(LinkedIn):
         url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/networkinfo"
         res = requests.get(url,
                            cookies=self.cookies,
-                           headers=self.headers).json()
+                           headers=self.headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
         # Parse json
-        data = res.get("data")
+        data = res_json.get("data")
         result = {
             "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_profileNetworkInfo:", ""),
             "PROFILE_ID": lk_id,
@@ -564,9 +578,15 @@ class Profile(LinkedIn):
         url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/profileContactInfo"
         res = requests.get(url,
                            cookies=self.cookies,
-                           headers=self.headers).json()
+                           headers=self.headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
         # Parse json
-        data = res.get("data")
+        data = res_json.get("data")
         # Specific
         lk_phone = None
         lk_phones = data.get("phoneNumbers")
@@ -613,9 +633,13 @@ class Network(LinkedIn):
         res = requests.post(url,
                             json=self.cookies,
                             headers=headers)
-        if res.status_code == 200:
-            return pd.DataFrame(res.json())
-        return res
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
+        return pd.DataFrame(res_json)
     
     def get_connections(self,
                         start=0,
@@ -628,9 +652,13 @@ class Network(LinkedIn):
         res = requests.post(url,
                             json=self.cookies,
                             headers=headers)
-        if res.status_code == 200:
-            return pd.DataFrame(res.json())
-        return res
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
+        return pd.DataFrame(res_json)
 
 
 class Invitation(LinkedIn):
@@ -702,7 +730,13 @@ class Post(LinkedIn):
         # Get lk conversation
         res = requests.get(f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
                            cookies=self.cookies,
-                           headers=self.headers,).json()
+                           headers=self.headers,)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            print(e)
+        else:
+            res_json = res.json()
 
         # Init var
         title = None
@@ -717,20 +751,20 @@ class Post(LinkedIn):
         num_emp = 0
 
         # Parse json
-        included = res.get("included")
+        included = res_json.get("included")
         if included is not None:
             for include in included:
                 if include.get("$type") == "com.linkedin.voyager.feed.shared.SocialActivityCounts":
-                    uid = p.get("entityUrn")
+                    uid = include.get("entityUrn")
                     if (
                         uid
                         == f"urn:li:fs_socialActivityCounts:urn:li:activity:{activity_id}"
                         or "urn:li:fs_socialActivityCounts:urn:li:ugcPost" in uid
                     ):
-                        tot_likes = p.get("numLikes")
-                        tot_views = p.get("numViews")
-                        tot_comments = p.get("numComments")
-                        likes = p.get("reactionTypeCounts")
+                        tot_likes = include.get("numLikes")
+                        tot_views = include.get("numViews")
+                        tot_comments = include.get("numComments")
+                        likes = include.get("reactionTypeCounts")
                         if likes is not None:
                             for like in likes:
                                 reaction = like.get("reactionType")
@@ -744,12 +778,12 @@ class Post(LinkedIn):
                                     num_app = like.get("count")
                                 if reaction == "EMPATHY":
                                     num_emp = like.get("count")
-                if lk_type == "com.linkedin.voyager.feed.render.UpdateV2":
-                    commentary = p.get("commentary")
+                if include.get("$type") == "com.linkedin.voyager.feed.render.UpdateV2":
+                    commentary = include.get("commentary")
                     if commentary is not None:
                         title = commentary.get("text").get("text").rsplit("\n")[0]
                     datepost = (
-                        p.get("actor").get("subDescription").get("accessibilityText")
+                        include.get("actor").get("subDescription").get("accessibilityText")
                     )
 
         # Data
@@ -766,10 +800,7 @@ class Post(LinkedIn):
             "LIKES_APPRECIATION": num_app,
             "LIKES_EMPATHY": num_emp,
         }
-
-        # DataFrame
-        df = pd.DataFrame([data])
-        return df
+        return pd.DataFrame([data])
     
     def get_comments(self, post_url):
         return RELEASE_MESSAGE
