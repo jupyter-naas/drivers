@@ -543,7 +543,7 @@ class Profile(LinkedIn):
             "SUMMARY": data.get("summary"),
             "OCCUPATION": data.get("headline"),
             "INDUSTRY_NAME": data.get("industryName"),
-            "ADRESS": data.get("address"),
+            "ADDRESS": data.get("address"),
             "REGION": data.get("geoLocationName"),
             "COUNTRY": data.get("geoCountryName"),
             "LOCATION": data.get("locationName"),
