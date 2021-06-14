@@ -1,3 +1,13 @@
+## 0.62.0 (2021-06-14)
+
+### Fix
+
+- linkedin api lint - variable not used
+
+### Feat
+
+- linkedin network get connections / get followers
+
 ## 0.61.2 (2021-06-14)
 
 ### Fix
