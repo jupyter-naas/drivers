@@ -1,3 +1,10 @@
+## 0.61.2 (2021-06-14)
+
+### Fix
+
+- get_identity change address name
+- error connected_at and change params names
+
 ## 0.61.1 (2021-06-14)
 
 ### Fix
