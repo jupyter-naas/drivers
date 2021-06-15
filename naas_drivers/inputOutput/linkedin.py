@@ -858,7 +858,7 @@ class Event(LinkedIn):
         self.headers = headers
         
     def get_guests(self, url):
-        req_url = f"{LINKEDIN_API}/post/getLikes?event_link={url}"
+        req_url = f"{LINKEDIN_API}/event/getGuests?event_link={url}"
         headers = {"Content-Type": "application/json"}
         res = requests.post(req_url, json=self.cookies, headers=headers)
         try:
