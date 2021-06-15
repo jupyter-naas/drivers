@@ -1,3 +1,13 @@
+## 0.64.0 (2021-06-15)
+
+### Fix
+
+- change api event/getGuests
+
+### Feat
+
+- linkedin get guests from event
+
 ## 0.63.0 (2021-06-15)
 
 ### Feat
