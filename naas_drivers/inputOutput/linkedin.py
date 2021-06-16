@@ -1,4 +1,4 @@
-from naas_drivers.driver import InDriver, OutDriver
+#from naas_drivers.driver import InDriver, OutDriver
 import pandas as pd
 import requests
 import time
@@ -12,8 +12,13 @@ RELEASE_MESSAGE = (
     "https://github.com/orgs/jupyter-naas/projects/4"
 )
 
+class LinkedIn():
+    deprecated = True
 
-class LinkedIn(InDriver, OutDriver):
+    def print_deprecated(self, new_funct):
+        if self.deprected:
+            print(f"This function is deprecated, please use {new_funct}")
+
     def get_profile_id(self, url):
         return url.rsplit("in/")[-1].rsplit("/")[0]
 
@@ -88,6 +93,7 @@ class LinkedIn(InDriver, OutDriver):
         return url
 
     def get_identity(self, username: str):
+        self.print_deprecated("profile.get_identity()")
         username = self.__get_id(username)
         data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
@@ -98,6 +104,7 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
 
     def get_network(self, username: str):
+        self.print_deprecated("profile.get_network()")
         username = self.__get_id(username)
         data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
@@ -109,6 +116,7 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
 
     def get_contact(self, username: str):
+        self.print_deprecated("profile.get_contact()")
         username = self.__get_id(username)
         data = requests.get(
             "https://www.linkedin.com/voyager/api/identity/profiles/"
@@ -325,6 +333,7 @@ class LinkedIn(InDriver, OutDriver):
         return df_message.reset_index(drop=True)
 
     def get_post(self, url):
+        self.print_deprecated("post.get_info()")
         activity_id = url.split("activity-")[-1].split("-")[0]
         data = requests.get(
             f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
@@ -334,6 +343,7 @@ class LinkedIn(InDriver, OutDriver):
         return data.json()
 
     def get_post_data(self, url):
+        self.print_deprecated("post.get_info()")
         activity_id = url.split("activity-")[-1].split("-")[0]
         # Get lk conversation
         post = self.get_post(url)
@@ -414,6 +424,7 @@ class LinkedIn(InDriver, OutDriver):
         return activity_urn.rsplit("?")[0]
 
     def get_post_likes(self, post_link=None, thread_urn=None, count=100, start=0):
+        self.print_deprecated("post.get_likes()")
         if post_link:
             thread_urn = urllib.parse.quote(self.get_post_urn(post_link), safe="")
 
@@ -629,6 +640,24 @@ class Profile(LinkedIn):
             "INTERESTS": data.get("interests"),
         }
         return pd.DataFrame([result])
+    
+    def get_posts(self, profile_url=None, profile_urn=None):
+        params = {}
+        if profile_url:
+            params['profile_url'] = profile_url
+        if profile_urn:
+            params['profile_urn'] = profile_urn
+        req_url = f"{LINKEDIN_API}/event/getGuests?{urllib.parse.urlencode(params, safe='(),')}"
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(req_url, json=self.cookies, headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError:
+            res_json = {}
+        else:
+            res_json = res.json()
+        df = pd.DataFrame(res_json)
+        return df.reset_index(drop=True)
 
 
 class Network(LinkedIn):
@@ -740,89 +769,60 @@ class Post(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_info(self, url):
-        activity_id = self.get_activity_id(url)
-        # Get lk conversation
-        res = requests.get(
-            f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
-            cookies=self.cookies,
-            headers=self.headers,
-        )
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            print(e)
-        else:
-            res_json = res.json()
+    def __get_social_activity_count(self, data, activity_id=None):
+        result = None
+        if data.get('$type') == "com.linkedin.voyager.feed.shared.SocialActivityCounts" and (activity_id is None or activity_id == data.get("entityUrn").replace("urn:li:fs_socialActivityCounts:urn:li:activity:", "")):
+            print(data.get("entityUrn").replace("urn:li:fs_socialActivityCounts:urn:li:activity:", ""))
+            result = {
+                "LIKES": data.get("numLikes"),
+                "VIEWS": data.get("numViews"),
+                "COMMENTS": data.get("numComments")
+            }
+            for elem in data.get('reactionTypeCounts', []):
+                result[f'{elem.get("reactionType")}_COUNT'] = elem.get("count")
+        return result
 
-        # Init var
-        title = None
-        datepost = None
-        tot_views = 0
-        tot_comments = 0
-        tot_likes = 0
-        num_lik = 0
-        num_pra = 0
-        num_int = 0
-        num_app = 0
-        num_emp = 0
+    def __get_post_update(self, data):
+        result = None
+        if data.get('$type') == "com.linkedin.voyager.feed.render.UpdateV2":
+            result = {
+                "POST_URN": data.get("updateMetadata", {}).get('urn').replace('urn:li:activity:', ''),
+                "TITLE": data.get('commentary', {}).get("text", {}).get("text", "").rsplit("\n")[0],
+                "TEXT": data.get('commentary', {}).get("text", {}).get("text", "").replace("\n", ""),
+                "TAGS_COUNT": data.get('commentary', {}).get("text", {}).get("text").count("#"),
+                "DATE": data.get('actor', {}).get('subDescription', {}).get('accessibilityText')
+            }
+            for i in range(1, result.get("TAGS_COUNT", 1)):
+                tag = result.get("TEXT", "").rsplit("#")[i]
+                for x in [" ", "\n", ".", ","]:
+                    tag = tag.rsplit(x)[0]
+                result[f"TAG_{i}"] = tag
+            for elem in data.get("updateMetadata", {}).get("actions", []):
+                if data.get("url") is not None:
+                    result['URL'] = elem.get('url')
+                    break
+        return result
 
-        # Parse json
-        included = res_json.get("included")
-        if included is not None:
-            for include in included:
-                if (
-                    include.get("$type")
-                    == "com.linkedin.voyager.feed.shared.SocialActivityCounts"
-                ):
-                    uid = include.get("entityUrn")
-                    if (
-                        uid
-                        == f"urn:li:fs_socialActivityCounts:urn:li:activity:{activity_id}"
-                        or "urn:li:fs_socialActivityCounts:urn:li:ugcPost" in uid
-                    ):
-                        tot_likes = include.get("numLikes")
-                        tot_views = include.get("numViews")
-                        tot_comments = include.get("numComments")
-                        likes = include.get("reactionTypeCounts")
-                        if likes is not None:
-                            for like in likes:
-                                reaction = like.get("reactionType")
-                                if reaction == "LIKE":
-                                    num_lik = like.get("count")
-                                if reaction == "PRAISE":
-                                    num_pra = like.get("count")
-                                if reaction == "INTEREST":
-                                    num_int = like.get("count")
-                                if reaction == "APPRECIATION":
-                                    num_app = like.get("count")
-                                if reaction == "EMPATHY":
-                                    num_emp = like.get("count")
-                if include.get("$type") == "com.linkedin.voyager.feed.render.UpdateV2":
-                    commentary = include.get("commentary")
-                    if commentary is not None:
-                        title = commentary.get("text").get("text").rsplit("\n")[0]
-                    datepost = (
-                        include.get("actor")
-                        .get("subDescription")
-                        .get("accessibilityText")
-                    )
+    def get_info(self, post_url=None, activity_id=None):
+        if post_url is not None:
+            activity_id = self.__get_post_urn(post_url)
+        if activity_id is None:
+            print("Error")
+            return None
 
-        # Data
-        data = {
-            "URL": url,
-            "TITLE": title,
-            "DATE": datepost,
-            "VIEWS": tot_views,
-            "COMMENTS": tot_comments,
-            "LIKES": tot_likes,
-            "LIKES_LIKE": num_lik,
-            "LIKES_PRAISE": num_pra,
-            "LIKES_INTEREST": num_int,
-            "LIKES_APPRECIATION": num_app,
-            "LIKES_EMPATHY": num_emp,
-        }
-        return pd.DataFrame([data])
+        post = requests.get(f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
+                            cookies=self.cookies,
+                            headers=self.headers).json()
+
+        result = {}
+        for elem in post.get("included", []):
+            activity_count = self.__get_social_activity_count(elem, activity_id)
+            if activity_count:
+                result.update(activity_count)
+            post_update = self.__get_post_update(elem)
+            if post_update:
+                result.update(post_update)
+        return pd.DataFrame([result])
 
     def get_comments(self, post_url):
         req_url = f"{LINKEDIN_API}/post/getComments?post_link={post_url}"
