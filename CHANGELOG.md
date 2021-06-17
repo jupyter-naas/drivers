@@ -1,3 +1,9 @@
+## 0.65.1 (2021-06-17)
+
+### Fix
+
+- change function name get posts stats from profile and get stats from post
+
 ## 0.65.0 (2021-06-17)
 
 ### Refactor
