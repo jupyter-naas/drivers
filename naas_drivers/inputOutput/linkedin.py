@@ -682,12 +682,56 @@ class Invitation(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
+    def send_invitation(self, recipient_url=None, message="", recipient_urn=None):
+        if recipient_url is not None:
+            recipient_urn = self.get_user_urn(recipient_url)
+        if recipient_urn is None:
+            return True
+        if message:
+            message = ',"message":' '"' + message + '"'
+        data = '{"trackingId":"yvzykVorToqcOuvtxjSFMg==","invitations":[],"excludeInvitations":[],"invitee":{"com.linkedin.voyager.growth.invitation.InviteeProfile":{"profileId":' + '"' + recipient_urn + '"' + '}}' + message + '}'
+        head = self.headers
+        head['accept'] = "application/vnd.linkedin.normalized+json+2.1"
+        res = requests.post(
+            'https://www.linkedin.com/voyager/api/growth/normInvitations',
+            data=data,
+            headers=head,
+            cookies=self.cookies
+        )
+        return res.status_code != 201
+
 
 class Message(LinkedIn):
     def __init__(self, cookies, headers):
         LinkedIn.__init__(self)
         self.cookies = cookies
         self.headers = headers
+
+    def get_messages(self, limit=-1, count=20):
+        req_url = f"{LINKEDIN_API}/message/getConversations?limit={limit}&count{count}"
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(req_url, json=self.cookies, headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError:
+            res_json = {}
+        else:
+            res_json = res.json()
+        df = pd.DataFrame(res_json)
+        return df.reset_index(drop=True)
+
+    def get_messages(self, conversation_urn, start=0, limit=-1, count=20):
+        req_url = f"{LINKEDIN_API}/message/geMessages?conversation_urn={conversation_urn}&start={start}&limit={limit}&count{count}"
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(req_url, json=self.cookies, headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError:
+            res_json = {}
+        else:
+            res_json = res.json()
+        df = pd.DataFrame(res_json)
+        return df.reset_index(drop=True)
 
     def send(self, content, recipients_url=None, recipients_urn=None):
         params = {"action": "create"}
