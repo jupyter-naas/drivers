@@ -1,3 +1,14 @@
+## 0.65.0 (2021-06-17)
+
+### Refactor
+
+- black format
+
+### Feat
+
+- add invitation.send + message.get_conversations + message.get_messages
+- get post info and get profile posts + deprecated function
+
 ## 0.64.0 (2021-06-15)
 
 ### Fix
