@@ -689,14 +689,23 @@ class Invitation(LinkedIn):
             return True
         if message:
             message = ',"message":' '"' + message + '"'
-        data = '{"trackingId":"yvzykVorToqcOuvtxjSFMg==","invitations":[],"excludeInvitations":[],"invitee":{"com.linkedin.voyager.growth.invitation.InviteeProfile":{"profileId":' + '"' + recipient_urn + '"' + '}}' + message + '}'
+        data = (
+            ('{"trackingId":"yvzykVorToqcOuvtxjSFMg==","invitations":[],"excludeInvitations":[],'
+            '"invitee":{"com.linkedin.voyager.growth.invitation.InviteeProfile":{"profileId":')
+            + '"'
+            + recipient_urn
+            + '"'
+            + "}}"
+            + message
+            + "}"
+        )
         head = self.headers
-        head['accept'] = "application/vnd.linkedin.normalized+json+2.1"
+        head["accept"] = "application/vnd.linkedin.normalized+json+2.1"
         res = requests.post(
-            'https://www.linkedin.com/voyager/api/growth/normInvitations',
+            "https://www.linkedin.com/voyager/api/growth/normInvitations",
             data=data,
             headers=head,
-            cookies=self.cookies
+            cookies=self.cookies,
         )
         return res.status_code != 201
 
@@ -707,7 +716,7 @@ class Message(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_messages(self, limit=-1, count=20):
+    def get_conversations(self, limit=-1, count=20):
         req_url = f"{LINKEDIN_API}/message/getConversations?limit={limit}&count{count}"
         headers = {"Content-Type": "application/json"}
         res = requests.post(req_url, json=self.cookies, headers=headers)
@@ -900,7 +909,7 @@ class Event(LinkedIn):
         LinkedIn.__init__(self)
         self.cookies = cookies
         self.headers = headers
-        
+
     def get_guests(self, url):
         req_url = f"{LINKEDIN_API}/event/getGuests?event_link={url}"
         headers = {"Content-Type": "application/json"}
