@@ -641,7 +641,7 @@ class Profile(LinkedIn):
         }
         return pd.DataFrame([result])
     
-    def get_posts(self, profile_url=None, profile_urn=None):
+    def get_posts_stats(self, profile_url=None, profile_urn=None):
         params = {}
         if profile_url:
             params['profile_url'] = profile_url
@@ -856,7 +856,7 @@ class Post(LinkedIn):
                     break
         return result
 
-    def get_info(self, post_url=None, activity_id=None):
+    def get_stats(self, post_url=None, activity_id=None):
         if post_url is not None:
             activity_id = self.__get_post_urn(post_url)
         if activity_id is None:
