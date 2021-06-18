@@ -13,7 +13,7 @@ RELEASE_MESSAGE = (
 )
 
 
-class LinkedIn:
+class LinkedIn(InDriver, OutDriver):
     deprecated = True
 
     def print_deprecated(self, new_funct):
