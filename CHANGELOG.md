@@ -1,3 +1,14 @@
+## 0.66.1 (2021-06-18)
+
+### Fix
+
+- linkedin inheritance
+- uncomment import + format black
+
+### Refactor
+
+- rename invitation.send_invitation to invitation.send
+
 ## 0.66.0 (2021-06-18)
 
 ## 0.65.1 (2021-06-17)
