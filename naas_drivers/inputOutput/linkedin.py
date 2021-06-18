@@ -843,11 +843,6 @@ class Post(LinkedIn):
                 "urn:li:fs_socialActivityCounts:urn:li:activity:", ""
             )
         ):
-            print(
-                data.get("entityUrn").replace(
-                    "urn:li:fs_socialActivityCounts:urn:li:activity:", ""
-                )
-            )
             result = {
                 "LIKES": data.get("numLikes"),
                 "VIEWS": data.get("numViews"),
