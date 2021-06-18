@@ -417,7 +417,8 @@ class LinkedIn(InDriver, OutDriver):
         df = pd.DataFrame([data])
         return df
 
-    def __get_post_urn(self, post_link):
+    @staticmethod
+    def get_post_urn(post_link):
         response = requests.get(post_link).text
         urn_index = response.index("urn:li:activity:")
         finish_index = response.index('"', urn_index)
@@ -427,7 +428,7 @@ class LinkedIn(InDriver, OutDriver):
     def get_post_likes(self, post_link=None, thread_urn=None, count=100, start=0):
         self.print_deprecated("post.get_likes()")
         if post_link:
-            thread_urn = urllib.parse.quote(self.get_post_urn(post_link), safe="")
+            thread_urn = urllib.parse.quote(LinkedIn.get_post_urn(post_link), safe="")
 
         if not thread_urn:
             print("Error, specify a 'post_link' or a 'thread_urn'")
@@ -648,7 +649,7 @@ class Profile(LinkedIn):
             params["profile_url"] = profile_url
         if profile_urn:
             params["profile_urn"] = profile_urn
-        req_url = f"{LINKEDIN_API}/event/getGuests?{urllib.parse.urlencode(params, safe='(),')}"
+        req_url = f"{LINKEDIN_API}/profile/getPostsStats?{urllib.parse.urlencode(params, safe='(),')}"
         headers = {"Content-Type": "application/json"}
         res = requests.post(req_url, json=self.cookies, headers=headers)
         try:
@@ -764,7 +765,7 @@ class Message(LinkedIn):
     def get_messages(
         self, conversation_url=None, conversation_urn=None, start=0, limit=-1, count=20
     ):
-        req_url = f"{LINKEDIN_API}/message/geMessages?start={start}&limit={limit}&count{count}"
+        req_url = f"{LINKEDIN_API}/message/getMessages?start={start}&limit={limit}&count{count}"
         if conversation_url:
             req_url += f"&conversation_url={conversation_url}"
         if conversation_urn:
@@ -892,7 +893,7 @@ class Post(LinkedIn):
 
     def get_stats(self, post_url=None, activity_id=None):
         if post_url is not None:
-            activity_id = self.__get_post_urn(post_url)
+            activity_id = LinkedIn.get_post_urn(post_url)
         if activity_id is None:
             print("Error")
             return None
