@@ -89,11 +89,7 @@ KIDx1c2UgaWQ9Im4iIHhsaW5rOmhyZWY9IiNzdHJpbmciLz4KPC9zdmc+Cg=="""
         return self
 
     def badge(self, url):
-        badge_url = (
-            self.__badge_base
-            + self.__badge_appearance
-            + self.__badge_logo
-        )
+        badge_url = self.__badge_base + self.__badge_appearance + self.__badge_logo
         redirect_url = self.__badge_link.replace("{DLURL}", url)
         html_content = f"""<a href="{redirect_url}" target="_parent">\n<img src="{badge_url}"/>\n</a>"""
         display(Markdown(html_content))

@@ -36,12 +36,12 @@ class Prediction:
     )
 
     def __init_class_vars(
-            self,
-            prediction_type: str,
-            dataset: pd.DataFrame,
-            label: str,
-            date_column: str,
-            data_points: int,
+        self,
+        prediction_type: str,
+        dataset: pd.DataFrame,
+        label: str,
+        date_column: str,
+        data_points: int,
     ):
 
         # either all to predict using all the models else one of arima, svr or linear
@@ -93,8 +93,8 @@ class Prediction:
             model.fit(X, y)
             x_predict = (
                 df[self.label]
-                    .to_numpy()
-                    .reshape(-1, 1)[-self.data_points:]  # noqa: E203
+                .to_numpy()
+                .reshape(-1, 1)[-self.data_points :]  # noqa: E203
             )
             predicted_values = model.predict(x_predict)
         else:
@@ -163,13 +163,13 @@ class Prediction:
         return predicted_cols, output_dfs
 
     def get(
-            self,
-            dataset: pd.DataFrame,
-            column: str = "Close",
-            prediction_type: str = "COMPOUND",
-            date_column: str = "Date",
-            data_points: int = 20,
-            concat_label=None,
+        self,
+        dataset: pd.DataFrame,
+        column: str = "Close",
+        prediction_type: str = "COMPOUND",
+        date_column: str = "Date",
+        data_points: int = 20,
+        concat_label=None,
     ):
         # Fallback for columns
         if column not in dataset.columns or column is None or column == "":
