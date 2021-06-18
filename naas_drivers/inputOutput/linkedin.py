@@ -758,8 +758,12 @@ class Message(LinkedIn):
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
 
-    def get_messages(self, conversation_urn, start=0, limit=-1, count=20):
-        req_url = f"{LINKEDIN_API}/message/geMessages?conversation_urn={conversation_urn}&start={start}&limit={limit}&count{count}"
+    def get_messages(self, conversation_url=None, conversation_urn=None, start=0, limit=-1, count=20):
+        req_url = f"{LINKEDIN_API}/message/geMessages?start={start}&limit={limit}&count{count}"
+        if conversation_url:
+            req_url += f"&conversation_url={conversation_url}"
+        if conversation_urn:
+            req_url += f"&conversation_urn={conversation_urn}"
         headers = {"Content-Type": "application/json"}
         res = requests.post(req_url, json=self.cookies, headers=headers)
         try:
