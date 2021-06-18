@@ -711,7 +711,7 @@ class Invitation(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def send_invitation(self, recipient_url=None, message="", recipient_urn=None):
+    def send(self, recipient_url=None, message="", recipient_urn=None):
         if recipient_url is not None:
             recipient_urn = self.get_user_urn(recipient_url)
         if recipient_urn is None:
