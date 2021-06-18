@@ -100,19 +100,21 @@ table_ie9_close = """
 """
 
 # Link Follow us
-GIT_LINK = 'https://github.com/jupyter-naas/naas'
-YT_LINK = 'https://www.youtube.com/channel/UCKKG5hzjXXU_rRdHHWQ8JHQ?sub_confirmation=1'
-LK_LINK = 'https://www.linkedin.com/showcase/naas-ai'
-TW_LINK = 'https://twitter.com/JupyterNaas'
+GIT_LINK = "https://github.com/jupyter-naas/naas"
+YT_LINK = "https://www.youtube.com/channel/UCKKG5hzjXXU_rRdHHWQ8JHQ?sub_confirmation=1"
+LK_LINK = "https://www.linkedin.com/showcase/naas-ai"
+TW_LINK = "https://twitter.com/JupyterNaas"
 
 # Logo Follow us
-GIT_IMG_BLACK = 'https://icons.iconarchive.com/icons/icons8/windows-8/512/Programming-Github-icon.png'
-YT_IMG_BLACK = 'https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Youtube-icon.png'
-LK_IMG_BLACK = 'https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Linkedin-icon.png'
-TW_IMG_BLACK = 'https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Twitter-icon.png'
+GIT_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Programming-Github-icon.png"
+YT_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Youtube-icon.png"
+LK_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Linkedin-icon.png"
+TW_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Twitter-icon.png"
+
 
 class Align(attributes.HtmlTagAttribute):
     """Specifies alignement position"""
+
 
 class EmailBuilder(InDriver):
     """ EmailBuilder generator lib"""
@@ -129,7 +131,7 @@ class EmailBuilder(InDriver):
                 """[Warning], naas_drivers.html or naas_drivers.emailBuilder is deprecated,
                 use naas_drivers.emailbuilder instead it will be remove in 1 june 2021"""
             )
-        if function:   
+        if function:
             # TODO remove this in July 2021
             warnings.warn(
                 f"""[Warning], The function emailbuilder.{function}() is deprecated,
@@ -176,91 +178,109 @@ class EmailBuilder(InDriver):
             return self.text(*args) if isinstance(data, str) else data
 
     def __create_network_icon(self, img_src, href, width, padding, margin, bg_color):
-        return tags.A(attributes.Href(href),
-                      attributes.Class('link'),
-                      attributes.Target('_blank'),
-                      tags.Img(attributes.Width('6%'),
-                               Align('center'),
-                               attributes.Src(img_src),
-                               attributes.InlineStyle(padding=padding,
-                                                     margin=margin,
-                                                     border_radius='20%',
-                                                     background_color=bg_color)))
+        return tags.A(
+            attributes.Href(href),
+            attributes.Class("link"),
+            attributes.Target("_blank"),
+            tags.Img(
+                attributes.Width("6%"),
+                Align("center"),
+                attributes.Src(img_src),
+                attributes.InlineStyle(
+                    padding=padding,
+                    margin=margin,
+                    border_radius="20%",
+                    background_color=bg_color,
+                ),
+            ),
+        )
 
     def __default_networks(self):
-        return [{
-                'img_src': GIT_IMG_BLACK,
-                'href': GIT_LINK
-            },{
-                'img_src': YT_IMG_BLACK,
-                'href': YT_LINK
-            },{
-                'img_src': LK_IMG_BLACK,
-                'href': LK_LINK
-            },{
-                'img_src': TW_IMG_BLACK,
-                'href': TW_LINK
-            }]
-    
-    def __default_company(self):
-        return ["Naas: Notebooks-as-a-service",
-                "<a target='_blank' href='https://www.naas.ai/'>www.naas.ai</a>"]
-    
-    def __default_legal(self):
-        return ["Powered by CASHSTORY © 2021",
-                "CashStory SAS, 5 rue Hermel, 75018 Paris, France"]
+        return [
+            {"img_src": GIT_IMG_BLACK, "href": GIT_LINK},
+            {"img_src": YT_IMG_BLACK, "href": YT_LINK},
+            {"img_src": LK_IMG_BLACK, "href": LK_LINK},
+            {"img_src": TW_IMG_BLACK, "href": TW_LINK},
+        ]
 
-    def __text_style(self,
-                     style={},
-                     color=None,
-                     font_size=None,
-                     text_align=None,
-                     bold=False,
-                     underline=False,
-                     italic=False):
+    def __default_company(self):
+        return [
+            "Naas: Notebooks-as-a-service",
+            "<a target='_blank' href='https://www.naas.ai/'>www.naas.ai</a>",
+        ]
+
+    def __default_legal(self):
+        return [
+            "Powered by CASHSTORY © 2021",
+            "CashStory SAS, 5 rue Hermel, 75018 Paris, France",
+        ]
+
+    def __text_style(
+        self,
+        style={},
+        color=None,
+        font_size=None,
+        text_align=None,
+        bold=False,
+        underline=False,
+        italic=False,
+    ):
         if color:
-            style['color'] = color
+            style["color"] = color
         if font_size:
-            style['font_size'] = f"{font_size}"
+            style["font_size"] = f"{font_size}"
         if text_align:
-            style['text_align'] = text_align
+            style["text_align"] = text_align
         if bold:
-            style['font_weight'] = 'bold'
+            style["font_weight"] = "bold"
         if underline:
-            style['text_decoration'] = 'underline'
+            style["text_decoration"] = "underline"
         if italic:
-            style['font_style'] = 'italic';
+            style["font_style"] = "italic"
         return style
 
-    def __create_table_cell(self,
-                            content,
-                            header=False,
-                            align=None,
-                            border=False,
-                            header_bg_color="black",
-                            header_ft_color="white",
-                            border_color="black",
-                            size=None):
+    def __create_table_cell(
+        self,
+        content,
+        header=False,
+        align=None,
+        border=False,
+        header_bg_color="black",
+        header_ft_color="white",
+        border_color="black",
+        size=None,
+    ):
         style = {}
         if border:
-            style['border'] = f'1px solid {border_color}'
+            style["border"] = f"1px solid {border_color}"
         if size:
-            style['width'] = f'{size}'
+            style["width"] = f"{size}"
         if header:
-            style['color'] = header_ft_color
-            style['background_color'] = header_bg_color
+            style["color"] = header_ft_color
+            style["background_color"] = header_bg_color
             return tags.Th(content, attributes.InlineStyle(**style))
         else:
             if align is not None:
-                style['text_align'] = align
+                style["text_align"] = align
             return tags.Td(content, attributes.InlineStyle(**style))
-        
-    def __df_table_header(self, df, border=False, header_bg_color="black", header_ft_color="white", border_color="black"):
+
+    def __df_table_header(
+        self,
+        df,
+        border=False,
+        header_bg_color="black",
+        header_ft_color="white",
+        border_color="black",
+    ):
         res = []
         for col in df.columns:
-            res.append(self.__create_table_cell(tags.Text(col), True, None, border, header_bg_color, header_ft_color))
+            res.append(
+                self.__create_table_cell(
+                    tags.Text(col), True, None, border, header_bg_color, header_ft_color
+                )
+            )
         return res
-    
+
     def address(self, title, content):
         self.deprecatedPrint("address")
         return tags.Address(
@@ -284,7 +304,7 @@ class EmailBuilder(InDriver):
             ),
             *elems,
         )
-    
+
     def space(self):
         self.deprecatedPrint("space")
         return tags.Br()
@@ -292,11 +312,11 @@ class EmailBuilder(InDriver):
     def separator(self):
         self.deprecatedPrint("separator")
         return tags.hr()
-    
+
     def logo(self, src, link=None, name="Logo", align="center", size="80px"):
         self.deprecatedPrint("logo")
         return self.image(src, link, name, width=size, height=size, align=align)
-    
+
     def header(self, *elems):
         self.deprecatedPrint("header")
         return tags.Header(*elems)
@@ -315,22 +335,22 @@ class EmailBuilder(InDriver):
         ]
         return tags.Footer(tags.P(one), *elems)
 
-    def title(self,
-              title,
-              heading=None,
-              color="#000000",
-              font_size="32px",
-              text_align="center",
-              bold=True,
-              underline=False,
-              italic=False):
+    def title(
+        self,
+        title,
+        heading=None,
+        color="#000000",
+        font_size="32px",
+        text_align="center",
+        bold=True,
+        underline=False,
+        italic=False,
+    ):
         self.deprecatedPrint()
-        style = {
-            'font_weight': "normal",
-            'line_height': "32px",
-            'margin': "48px 0"
-        }
-        style = self.__text_style(style, color, font_size, text_align, bold, underline, italic)
+        style = {"font_weight": "normal", "line_height": "32px", "margin": "48px 0"}
+        style = self.__text_style(
+            style, color, font_size, text_align, bold, underline, italic
+        )
         return tags.H1(
             attributes.InlineStyle(**style),
             tags.Text(title),
@@ -347,83 +367,100 @@ class EmailBuilder(InDriver):
             ),
         )
 
-    def heading(self,
-                text,
-                color="#000000",
-                font_size=28,
-                text_align="center",
-                bold=True,
-                underline=False,
-                italic=False):
+    def heading(
+        self,
+        text,
+        color="#000000",
+        font_size=28,
+        text_align="center",
+        bold=True,
+        underline=False,
+        italic=False,
+    ):
         self.deprecatedPrint()
         style = {
-            'font-weight': 'normal',
-            'line_height': "32px",
-            'margin': "48px 0 24px 0",
-            'text_align': text_align
+            "font-weight": "normal",
+            "line_height": "32px",
+            "margin": "48px 0 24px 0",
+            "text_align": text_align,
         }
-        style = self.__text_style(style, color, font_size, text_align, bold, underline, italic)
+        style = self.__text_style(
+            style, color, font_size, text_align, bold, underline, italic
+        )
         return tags.H2(
             attributes.InlineStyle(**style),
             tags.Text(text),
         )
 
-    def subheading(self,
-                   text,
-                   color="#000000",
-                   font_size="24px",
-                   text_align="left",
-                   bold=False,
-                   underline=False,
-                   italic=False):
+    def subheading(
+        self,
+        text,
+        color="#000000",
+        font_size="24px",
+        text_align="left",
+        bold=False,
+        underline=False,
+        italic=False,
+    ):
         self.deprecatedPrint()
         return self.text(text, color, font_size, text_align, bold, underline, italic)
 
-    def text(self,
-             text,
-             color="#000000",
-             font_size="18px",
-             text_align="left",
-             bold=False,
-             underline=False,
-             italic=False,
-            padding_left="10px",
-            padding_right="10px"):
+    def text(
+        self,
+        text,
+        color="#000000",
+        font_size="18px",
+        text_align="left",
+        bold=False,
+        underline=False,
+        italic=False,
+        padding_left="10px",
+        padding_right="10px",
+    ):
         self.deprecatedPrint()
-        style = {
-            'padding_left': padding_left,
-            'padding_right': padding_right
-        }
-        style = self.__text_style(style, color, font_size, text_align, bold, underline, italic)
+        style = {"padding_left": padding_left, "padding_right": padding_right}
+        style = self.__text_style(
+            style, color, font_size, text_align, bold, underline, italic
+        )
         return tags.P(
             tags.Text(text),
             attributes.InlineStyle(**style),
         )
-    
-    def link(self,
-             link,
-             title="Open",
-             color="#B200FD",
-             font_size="18px",
-             text_align="left",
-             bold=False,
-             underline=True,
-             italic=False):
+
+    def link(
+        self,
+        link,
+        title="Open",
+        color="#B200FD",
+        font_size="18px",
+        text_align="left",
+        bold=False,
+        underline=True,
+        italic=False,
+    ):
         self.deprecatedPrint()
-        style = self.__text_style({}, color, font_size, text_align, bold, underline, italic)
+        style = self.__text_style(
+            {}, color, font_size, text_align, bold, underline, italic
+        )
         return tags.A(
-            attributes.Class('link'),
+            attributes.Class("link"),
             attributes.Href(link),
             attributes.InlineStyle(**style),
             tags.Text(title),
         )
-    
+
     def list(self, list_):
         elems = []
         for elem in list_:
-            elems.append(tags.Li(elem if issubclass(type(elem), tags.HtmlTag) else tags.Text(f'{elem}')))
+            elems.append(
+                tags.Li(
+                    elem
+                    if issubclass(type(elem), tags.HtmlTag)
+                    else tags.Text(f"{elem}")
+                )
+            )
         return tags.Ul(elems)
-    
+
     def button(
         self,
         link,
@@ -460,16 +497,18 @@ class EmailBuilder(InDriver):
                 ),
             )
         )
-    
-    def table(self,
-              data,
-              border=False,
-              header=False,
-              col_align={},
-              header_bg_color="black",
-              header_ft_color="white",
-              border_color="black",
-              col_size={}):
+
+    def table(
+        self,
+        data,
+        border=False,
+        header=False,
+        col_align={},
+        header_bg_color="black",
+        header_ft_color="white",
+        border_color="black",
+        col_size={},
+    ):
         self.deprecatedPrint()
         elems = []
         table_arr = None
@@ -491,21 +530,27 @@ class EmailBuilder(InDriver):
             return None
         for row in table_arr:
             res = []
-            is_header = (index == 0 and header is True)
+            is_header = index == 0 and header is True
             if isinstance(row, list):
                 for i in range(len(row)):
                     align = col_align[i] if i in col_align else None
                     size = col_size[i] if i in col_size else None
                     cell = row[i]
-                    
+
                     if isinstance(data, pd.DataFrame):
                         col = list(data.columns)[i]
                         if is_header:
-                            elems.append(tags.Tr(self.__df_table_header(data,
-                                                                        border,
-                                                                        header_bg_color,
-                                                                        header_ft_color,
-                                                                        border_color)))
+                            elems.append(
+                                tags.Tr(
+                                    self.__df_table_header(
+                                        data,
+                                        border,
+                                        header_bg_color,
+                                        header_ft_color,
+                                        border_color,
+                                    )
+                                )
+                            )
                             is_header = False
                         if row_link:
                             if col != "row_link":
@@ -513,7 +558,7 @@ class EmailBuilder(InDriver):
                                 res.append(
                                     self.__create_table_cell(
                                         tags.A(
-                                            attributes.Class('link'),
+                                            attributes.Class("link"),
                                             attributes.Href(link),
                                             self.__convert(cell, col),
                                         ),
@@ -522,44 +567,54 @@ class EmailBuilder(InDriver):
                                         border=border,
                                         header_bg_color=header_bg_color,
                                         header_ft_color=header_ft_color,
-                                        border_color=border_color
+                                        border_color=border_color,
                                     )
                                 )
                         else:
-                            res.append(self.__create_table_cell(self.__convert(cell, col),
-                                                                is_header,
-                                                                align,
-                                                                border,
-                                                                header_bg_color,
-                                                                header_ft_color,
-                                                                border_color,
-                                                                size))
+                            res.append(
+                                self.__create_table_cell(
+                                    self.__convert(cell, col),
+                                    is_header,
+                                    align,
+                                    border,
+                                    header_bg_color,
+                                    header_ft_color,
+                                    border_color,
+                                    size,
+                                )
+                            )
                     else:
                         res.append(
                             self.__create_table_cell(
                                 (tags.Text(cell) if isinstance(cell, str) else cell),
                                 is_header,
-                                align, border,
+                                align,
+                                border,
                                 header_bg_color,
                                 header_ft_color,
                                 border_color,
-                                size)
+                                size,
+                            )
                         )
             else:
                 align = col_align[0] if 0 in col_align else None
                 size = col_size[0] if 0 in col_size else None
-                res.append(self.__create_table_cell(
-                    (tags.Text(row) if isinstance(row, str) else row),
-                    is_header,
-                    align, border,
-                    header_bg_color,
-                    header_ft_color,
-                    border_color,
-                    size))
+                res.append(
+                    self.__create_table_cell(
+                        (tags.Text(row) if isinstance(row, str) else row),
+                        is_header,
+                        align,
+                        border,
+                        header_bg_color,
+                        header_ft_color,
+                        border_color,
+                        size,
+                    )
+                )
             elems.append(tags.Tr(res))
             index += 1
         tab = tags.Table(
-            attributes.InlineStyle(width="100%", border_collapse='collapse'),
+            attributes.InlineStyle(width="100%", border_collapse="collapse"),
             attributes.Class("table_border") if border else None,
             elems,
         )
@@ -584,19 +639,23 @@ class EmailBuilder(InDriver):
             {"name": "alt", "value": name},
         ]
         if link:
-            return tags.A(attributes.Class('link'), attributes.Href(link), tags.Img(elems_img))
+            return tags.A(
+                attributes.Class("link"), attributes.Href(link), tags.Img(elems_img)
+            )
         else:
             return tags.Img(elems_img)
-    
-    def footer_company(self,
-                       networks=None,
-                       company=None,
-                       legal=None,
-                       logo_width='6%',
-                       logo_padding='5px',
-                       logo_margin='0px 15px',
-                       logo_bg_color='white',
-                       naas=False):
+
+    def footer_company(
+        self,
+        networks=None,
+        company=None,
+        legal=None,
+        logo_width="6%",
+        logo_padding="5px",
+        logo_margin="0px 15px",
+        logo_bg_color="white",
+        naas=False,
+    ):
         self.deprecatedPrint()
         net = []
         com = []
@@ -608,31 +667,34 @@ class EmailBuilder(InDriver):
         if networks:
             for elem in networks:
                 if elem.keys() >= frozenset({"img_src", "href"}):
-                    net.append(self.__create_network_icon(**elem,
-                                                          width=logo_width,
-                                                          padding=logo_padding,
-                                                          margin=logo_margin,
-                                                          bg_color=logo_bg_color))
-            net = tags.P(net, attributes.InlineStyle(text_align='center'))
+                    net.append(
+                        self.__create_network_icon(
+                            **elem,
+                            width=logo_width,
+                            padding=logo_padding,
+                            margin=logo_margin,
+                            bg_color=logo_bg_color,
+                        )
+                    )
+            net = tags.P(net, attributes.InlineStyle(text_align="center"))
         if company:
             for elem in company:
                 com.append(tags.B(tags.Text(elem)))
                 com.append(tags.Br())
-            com = tags.P(attributes.InlineStyle(line_height=1, text_align='center'),
-                        tags.Span(com,
-                                 attributes.InlineStyle(font_size= '12px')))
+            com = tags.P(
+                attributes.InlineStyle(line_height=1, text_align="center"),
+                tags.Span(com, attributes.InlineStyle(font_size="12px")),
+            )
         if legal:
             for elem in legal:
                 leg.append(tags.Text(elem))
                 leg.append(tags.Br())
-            leg = tags.P(attributes.InlineStyle(line_height=1, text_align='center'),
-                        tags.Span(leg,
-                                 attributes.InlineStyle(font_size= '11px')))
-        return tags.Footer(tags.Hr(),
-                           net,
-                           com,
-                           leg)
-    
+            leg = tags.P(
+                attributes.InlineStyle(line_height=1, text_align="center"),
+                tags.Span(leg, attributes.InlineStyle(font_size="11px")),
+            )
+        return tags.Footer(tags.Hr(), net, com, leg)
+
     def main(
         self,
         **kwargs,
@@ -717,7 +779,7 @@ class EmailBuilder(InDriver):
                 self.__export(html, filename, css)
         else:
             self.__export(html, filenames, css)
-            
+
     def generate(self, title=None, logo=None, display="embed", footer=None, **kwargs):
         self.deprecatedPrint()
         gen_html = tags.Html(

@@ -2,19 +2,31 @@
 
 from typing import Optional, Union, Dict, Any
 
-from transformers import PretrainedConfig, PreTrainedTokenizer, AutoConfig, AutoTokenizer
+from transformers import (
+    PretrainedConfig,
+    PreTrainedTokenizer,
+    AutoConfig,
+    AutoTokenizer,
+)
 
 from naas_drivers.driver import InDriver
 from transformers.pipelines.question_answering import QuestionAnsweringPipeline
-from transformers.pipelines.text2text_generation import SummarizationPipeline, Text2TextGenerationPipeline, \
-    TranslationPipeline
+from transformers.pipelines.text2text_generation import (
+    SummarizationPipeline,
+    Text2TextGenerationPipeline,
+    TranslationPipeline,
+)
 from transformers.pipelines.text_classification import TextClassificationPipeline
 from transformers.pipelines.text_generation import TextGenerationPipeline
 from transformers.pipelines.feature_extraction import FeatureExtractionPipeline
 from transformers.pipelines.token_classification import TokenClassificationPipeline
 from transformers.pipelines.fill_mask import FillMaskPipeline
-from transformers.pipelines.table_question_answering import TableQuestionAnsweringPipeline
-from transformers.pipelines.zero_shot_classification import ZeroShotClassificationPipeline
+from transformers.pipelines.table_question_answering import (
+    TableQuestionAnsweringPipeline,
+)
+from transformers.pipelines.zero_shot_classification import (
+    ZeroShotClassificationPipeline,
+)
 from transformers.pipelines.conversational import ConversationalPipeline
 from transformers.pipelines.image_classification import ImageClassificationPipeline
 from transformers.pipelines.base import infer_framework_from_model, Pipeline
@@ -36,7 +48,7 @@ if is_torch_available():
         AutoModelForTokenClassification,
         AutoModelForTableQuestionAnswering,
         AutoModelForImageClassification,
-)
+    )
 
 if is_tf_available():
     import tensorflow as tf
@@ -48,14 +60,16 @@ if is_tf_available():
         TFAutoModelForMaskedLM,
         TFAutoModel,
         TFAutoModelForTokenClassification,
-)
+    )
 
 TASKS = {
     "feature-extraction": {
         "impl": FeatureExtractionPipeline,
         "tf": TFAutoModel if is_tf_available() else None,
         "pt": AutoModel if is_torch_available() else None,
-        "default": {"model": {"pt": "distilbert-base-cased", "tf": "distilbert-base-cased"}},
+        "default": {
+            "model": {"pt": "distilbert-base-cased", "tf": "distilbert-base-cased"}
+        },
     },
     "text-classification": {
         "impl": TextClassificationPipeline,
@@ -84,7 +98,10 @@ TASKS = {
         "tf": TFAutoModelForQuestionAnswering if is_tf_available() else None,
         "pt": AutoModelForQuestionAnswering if is_torch_available() else None,
         "default": {
-            "model": {"pt": "distilbert-base-cased-distilled-squad", "tf": "distilbert-base-cased-distilled-squad"},
+            "model": {
+                "pt": "distilbert-base-cased-distilled-squad",
+                "tf": "distilbert-base-cased-distilled-squad",
+            },
         },
     },
     "table-question-answering": {
@@ -148,7 +165,12 @@ TASKS = {
         "impl": ConversationalPipeline,
         "tf": TFAutoModelForCausalLM if is_tf_available() else None,
         "pt": AutoModelForCausalLM if is_torch_available() else None,
-        "default": {"model": {"pt": "microsoft/DialoGPT-medium", "tf": "microsoft/DialoGPT-medium"}},
+        "default": {
+            "model": {
+                "pt": "microsoft/DialoGPT-medium",
+                "tf": "microsoft/DialoGPT-medium",
+            }
+        },
     },
     "image-classification": {
         "impl": ImageClassificationPipeline,
@@ -163,17 +185,18 @@ TASK_ALIASES = {
     "ner": "token-classification",
 }
 
+
 class NLP(InDriver):
     def get(
-            self,
-            task: str,
-            model: Optional = None,
-            config: Optional[Union[str, PretrainedConfig]] = None,
-            tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
-            framework: Optional[str] = None,
-            revision: Optional[str] = None,
-            model_kwargs: Dict[str, Any] = {},
-            **kwargs
+        self,
+        task: str,
+        model: Optional = None,
+        config: Optional[Union[str, PretrainedConfig]] = None,
+        tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
+        framework: Optional[str] = None,
+        revision: Optional[str] = None,
+        model_kwargs: Dict[str, Any] = {},
+        **kwargs,
     ) -> Pipeline:
         """
         Args:
@@ -223,11 +246,15 @@ class NLP(InDriver):
             )
 
         if framework is None:
-            framework, model = infer_framework_from_model(model, targeted_task, revision=revision, task=task)
+            framework, model = infer_framework_from_model(
+                model, targeted_task, revision=revision, task=task
+            )
 
         task_class, model_class = targeted_task["impl"], targeted_task[framework]
         if isinstance(config, str):
-            config = AutoConfig.from_pretrained(config, revision=revision, _from_pipeline=task, **model_kwargs)
+            config = AutoConfig.from_pretrained(
+                config, revision=revision, _from_pipeline=task, **model_kwargs
+            )
 
         if model is None:
             model = targeted_task["default"]["model"][framework]
@@ -265,7 +292,13 @@ class NLP(InDriver):
                 )
 
             model = model_class.from_pretrained(
-                model, config=config, revision=revision, _from_pipeline=task, **model_kwargs
+                model,
+                config=config,
+                revision=revision,
+                _from_pipeline=task,
+                **model_kwargs,
             )
 
-        return task_class(model=model, framework=framework, tokenizer=tokenizer, task=task, **kwargs)
+        return task_class(
+            model=model, framework=framework, tokenizer=tokenizer, task=task, **kwargs
+        )

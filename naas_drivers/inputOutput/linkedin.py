@@ -1,4 +1,4 @@
-#from naas_drivers.driver import InDriver, OutDriver
+from naas_drivers.driver import InDriver, OutDriver
 import pandas as pd
 import requests
 import time
@@ -12,7 +12,8 @@ RELEASE_MESSAGE = (
     "https://github.com/orgs/jupyter-naas/projects/4"
 )
 
-class LinkedIn():
+
+class LinkedIn:
     deprecated = True
 
     def print_deprecated(self, new_funct):
@@ -640,13 +641,13 @@ class Profile(LinkedIn):
             "INTERESTS": data.get("interests"),
         }
         return pd.DataFrame([result])
-    
+
     def get_posts_stats(self, profile_url=None, profile_urn=None):
         params = {}
         if profile_url:
-            params['profile_url'] = profile_url
+            params["profile_url"] = profile_url
         if profile_urn:
-            params['profile_urn'] = profile_urn
+            params["profile_urn"] = profile_urn
         req_url = f"{LINKEDIN_API}/event/getGuests?{urllib.parse.urlencode(params, safe='(),')}"
         headers = {"Content-Type": "application/json"}
         res = requests.post(req_url, json=self.cookies, headers=headers)
@@ -719,8 +720,10 @@ class Invitation(LinkedIn):
         if message:
             message = ',"message":' '"' + message + '"'
         data = (
-            ('{"trackingId":"yvzykVorToqcOuvtxjSFMg==","invitations":[],"excludeInvitations":[],'
-            '"invitee":{"com.linkedin.voyager.growth.invitation.InviteeProfile":{"profileId":')
+            (
+                '{"trackingId":"yvzykVorToqcOuvtxjSFMg==","invitations":[],"excludeInvitations":[],'
+                '"invitee":{"com.linkedin.voyager.growth.invitation.InviteeProfile":{"profileId":'
+            )
             + '"'
             + recipient_urn
             + '"'
@@ -758,7 +761,9 @@ class Message(LinkedIn):
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
 
-    def get_messages(self, conversation_url=None, conversation_urn=None, start=0, limit=-1, count=20):
+    def get_messages(
+        self, conversation_url=None, conversation_urn=None, start=0, limit=-1, count=20
+    ):
         req_url = f"{LINKEDIN_API}/message/geMessages?start={start}&limit={limit}&count{count}"
         if conversation_url:
             req_url += f"&conversation_url={conversation_url}"
@@ -828,26 +833,51 @@ class Post(LinkedIn):
 
     def __get_social_activity_count(self, data, activity_id=None):
         result = None
-        if data.get('$type') == "com.linkedin.voyager.feed.shared.SocialActivityCounts" and (activity_id is None or activity_id == data.get("entityUrn").replace("urn:li:fs_socialActivityCounts:urn:li:activity:", "")):
-            print(data.get("entityUrn").replace("urn:li:fs_socialActivityCounts:urn:li:activity:", ""))
+        if data.get(
+            "$type"
+        ) == "com.linkedin.voyager.feed.shared.SocialActivityCounts" and (
+            activity_id is None
+            or activity_id
+            == data.get("entityUrn").replace(
+                "urn:li:fs_socialActivityCounts:urn:li:activity:", ""
+            )
+        ):
+            print(
+                data.get("entityUrn").replace(
+                    "urn:li:fs_socialActivityCounts:urn:li:activity:", ""
+                )
+            )
             result = {
                 "LIKES": data.get("numLikes"),
                 "VIEWS": data.get("numViews"),
-                "COMMENTS": data.get("numComments")
+                "COMMENTS": data.get("numComments"),
             }
-            for elem in data.get('reactionTypeCounts', []):
+            for elem in data.get("reactionTypeCounts", []):
                 result[f'{elem.get("reactionType")}_COUNT'] = elem.get("count")
         return result
 
     def __get_post_update(self, data):
         result = None
-        if data.get('$type') == "com.linkedin.voyager.feed.render.UpdateV2":
+        if data.get("$type") == "com.linkedin.voyager.feed.render.UpdateV2":
             result = {
-                "POST_URN": data.get("updateMetadata", {}).get('urn').replace('urn:li:activity:', ''),
-                "TITLE": data.get('commentary', {}).get("text", {}).get("text", "").rsplit("\n")[0],
-                "TEXT": data.get('commentary', {}).get("text", {}).get("text", "").replace("\n", ""),
-                "TAGS_COUNT": data.get('commentary', {}).get("text", {}).get("text").count("#"),
-                "DATE": data.get('actor', {}).get('subDescription', {}).get('accessibilityText')
+                "POST_URN": data.get("updateMetadata", {})
+                .get("urn")
+                .replace("urn:li:activity:", ""),
+                "TITLE": data.get("commentary", {})
+                .get("text", {})
+                .get("text", "")
+                .rsplit("\n")[0],
+                "TEXT": data.get("commentary", {})
+                .get("text", {})
+                .get("text", "")
+                .replace("\n", ""),
+                "TAGS_COUNT": data.get("commentary", {})
+                .get("text", {})
+                .get("text")
+                .count("#"),
+                "DATE": data.get("actor", {})
+                .get("subDescription", {})
+                .get("accessibilityText"),
             }
             for i in range(1, result.get("TAGS_COUNT", 1)):
                 tag = result.get("TEXT", "").rsplit("#")[i]
@@ -856,7 +886,7 @@ class Post(LinkedIn):
                 result[f"TAG_{i}"] = tag
             for elem in data.get("updateMetadata", {}).get("actions", []):
                 if data.get("url") is not None:
-                    result['URL'] = elem.get('url')
+                    result["URL"] = elem.get("url")
                     break
         return result
 
@@ -867,9 +897,11 @@ class Post(LinkedIn):
             print("Error")
             return None
 
-        post = requests.get(f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
-                            cookies=self.cookies,
-                            headers=self.headers).json()
+        post = requests.get(
+            f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
+            cookies=self.cookies,
+            headers=self.headers,
+        ).json()
 
         result = {}
         for elem in post.get("included", []):
