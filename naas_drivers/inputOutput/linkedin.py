@@ -5,7 +5,7 @@ import time
 import urllib
 from datetime import datetime
 
-LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod/"
+LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
     "Feature not release yet."
     "Please create or comment issue on Jupyter Naas Github: "
@@ -36,13 +36,10 @@ class LinkedIn(InDriver, OutDriver):
         # Check if requests is successful
         try:
             res.raise_for_status()
+            res_json = res.json()
+            return res_json.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
         except requests.HTTPError as e:
             return e
-        else:
-            res_json = res.json()
-        return (
-            res_json.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
-        )
 
     def get_birthdate(self, bd):
         if bd is None:
@@ -644,18 +641,18 @@ class Profile(LinkedIn):
         return pd.DataFrame([result])
 
     def get_posts_stats(self, profile_url=None, profile_urn=None):
-        params = {}
-        if profile_url:
-            params["profile_url"] = profile_url
-        if profile_urn:
-            params["profile_urn"] = profile_urn
-        req_url = f"{LINKEDIN_API}/profile/getPostsStats?{urllib.parse.urlencode(params, safe='(),')}"
+        res_json = {}
+        if profile_urn is None:
+            profile_urn = LinkedIn.get_profile_urn(self, profile_url)
+            if profile_urn is None:
+                return "Please enter a valid profile_url or profile_urn"
+        req_url = f"{LINKEDIN_API}/profile/getPostsStats?profile_urn={profile_urn}"
         headers = {"Content-Type": "application/json"}
         res = requests.post(req_url, json=self.cookies, headers=headers)
         try:
             res.raise_for_status()
-        except requests.HTTPError:
-            res_json = {}
+        except requests.HTTPError as e:
+            return e
         else:
             res_json = res.json()
         df = pd.DataFrame(res_json)
@@ -740,7 +737,11 @@ class Invitation(LinkedIn):
             headers=head,
             cookies=self.cookies,
         )
-        return res.status_code != 201
+        try:
+            res.raise_for_status()
+            return("✉️ Invitation successfully sent !")
+        except requests.HTTPError as e:
+            return e
 
 
 class Message(LinkedIn):
@@ -782,6 +783,7 @@ class Message(LinkedIn):
         return df.reset_index(drop=True)
 
     def send(self, content, recipients_url=None, recipients_urn=None):
+        recipient_errors = []
         params = {"action": "create"}
         message_event = {
             "eventCreate": {
@@ -798,16 +800,19 @@ class Message(LinkedIn):
                 }
             }
         }
-        if type(recipients_url) is not list and recipients_url is not None:
+        if type(recipients_url) is str:
             recipients_url = [recipients_url]
-        if recipients_urn is not list:
-            if recipients_urn is str:
-                recipients_urn = [recipients_urn]
-            else:
-                recipients_urn = []
-        if recipients_url is not None:
+        if type(recipients_urn) is str:
+            recipients_urn = [recipients_urn]
+        if type(recipients_url) is list:
+            recipients_urn = []
             for recipient in recipients_url:
-                recipients_urn.append(self.get_profile_urn(recipient))
+                recipient_urn = LinkedIn.get_profile_urn(self, recipient)
+                if type(recipient_urn) is requests.exceptions.HTTPError:
+                    recipient_errors.append(recipient_urn)
+                recipients_urn.append(recipient_urn)
+        if len(recipient_errors) > 0:
+            return recipient_errors
         message_event["recipients"] = recipients_urn
         message_event["subtype"] = "MEMBER_TO_MEMBER"
         payload = {
@@ -821,9 +826,11 @@ class Message(LinkedIn):
             cookies=self.cookies,
             headers=self.headers,
         )
-        if res.status_code == 201:
-            print("Message successfully sent")
-        return res
+        try:
+            res.raise_for_status()
+            return("💬 Message successfully sent !")
+        except requests.HTTPError as e:
+            return e
 
 
 class Post(LinkedIn):
@@ -843,6 +850,11 @@ class Post(LinkedIn):
                 "urn:li:fs_socialActivityCounts:urn:li:activity:", ""
             )
         ):
+            print(
+                data.get("entityUrn").replace(
+                    "urn:li:fs_socialActivityCounts:urn:li:activity:", ""
+                )
+            )
             result = {
                 "LIKES": data.get("numLikes"),
                 "VIEWS": data.get("numViews"),
@@ -875,7 +887,7 @@ class Post(LinkedIn):
                 .get("subDescription", {})
                 .get("accessibilityText"),
             }
-            for i in range(1, result.get("TAGS_COUNT", 0) + 1):
+            for i in range(1, result.get("TAGS_COUNT", 1)):
                 tag = result.get("TEXT", "").rsplit("#")[i]
                 for x in [" ", "\n", ".", ","]:
                     tag = tag.rsplit(x)[0]
@@ -888,7 +900,7 @@ class Post(LinkedIn):
 
     def get_stats(self, post_url=None, activity_id=None):
         if post_url is not None:
-            activity_id = self.get_activity_id(post_url)
+            activity_id = LinkedIn.get_post_urn(post_url)
         if activity_id is None:
             print("Error")
             return None
