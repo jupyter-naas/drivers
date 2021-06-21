@@ -410,7 +410,7 @@ class EmailBuilder(InDriver):
         text,
         color="#000000",
         font_size="18px",
-        text_align="left",
+        text_align=None,
         bold=False,
         underline=False,
         italic=False,
