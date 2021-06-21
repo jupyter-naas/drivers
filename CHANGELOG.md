@@ -1,3 +1,12 @@
+## 0.66.3 (2021-06-21)
+
+### Fix
+
+- lint black
+- linkedin get posts stats, improve send message
+- remove a debug print
+- post.get_stats
+
 ## 0.66.2 (2021-06-18)
 
 ### Fix
