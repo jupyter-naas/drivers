@@ -1,3 +1,9 @@
+## 0.66.4 (2021-06-21)
+
+### Fix
+
+- email builder table text align is not always set to left
+
 ## 0.66.3 (2021-06-21)
 
 ### Fix
