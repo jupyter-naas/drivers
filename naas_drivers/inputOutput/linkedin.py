@@ -37,7 +37,11 @@ class LinkedIn(InDriver, OutDriver):
         try:
             res.raise_for_status()
             res_json = res.json()
-            return res_json.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
+            return (
+                res_json.get("data", {})
+                .get("entityUrn")
+                .replace("urn:li:fs_profile:", "")
+            )
         except requests.HTTPError as e:
             return e
 
@@ -161,13 +165,11 @@ class LinkedIn(InDriver, OutDriver):
             adress = pf.get("geoLocationName")
             lk_headline = pf.get("headline")
             lk_industry = pf.get("industryName")
-
         # Get network info
         nw = network.get("data")
         lk_followers = None
         if nw is not None:
             lk_followers = nw.get("followersCount")
-
         # Get contact info
         ct = contact.get("data")
         lk_phone = None
@@ -188,7 +190,6 @@ class LinkedIn(InDriver, OutDriver):
                 for rows in lk_twiters:
                     lk_twiter = rows["name"]
                     break
-
         # Profile dict
         lk_profile = {
             "FIRSTNAME": firstname,
@@ -209,7 +210,6 @@ class LinkedIn(InDriver, OutDriver):
 
         if output == "json":
             return lk_profile
-
         if output == "dataframe":
             df = pd.DataFrame.from_records([lk_profile])
             return df
@@ -260,7 +260,6 @@ class LinkedIn(InDriver, OutDriver):
                         "PROFILE_PUBLIC_ID": publicidentifier,
                     }
                     lk_profile.append(tmp_dict)
-
             if lk_type == "com.linkedin.voyager.messaging.Conversation":
                 # Init variable
                 profile_id = None
@@ -278,7 +277,6 @@ class LinkedIn(InDriver, OutDriver):
                     lastactivityat = datetime.fromtimestamp(lastactivityat / 1000.0)
                 if lastreadat is not None:
                     lastreadat = datetime.fromtimestamp(lastreadat / 1000.0)
-
                 # Create conversation dict
                 profile_id = str(profile_id).rsplit(",")[-1].rsplit(")")[0]
                 if profile_id != "UNKNOWN":
@@ -290,7 +288,6 @@ class LinkedIn(InDriver, OutDriver):
                         "LAST_READ_AT": lastreadat,
                     }
                     lk_conversation.append(tmp_dict)
-
             if lk_type == "com.linkedin.voyager.messaging.Event":
                 # Init variable
                 message_id = None
@@ -306,7 +303,6 @@ class LinkedIn(InDriver, OutDriver):
                         if key == "attributedBody":
                             message_text = m.get("eventContent").get(key).get("text")
                             break
-
                 # Create event dict
                 tmp_dict = {}
                 tmp_dict = {
@@ -315,7 +311,6 @@ class LinkedIn(InDriver, OutDriver):
                     "MESSAGE_TYPE": message_type,
                 }
                 lk_event.append(tmp_dict)
-
         # Convert dict to dataframe
         df_profile = pd.DataFrame.from_records(lk_profile)
         df_conversation = pd.DataFrame.from_records(lk_conversation)
@@ -394,7 +389,6 @@ class LinkedIn(InDriver, OutDriver):
                     datepost = (
                         p.get("actor").get("subDescription").get("accessibilityText")
                     )
-
         # Data
         data = {
             "URL": url,
@@ -426,11 +420,9 @@ class LinkedIn(InDriver, OutDriver):
         self.print_deprecated("post.get_likes()")
         if post_link:
             thread_urn = urllib.parse.quote(LinkedIn.get_post_urn(post_link), safe="")
-
         if not thread_urn:
             print("Error, specify a 'post_link' or a 'thread_urn'")
             return None
-
         user = {
             "URN_ID": [],
             "PUBLIC_IDENTIFIER": [],
@@ -739,7 +731,7 @@ class Invitation(LinkedIn):
         )
         try:
             res.raise_for_status()
-            return("✉️ Invitation successfully sent !")
+            return "✉️ Invitation successfully sent !"
         except requests.HTTPError as e:
             return e
 
@@ -828,7 +820,7 @@ class Message(LinkedIn):
         )
         try:
             res.raise_for_status()
-            return("💬 Message successfully sent !")
+            return "💬 Message successfully sent !"
         except requests.HTTPError as e:
             return e
 
@@ -904,7 +896,6 @@ class Post(LinkedIn):
         if activity_id is None:
             print("Error")
             return None
-
         post = requests.get(
             f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
             cookies=self.cookies,
