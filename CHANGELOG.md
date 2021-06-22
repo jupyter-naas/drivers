@@ -1,3 +1,15 @@
+## 0.66.5 (2021-06-22)
+
+### Fix
+
+- remove tests
+- post.get_stats get good urn
+
+### Refactor
+
+- post.get_stats format based on profile.get_posts_stats
+- post.get_stats POST_URL column in second position
+
 ## 0.66.4 (2021-06-21)
 
 ### Fix
