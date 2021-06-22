@@ -1,3 +1,9 @@
+## 0.66.6 (2021-06-22)
+
+### Fix
+
+- linkedin post get stats columns order
+
 ## 0.66.5 (2021-06-22)
 
 ### Fix
