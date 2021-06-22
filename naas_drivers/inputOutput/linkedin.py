@@ -547,9 +547,9 @@ class Profile(LinkedIn):
         else:
             res_json = res.json()
         # Parse json
-        data = res_json.get("data")
+        data = res_json.get("data", {})
         result = {
-            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_profile:", ""),
+            "PROFILE_URN": data.get("entityUrn", "").replace("urn:li:fs_profile:", ""),
             "PROFILE_ID": lk_id,
             "FIRSTNAME": data.get("firstName"),
             "LASTNAME": data.get("lastName"),
@@ -578,13 +578,13 @@ class Profile(LinkedIn):
         else:
             res_json = res.json()
         # Parse json
-        data = res_json.get("data")
+        data = res_json.get("data", {})
         result = {
-            "PROFILE_URN": data.get("entityUrn").replace(
+            "PROFILE_URN": data.get("entityUrn", "").replace(
                 "urn:li:fs_profileNetworkInfo:", ""
             ),
             "PROFILE_ID": lk_id,
-            "DISTANCE": data.get("distance").get("value"),
+            "DISTANCE": data.get("distance", {}).get("value"),
             "FOLLOWING": data.get("following"),
             "FOLLOWABLE": data.get("followable"),
             "FOLLOWERS_COUNT": data.get("followersCount"),
@@ -605,7 +605,7 @@ class Profile(LinkedIn):
         else:
             res_json = res.json()
         # Parse json
-        data = res_json.get("data")
+        data = res_json.get("data", {})
         # Specific
         connected_at = data.get("connectedAt")
         if connected_at is not None:
@@ -626,7 +626,7 @@ class Profile(LinkedIn):
                 lk_twiter = rows["name"]
                 break
         result = {
-            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_contactinfo:", ""),
+            "PROFILE_URN": data.get("entityUrn", "").replace("urn:li:fs_contactinfo:", ""),
             "PROFILE_ID": lk_id,
             "EMAIL": data.get("emailAddress"),
             "CONNECTED_AT": connected_at,
