@@ -910,7 +910,9 @@ class Post(LinkedIn):
             post_update = self.__get_post_update(elem)
             if post_update:
                 result.update(post_update)
-        return pd.DataFrame([result])
+        df = pd.DataFrame([result])
+        df.insert(1, "POST_URL", post_url)
+        return df
 
     def get_comments(self, post_url):
         req_url = f"{LINKEDIN_API}/post/getComments?post_link={post_url}"
