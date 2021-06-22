@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 import time
 import urllib
-from datetime import datetime
+from datetime import datetime, timedelta
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -11,6 +11,7 @@ RELEASE_MESSAGE = (
     "Please create or comment issue on Jupyter Naas Github: "
     "https://github.com/orgs/jupyter-naas/projects/4"
 )
+DATE_FORMAT = "%Y-%m-%d"
 
 
 class LinkedIn(InDriver, OutDriver):
@@ -837,32 +838,61 @@ class Post(LinkedIn):
             "$type"
         ) == "com.linkedin.voyager.feed.shared.SocialActivityCounts" and (
             activity_id is None
-            or activity_id
-            == data.get("entityUrn").replace(
-                "urn:li:fs_socialActivityCounts:urn:li:activity:", ""
-            )
+            or activity_id == data.get("urn").replace("urn:li:activity:", "")
         ):
-            print(
-                data.get("entityUrn").replace(
-                    "urn:li:fs_socialActivityCounts:urn:li:activity:", ""
-                )
-            )
             result = {
-                "LIKES": data.get("numLikes"),
-                "VIEWS": data.get("numViews"),
-                "COMMENTS": data.get("numComments"),
+                "POST_URN": data.get("urn").replace("urn:li:activity:", ""),
+                "COMMENTS": data.get("numComments", 0),
+                "LIKES": data.get("numLikes", 0),
+                "VIEWS": data.get("numViews", 0),
             }
-            for elem in data.get("reactionTypeCounts", []):
-                result[f'{elem.get("reactionType")}_COUNT'] = elem.get("count")
+            if data.get("reactionTypeCounts", []):
+                for elem in data.get("reactionTypeCounts", []):
+                    result[f'LIKES_{elem.get("reactionType")}'] = elem.get("count", 0)
         return result
 
     def __get_post_update(self, data):
         result = None
-        if data.get("$type") == "com.linkedin.voyager.feed.render.UpdateV2":
+        if data.get(
+            "$type"
+        ) == "com.linkedin.voyager.feed.render.UpdateV2" and data.get("commentary"):
+            # Get post url
+            post_url = None
+            actions = data.get("updateMetadata", {}).get("actions", {})
+            for action in actions:
+                if action.get("$type") == "com.linkedin.voyager.feed.actions.Action":
+                    post_url = action.get("url")
+                    if post_url is not None:
+                        break
+            # Get time delta & month
+            time_delta = data.get("actor", {}).get("subDescription", {}).get("text", {})
+            if time_delta is not None:
+                t = time_delta.rsplit(" •")[0]
+                if t[-1:] == "h":
+                    date_approx = (
+                        datetime.now() - timedelta(hours=int(t[:-1]))
+                    ).strftime(DATE_FORMAT)
+                if t[-1:] == "d":
+                    date_approx = (
+                        datetime.now() - timedelta(days=int(t[:-1]))
+                    ).strftime(DATE_FORMAT)
+                if t[-1:] == "w":
+                    date_approx = (
+                        datetime.now() - timedelta(weeks=int(t[:-1]))
+                    ).strftime(DATE_FORMAT)
+                if t[-2:] == "mo":
+                    date_approx = (
+                        datetime.now() - timedelta(days=int(t[:-2]) * 30)
+                    ).strftime(DATE_FORMAT)
+                if t[-2:] == "yr":
+                    date_approx = (
+                        datetime.now() - timedelta(days=int(t[:-2]) * 360)
+                    ).strftime(DATE_FORMAT)
             result = {
                 "POST_URN": data.get("updateMetadata", {})
                 .get("urn")
                 .replace("urn:li:activity:", ""),
+                "POST_URL": post_url,
                 "TITLE": data.get("commentary", {})
                 .get("text", {})
                 .get("text", "")
@@ -871,13 +901,12 @@ class Post(LinkedIn):
                 .get("text", {})
                 .get("text", "")
                 .replace("\n", ""),
+                "TIME_DELTA": t,
+                "DATE_APPROX": date_approx,
                 "TAGS_COUNT": data.get("commentary", {})
                 .get("text", {})
                 .get("text")
                 .count("#"),
-                "DATE": data.get("actor", {})
-                .get("subDescription", {})
-                .get("accessibilityText"),
             }
             for i in range(1, result.get("TAGS_COUNT", 1)):
                 tag = result.get("TEXT", "").rsplit("#")[i]
@@ -890,9 +919,23 @@ class Post(LinkedIn):
                     break
         return result
 
+    def __get_social_detail(self, data):
+        result = None
+        if data.get("$type") == "com.linkedin.voyager.feed.SocialDetail":
+            result = {
+                "POST_URN": data.get("urn").replace("urn:li:activity:", ""),
+                "LIKES": data.get("likes", {}).get("paging", {}).get("total", 0),
+                "DIRECT_COMMENTS": data.get("comments", {})
+                .get("paging", {})
+                .get("total", 0),
+            }
+            if "urn:li:ugcPost:" in result["POST_URN"]:
+                result = None
+        return result
+
     def get_stats(self, post_url=None, activity_id=None):
         if post_url is not None:
-            activity_id = LinkedIn.get_post_urn(post_url)
+            activity_id = self.get_activity_id(post_url)
         if activity_id is None:
             print("Error")
             return None
@@ -902,14 +945,18 @@ class Post(LinkedIn):
             headers=self.headers,
         ).json()
 
-        result = {}
-        for elem in post.get("included", []):
-            activity_count = self.__get_social_activity_count(elem, activity_id)
+        result = {"POST_URN": None, "POST_URL": None, "TITLE": None, "TEXT": None}
+        included = post.get("included", [])
+        for include in included:
+            activity_count = self.__get_social_activity_count(include, activity_id)
             if activity_count:
                 result.update(activity_count)
-            post_update = self.__get_post_update(elem)
+            post_update = self.__get_post_update(include)
             if post_update:
                 result.update(post_update)
+            social_detail = self.__get_social_detail(include)
+            if social_detail:
+                result.update(social_detail)
         return pd.DataFrame([result])
 
     def get_comments(self, post_url):
