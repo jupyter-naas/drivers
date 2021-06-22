@@ -948,15 +948,15 @@ class Post(LinkedIn):
         result = {"POST_URN": None, "POST_URL": None, "TITLE": None, "TEXT": None}
         included = post.get("included", [])
         for include in included:
-            activity_count = self.__get_social_activity_count(include, activity_id)
-            if activity_count:
-                result.update(activity_count)
             post_update = self.__get_post_update(include)
             if post_update:
                 result.update(post_update)
             social_detail = self.__get_social_detail(include)
             if social_detail:
                 result.update(social_detail)
+            activity_count = self.__get_social_activity_count(include, activity_id)
+            if activity_count:
+                result.update(activity_count)
         return pd.DataFrame([result])
 
     def get_comments(self, post_url):
