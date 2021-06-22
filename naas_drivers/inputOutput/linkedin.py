@@ -479,7 +479,9 @@ class LinkedIn(InDriver, OutDriver):
             cookies=self.cookies,
             headers=self.headers,
         ).json()
-        return res_json.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
+        return (
+            res_json.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
+        )
 
     def send_message(self, content, recipients_url=None, recipients_urn=None):
         params = {"action": "create"}
@@ -832,25 +834,6 @@ class Post(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def __get_social_activity_count(self, data, activity_id=None):
-        result = None
-        if data.get(
-            "$type"
-        ) == "com.linkedin.voyager.feed.shared.SocialActivityCounts" and (
-            activity_id is None
-            or activity_id == data.get("urn").replace("urn:li:activity:", "")
-        ):
-            result = {
-                "POST_URN": data.get("urn").replace("urn:li:activity:", ""),
-                "COMMENTS": data.get("numComments", 0),
-                "LIKES": data.get("numLikes", 0),
-                "VIEWS": data.get("numViews", 0),
-            }
-            if data.get("reactionTypeCounts", []):
-                for elem in data.get("reactionTypeCounts", []):
-                    result[f'LIKES_{elem.get("reactionType")}'] = elem.get("count", 0)
-        return result
-
     def __get_post_update(self, data):
         result = None
         if data.get(
@@ -903,20 +886,20 @@ class Post(LinkedIn):
                 .replace("\n", ""),
                 "TIME_DELTA": t,
                 "DATE_APPROX": date_approx,
-                "TAGS_COUNT": data.get("commentary", {})
-                .get("text", {})
-                .get("text")
-                .count("#"),
+                #                 "TAGS_COUNT": data.get("commentary", {})
+                #                 .get("text", {})
+                #                 .get("text")
+                #                 .count("#"),
             }
-            for i in range(1, result.get("TAGS_COUNT", 1)):
-                tag = result.get("TEXT", "").rsplit("#")[i]
-                for x in [" ", "\n", ".", ","]:
-                    tag = tag.rsplit(x)[0]
-                result[f"TAG_{i}"] = tag
-            for elem in data.get("updateMetadata", {}).get("actions", []):
-                if data.get("url") is not None:
-                    result["URL"] = elem.get("url")
-                    break
+        #             for i in range(1, result.get("TAGS_COUNT", 1)):
+        #                 tag = result.get("TEXT", "").rsplit("#")[i]
+        #                 for x in [" ", "\n", ".", ","]:
+        #                     tag = tag.rsplit(x)[0]
+        #                 result[f"TAG_{i}"] = tag
+        #             for elem in data.get("updateMetadata", {}).get("actions", []):
+        #                 if data.get("url") is not None:
+        #                     result["URL"] = elem.get("url")
+        #                     break
         return result
 
     def __get_social_detail(self, data):
@@ -933,31 +916,59 @@ class Post(LinkedIn):
                 result = None
         return result
 
+    def __get_social_activity_count(self, data, activity_id=None):
+        result = None
+        if data.get(
+            "$type"
+        ) == "com.linkedin.voyager.feed.shared.SocialActivityCounts" and (
+            activity_id is None
+            or activity_id == data.get("urn").replace("urn:li:activity:", "")
+        ):
+            result = {
+                "POST_URN": data.get("urn").replace("urn:li:activity:", ""),
+                "COMMENTS": data.get("numComments", 0),
+                "LIKES": data.get("numLikes", 0),
+                "VIEWS": data.get("numViews", 0),
+            }
+            if data.get("reactionTypeCounts", []):
+                for elem in data.get("reactionTypeCounts", []):
+                    result[f'LIKES_{elem.get("reactionType")}'] = elem.get("count", 0)
+        return result
+
     def get_stats(self, post_url=None, activity_id=None):
         if post_url is not None:
             activity_id = self.get_activity_id(post_url)
         if activity_id is None:
-            print("Error")
-            return None
+            return "Please enter a valid post url"
         post = requests.get(
             f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
             cookies=self.cookies,
             headers=self.headers,
         ).json()
 
-        result = {"POST_URN": None, "POST_URL": None, "TITLE": None, "TEXT": None}
-        included = post.get("included", [])
+        included = post.get("included")
+        update = []
+        social = []
+        activity = []
         for include in included:
-            post_update = self.__get_post_update(include)
-            if post_update:
-                result.update(post_update)
-            social_detail = self.__get_social_detail(include)
-            if social_detail:
-                result.update(social_detail)
-            activity_count = self.__get_social_activity_count(include, activity_id)
-            if activity_count:
-                result.update(activity_count)
-        return pd.DataFrame([result])
+            u = self.__get_post_update(include)
+            if u is not None:
+                update.append(u)
+            s = self.__get_social_detail(include)
+            if s is not None:
+                social.append(s)
+            a = self.__get_social_activity_count(include, activity_id)
+            if a is not None:
+                activity.append(a)
+        # Set up dataframe
+        df_update = pd.DataFrame(update)
+        df_social = pd.DataFrame(social)
+        df_activity = pd.DataFrame(activity)
+
+        # Merge
+        df = pd.merge(df_update, df_social, on=["POST_URN"], how="left")
+        df = pd.merge(df, df_activity, on=["POST_URN", "LIKES"], how="left")
+        return df
 
     def get_comments(self, post_url):
         req_url = f"{LINKEDIN_API}/post/getComments?post_link={post_url}"
