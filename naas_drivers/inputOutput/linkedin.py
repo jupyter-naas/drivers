@@ -892,7 +892,7 @@ class Post(LinkedIn):
 
     def get_stats(self, post_url=None, activity_id=None):
         if post_url is not None:
-            activity_id = LinkedIn.get_post_urn(post_url)
+            activity_id = self.get_activity_id(post_url)
         if activity_id is None:
             print("Error")
             return None
