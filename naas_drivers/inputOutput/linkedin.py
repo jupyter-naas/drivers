@@ -4,6 +4,7 @@ import requests
 import time
 import urllib
 from datetime import datetime, timedelta
+import random
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -12,6 +13,7 @@ RELEASE_MESSAGE = (
     "https://github.com/orgs/jupyter-naas/projects/4"
 )
 DATE_FORMAT = "%Y-%m-%d"
+TIME_SLEEP = random.randint(2, 4)
 
 
 class LinkedIn(InDriver, OutDriver):
@@ -22,7 +24,7 @@ class LinkedIn(InDriver, OutDriver):
             print(f"This function is deprecated, please use {new_funct}")
 
     def get_profile_id(self, url):
-        return url.rsplit("in/")[-1].rsplit("/")[0]
+        return url.rsplit("/in/")[-1].rsplit("/")[0]
 
     def get_activity_id(self, url):
         return url.split("activity-")[-1].split("-")[0]
@@ -560,6 +562,7 @@ class Profile(LinkedIn):
             "LOCATION": data.get("locationName"),
             "BIRTHDATE": self.get_birthdate(data.get("birthDateOn")),
         }
+        time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
     def get_network(self, url=None, urn=None):
@@ -586,6 +589,7 @@ class Profile(LinkedIn):
             "FOLLOWABLE": data.get("followable"),
             "FOLLOWERS_COUNT": data.get("followersCount"),
         }
+        time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
     def get_contact(self, url=None, urn=None):
@@ -633,6 +637,7 @@ class Profile(LinkedIn):
             "WEBSITES": data.get("websites"),
             "INTERESTS": data.get("interests"),
         }
+        time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
     def get_posts_stats(self, profile_url=None, profile_urn=None):
@@ -651,6 +656,7 @@ class Profile(LinkedIn):
         else:
             res_json = res.json()
         df = pd.DataFrame(res_json)
+        time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
 
 
@@ -677,6 +683,7 @@ class Network(LinkedIn):
             start += limit
             if len(df) == 0:
                 break
+            time.sleep(TIME_SLEEP)
         return df_followers.reset_index(drop=True)
 
     def get_connections(self, start=0, count=100, limit=1000):
@@ -696,6 +703,7 @@ class Network(LinkedIn):
             start += limit
             if len(df) == 0:
                 break
+            time.sleep(TIME_SLEEP)
         return df_connections.reset_index(drop=True)
 
 
@@ -732,6 +740,7 @@ class Invitation(LinkedIn):
             headers=head,
             cookies=self.cookies,
         )
+        time.sleep(TIME_SLEEP)
         try:
             res.raise_for_status()
             return "✉️ Invitation successfully sent !"
@@ -756,6 +765,7 @@ class Message(LinkedIn):
         else:
             res_json = res.json()
         df = pd.DataFrame(res_json)
+        time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
 
     def get_messages(
@@ -775,6 +785,7 @@ class Message(LinkedIn):
         else:
             res_json = res.json()
         df = pd.DataFrame(res_json)
+        time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
 
     def send(self, content, recipients_url=None, recipients_urn=None):
@@ -821,6 +832,7 @@ class Message(LinkedIn):
             cookies=self.cookies,
             headers=self.headers,
         )
+        time.sleep(TIME_SLEEP)
         try:
             res.raise_for_status()
             return "💬 Message successfully sent !"
