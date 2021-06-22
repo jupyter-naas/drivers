@@ -474,12 +474,12 @@ class LinkedIn(InDriver, OutDriver):
 
     def get_user_urn(self, user_url):
         user_url = self.__get_id(user_url)
-        res = requests.get(
+        res_json = requests.get(
             f"https://www.linkedin.com/voyager/api/identity/profiles/{user_url}",
             cookies=self.cookies,
             headers=self.headers,
-        )
-        return res.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
+        ).json()
+        return res_json.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
 
     def send_message(self, content, recipients_url=None, recipients_urn=None):
         params = {"action": "create"}
