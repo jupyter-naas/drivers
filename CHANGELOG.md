@@ -1,3 +1,9 @@
+## 0.66.8 (2021-06-23)
+
+### Fix
+
+- gsheet change type to string to send data
+
 ## 0.66.7 (2021-06-23)
 
 ### Fix
