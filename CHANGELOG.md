@@ -1,3 +1,15 @@
+## 0.66.7 (2021-06-23)
+
+### Fix
+
+- change randint by secret.randbelow
+- random.randint
+- add sensitive for randint (security)
+- avoid object error
+- add random time sleep to mimic human behavior
+- linkedin remove tags and reorder post get stats
+- get_user_urn
+
 ## 0.66.6 (2021-06-22)
 
 ### Fix
