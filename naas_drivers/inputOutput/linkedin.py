@@ -4,7 +4,7 @@ import requests
 import time
 import urllib
 from datetime import datetime, timedelta
-import random
+import secrets
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -13,7 +13,7 @@ RELEASE_MESSAGE = (
     "https://github.com/orgs/jupyter-naas/projects/4"
 )
 DATE_FORMAT = "%Y-%m-%d"
-TIME_SLEEP = random.randint(2,4) # Sensitive
+TIME_SLEEP = secrets.randbelow(3) + 2
 
 
 class LinkedIn(InDriver, OutDriver):
