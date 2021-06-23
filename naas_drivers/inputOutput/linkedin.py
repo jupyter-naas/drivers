@@ -4,6 +4,7 @@ import requests
 import time
 import urllib
 from datetime import datetime, timedelta
+import secrets
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -12,6 +13,7 @@ RELEASE_MESSAGE = (
     "https://github.com/orgs/jupyter-naas/projects/4"
 )
 DATE_FORMAT = "%Y-%m-%d"
+TIME_SLEEP = secrets.randbelow(3) + 2
 
 
 class LinkedIn(InDriver, OutDriver):
@@ -22,7 +24,7 @@ class LinkedIn(InDriver, OutDriver):
             print(f"This function is deprecated, please use {new_funct}")
 
     def get_profile_id(self, url):
-        return url.rsplit("in/")[-1].rsplit("/")[0]
+        return url.rsplit("/in/")[-1].rsplit("/")[0]
 
     def get_activity_id(self, url):
         return url.split("activity-")[-1].split("-")[0]
@@ -474,12 +476,14 @@ class LinkedIn(InDriver, OutDriver):
 
     def get_user_urn(self, user_url):
         user_url = self.__get_id(user_url)
-        res = requests.get(
+        res_json = requests.get(
             f"https://www.linkedin.com/voyager/api/identity/profiles/{user_url}",
             cookies=self.cookies,
             headers=self.headers,
+        ).json()
+        return (
+            res_json.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
         )
-        return res.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
 
     def send_message(self, content, recipients_url=None, recipients_urn=None):
         params = {"action": "create"}
@@ -543,9 +547,9 @@ class Profile(LinkedIn):
         else:
             res_json = res.json()
         # Parse json
-        data = res_json.get("data")
+        data = res_json.get("data", {})
         result = {
-            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_profile:", ""),
+            "PROFILE_URN": data.get("entityUrn", "").replace("urn:li:fs_profile:", ""),
             "PROFILE_ID": lk_id,
             "FIRSTNAME": data.get("firstName"),
             "LASTNAME": data.get("lastName"),
@@ -558,6 +562,7 @@ class Profile(LinkedIn):
             "LOCATION": data.get("locationName"),
             "BIRTHDATE": self.get_birthdate(data.get("birthDateOn")),
         }
+        time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
     def get_network(self, url=None, urn=None):
@@ -573,17 +578,18 @@ class Profile(LinkedIn):
         else:
             res_json = res.json()
         # Parse json
-        data = res_json.get("data")
+        data = res_json.get("data", {})
         result = {
-            "PROFILE_URN": data.get("entityUrn").replace(
+            "PROFILE_URN": data.get("entityUrn", "").replace(
                 "urn:li:fs_profileNetworkInfo:", ""
             ),
             "PROFILE_ID": lk_id,
-            "DISTANCE": data.get("distance").get("value"),
+            "DISTANCE": data.get("distance", {}).get("value"),
             "FOLLOWING": data.get("following"),
             "FOLLOWABLE": data.get("followable"),
             "FOLLOWERS_COUNT": data.get("followersCount"),
         }
+        time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
     def get_contact(self, url=None, urn=None):
@@ -599,7 +605,7 @@ class Profile(LinkedIn):
         else:
             res_json = res.json()
         # Parse json
-        data = res_json.get("data")
+        data = res_json.get("data", {})
         # Specific
         connected_at = data.get("connectedAt")
         if connected_at is not None:
@@ -620,7 +626,7 @@ class Profile(LinkedIn):
                 lk_twiter = rows["name"]
                 break
         result = {
-            "PROFILE_URN": data.get("entityUrn").replace("urn:li:fs_contactinfo:", ""),
+            "PROFILE_URN": data.get("entityUrn", "").replace("urn:li:fs_contactinfo:", ""),
             "PROFILE_ID": lk_id,
             "EMAIL": data.get("emailAddress"),
             "CONNECTED_AT": connected_at,
@@ -631,6 +637,7 @@ class Profile(LinkedIn):
             "WEBSITES": data.get("websites"),
             "INTERESTS": data.get("interests"),
         }
+        time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
     def get_posts_stats(self, profile_url=None, profile_urn=None):
@@ -649,6 +656,7 @@ class Profile(LinkedIn):
         else:
             res_json = res.json()
         df = pd.DataFrame(res_json)
+        time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
 
 
@@ -675,6 +683,7 @@ class Network(LinkedIn):
             start += limit
             if len(df) == 0:
                 break
+            time.sleep(TIME_SLEEP)
         return df_followers.reset_index(drop=True)
 
     def get_connections(self, start=0, count=100, limit=1000):
@@ -694,6 +703,7 @@ class Network(LinkedIn):
             start += limit
             if len(df) == 0:
                 break
+            time.sleep(TIME_SLEEP)
         return df_connections.reset_index(drop=True)
 
 
@@ -730,6 +740,7 @@ class Invitation(LinkedIn):
             headers=head,
             cookies=self.cookies,
         )
+        time.sleep(TIME_SLEEP)
         try:
             res.raise_for_status()
             return "✉️ Invitation successfully sent !"
@@ -754,6 +765,7 @@ class Message(LinkedIn):
         else:
             res_json = res.json()
         df = pd.DataFrame(res_json)
+        time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
 
     def get_messages(
@@ -773,6 +785,7 @@ class Message(LinkedIn):
         else:
             res_json = res.json()
         df = pd.DataFrame(res_json)
+        time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
 
     def send(self, content, recipients_url=None, recipients_urn=None):
@@ -819,6 +832,7 @@ class Message(LinkedIn):
             cookies=self.cookies,
             headers=self.headers,
         )
+        time.sleep(TIME_SLEEP)
         try:
             res.raise_for_status()
             return "💬 Message successfully sent !"
@@ -831,25 +845,6 @@ class Post(LinkedIn):
         LinkedIn.__init__(self)
         self.cookies = cookies
         self.headers = headers
-
-    def __get_social_activity_count(self, data, activity_id=None):
-        result = None
-        if data.get(
-            "$type"
-        ) == "com.linkedin.voyager.feed.shared.SocialActivityCounts" and (
-            activity_id is None
-            or activity_id == data.get("urn").replace("urn:li:activity:", "")
-        ):
-            result = {
-                "POST_URN": data.get("urn").replace("urn:li:activity:", ""),
-                "COMMENTS": data.get("numComments", 0),
-                "LIKES": data.get("numLikes", 0),
-                "VIEWS": data.get("numViews", 0),
-            }
-            if data.get("reactionTypeCounts", []):
-                for elem in data.get("reactionTypeCounts", []):
-                    result[f'LIKES_{elem.get("reactionType")}'] = elem.get("count", 0)
-        return result
 
     def __get_post_update(self, data):
         result = None
@@ -903,20 +898,20 @@ class Post(LinkedIn):
                 .replace("\n", ""),
                 "TIME_DELTA": t,
                 "DATE_APPROX": date_approx,
-                "TAGS_COUNT": data.get("commentary", {})
-                .get("text", {})
-                .get("text")
-                .count("#"),
+                #                 "TAGS_COUNT": data.get("commentary", {})
+                #                 .get("text", {})
+                #                 .get("text")
+                #                 .count("#"),
             }
-            for i in range(1, result.get("TAGS_COUNT", 1)):
-                tag = result.get("TEXT", "").rsplit("#")[i]
-                for x in [" ", "\n", ".", ","]:
-                    tag = tag.rsplit(x)[0]
-                result[f"TAG_{i}"] = tag
-            for elem in data.get("updateMetadata", {}).get("actions", []):
-                if data.get("url") is not None:
-                    result["URL"] = elem.get("url")
-                    break
+        #             for i in range(1, result.get("TAGS_COUNT", 1)):
+        #                 tag = result.get("TEXT", "").rsplit("#")[i]
+        #                 for x in [" ", "\n", ".", ","]:
+        #                     tag = tag.rsplit(x)[0]
+        #                 result[f"TAG_{i}"] = tag
+        #             for elem in data.get("updateMetadata", {}).get("actions", []):
+        #                 if data.get("url") is not None:
+        #                     result["URL"] = elem.get("url")
+        #                     break
         return result
 
     def __get_social_detail(self, data):
@@ -933,31 +928,59 @@ class Post(LinkedIn):
                 result = None
         return result
 
+    def __get_social_activity_count(self, data, activity_id=None):
+        result = None
+        if data.get(
+            "$type"
+        ) == "com.linkedin.voyager.feed.shared.SocialActivityCounts" and (
+            activity_id is None
+            or activity_id == data.get("urn").replace("urn:li:activity:", "")
+        ):
+            result = {
+                "POST_URN": data.get("urn").replace("urn:li:activity:", ""),
+                "COMMENTS": data.get("numComments", 0),
+                "LIKES": data.get("numLikes", 0),
+                "VIEWS": data.get("numViews", 0),
+            }
+            if data.get("reactionTypeCounts", []):
+                for elem in data.get("reactionTypeCounts", []):
+                    result[f'LIKES_{elem.get("reactionType")}'] = elem.get("count", 0)
+        return result
+
     def get_stats(self, post_url=None, activity_id=None):
         if post_url is not None:
             activity_id = self.get_activity_id(post_url)
         if activity_id is None:
-            print("Error")
-            return None
+            return "Please enter a valid post url"
         post = requests.get(
             f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
             cookies=self.cookies,
             headers=self.headers,
         ).json()
 
-        result = {"POST_URN": None, "POST_URL": None, "TITLE": None, "TEXT": None}
-        included = post.get("included", [])
+        included = post.get("included")
+        update = []
+        social = []
+        activity = []
         for include in included:
-            post_update = self.__get_post_update(include)
-            if post_update:
-                result.update(post_update)
-            social_detail = self.__get_social_detail(include)
-            if social_detail:
-                result.update(social_detail)
-            activity_count = self.__get_social_activity_count(include, activity_id)
-            if activity_count:
-                result.update(activity_count)
-        return pd.DataFrame([result])
+            u = self.__get_post_update(include)
+            if u is not None:
+                update.append(u)
+            s = self.__get_social_detail(include)
+            if s is not None:
+                social.append(s)
+            a = self.__get_social_activity_count(include, activity_id)
+            if a is not None:
+                activity.append(a)
+        # Set up dataframe
+        df_update = pd.DataFrame(update)
+        df_social = pd.DataFrame(social)
+        df_activity = pd.DataFrame(activity)
+
+        # Merge
+        df = pd.merge(df_update, df_social, on=["POST_URN"], how="left")
+        df = pd.merge(df, df_activity, on=["POST_URN", "LIKES"], how="left")
+        return df
 
     def get_comments(self, post_url):
         req_url = f"{LINKEDIN_API}/post/getComments?post_link={post_url}"
