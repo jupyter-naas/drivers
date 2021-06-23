@@ -60,10 +60,7 @@ class Gsheet(InDriver, OutDriver):
         self.check_connect()
         data_formated = data
         if isinstance(data, pd.DataFrame):
-            for column in data:
-                if data[column].dtypes == "datetime64[ns]":
-                    data[column] = data[column].astype(str)
-            data_formated = data.to_dict(orient="records")
+            data_formated = data.astype(str).to_dict(orient="records")
 
         if not append:
             try:
