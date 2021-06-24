@@ -13,6 +13,7 @@ RELEASE_MESSAGE = (
     "https://github.com/orgs/jupyter-naas/projects/4"
 )
 DATE_FORMAT = "%Y-%m-%d"
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 TIME_SLEEP = secrets.randbelow(3) + 2
 
 
@@ -474,17 +475,6 @@ class LinkedIn(InDriver, OutDriver):
         df["POST_URL"] = post_link
         return df
 
-    def get_user_urn(self, user_url):
-        user_url = self.__get_id(user_url)
-        res_json = requests.get(
-            f"https://www.linkedin.com/voyager/api/identity/profiles/{user_url}",
-            cookies=self.cookies,
-            headers=self.headers,
-        ).json()
-        return (
-            res_json.get("data", {}).get("entityUrn").replace("urn:li:fs_profile:", "")
-        )
-
     def send_message(self, content, recipients_url=None, recipients_urn=None):
         params = {"action": "create"}
         message_event = {
@@ -511,7 +501,7 @@ class LinkedIn(InDriver, OutDriver):
                 recipients_urn = []
         if recipients_url is not None:
             for recipient in recipients_url:
-                recipients_urn.append(self.get_user_urn(recipient))
+                recipients_urn.append(self.get_profile_urn(recipient))
         message_event["recipients"] = recipients_urn
         message_event["subtype"] = "MEMBER_TO_MEMBER"
         payload = {
@@ -715,7 +705,7 @@ class Invitation(LinkedIn):
 
     def send(self, recipient_url=None, message="", recipient_urn=None):
         if recipient_url is not None:
-            recipient_urn = self.get_user_urn(recipient_url)
+            recipient_urn = self.get_profile_urn(recipient_url)
         if recipient_urn is None:
             return True
         if message:
@@ -755,18 +745,40 @@ class Message(LinkedIn):
         self.headers = headers
 
     def get_conversations(self, limit=-1, count=20):
-        req_url = f"{LINKEDIN_API}/message/getConversations?limit={limit}&count{count}"
+        limit_max = 500
+        params = {
+            "limit": limit_max if limit > limit_max or limit == -1 else limit,
+            "count": count
+        }
         headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError:
-            res_json = {}
-        else:
-            res_json = res.json()
-        df = pd.DataFrame(res_json)
-        time.sleep(TIME_SLEEP)
-        return df.reset_index(drop=True)
+        df_result = None
+        while True:
+            req_url = f"{LINKEDIN_API}/message/getConversations?{urllib.parse.urlencode(params, safe='(),')}"
+            res = requests.post(req_url, json=self.cookies, headers=headers)
+            print(res)
+            if limit != -1:
+                limit -= limit_max
+                if limit < 0:
+                    limit = 0
+            try:
+                res.raise_for_status()
+            except requests.RequestException as e:
+                return e
+            else:
+                res_json = res.json()
+            if res.status_code != 200:
+                return res.text
+            df = pd.DataFrame(res_json)
+            created_before = ((int) (datetime.strptime(df["LAST_ACTIVITY"].iloc[-1], DATETIME_FORMAT).timestamp())) * 1000
+            params["created_before"] = created_before
+            if df_result is None:
+                df_result = df
+            else:
+                df_result = pd.concat([df_result, df])
+            time.sleep(TIME_SLEEP)
+            if limit == 0 or len(df) < params['limit']:
+                break
+        return df_result.reset_index(drop=True)
 
     def get_messages(
         self, conversation_url=None, conversation_urn=None, start=0, limit=-1, count=20
