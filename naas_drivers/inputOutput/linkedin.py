@@ -616,7 +616,9 @@ class Profile(LinkedIn):
                 lk_twiter = rows["name"]
                 break
         result = {
-            "PROFILE_URN": data.get("entityUrn", "").replace("urn:li:fs_contactinfo:", ""),
+            "PROFILE_URN": data.get("entityUrn", "").replace(
+                "urn:li:fs_contactinfo:", ""
+            ),
             "PROFILE_ID": lk_id,
             "EMAIL": data.get("emailAddress"),
             "CONNECTED_AT": connected_at,
@@ -748,7 +750,7 @@ class Message(LinkedIn):
         limit_max = 500
         params = {
             "limit": limit_max if limit > limit_max or limit == -1 else limit,
-            "count": count
+            "count": count,
         }
         headers = {"Content-Type": "application/json"}
         df_result = None
@@ -768,14 +770,20 @@ class Message(LinkedIn):
             if res.status_code != 200:
                 return res.text
             df = pd.DataFrame(res_json)
-            created_before = ((int) (datetime.strptime(df["LAST_ACTIVITY"].iloc[-1], DATETIME_FORMAT).timestamp())) * 1000
+            created_before = (
+                (int)(
+                    datetime.strptime(
+                        df["LAST_ACTIVITY"].iloc[-1], DATETIME_FORMAT
+                    ).timestamp()
+                )
+            ) * 1000
             params["created_before"] = created_before
             if df_result is None:
                 df_result = df
             else:
                 df_result = pd.concat([df_result, df])
             time.sleep(TIME_SLEEP)
-            if limit == 0 or len(df) < params['limit']:
+            if limit == 0 or len(df) < params["limit"]:
                 break
         return df_result.reset_index(drop=True)
 
