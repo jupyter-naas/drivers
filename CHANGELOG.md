@@ -1,3 +1,14 @@
+## 0.67.0 (2021-06-28)
+
+### Refactor
+
+- black format
+
+### Feat
+
+- get conversation in loop
+- loop to get conversations
+
 ## 0.66.8 (2021-06-23)
 
 ### Fix
