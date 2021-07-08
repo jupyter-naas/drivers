@@ -13,13 +13,13 @@
 
 # Welcome to Naas Drivers
 
-🏎 Simple formulas to build highly efficient scripts
+Simple formulas to build highly efficient scripts
 
 # Documentation
 
 Yu can check the documentation there:
 
-https://naas.gitbook.io/drivers/
+https://docs.naas.ai
 
 ## Why Naas Drivers?
 
@@ -60,7 +60,9 @@ Few drivers need specific env var set, that will be notified in the documentatio
 
 ## Publish
 
-this auto publish on pypip by github action on main branch
+This auto publish on pypip by github action on main branch.
 
 ### Authors:
-* [Martin donadieu](https://github.com/riderx)
+* [Jeremy Ravenel](https://github.com/jravenel)
+* [Maxime Jublou](https://github.com/Dr0p42)
+* [Martin Donadieu](https://github.com/riderx)
