@@ -1,3 +1,10 @@
+## 0.67.1 (2021-07-12)
+
+### Fix
+
+- remove deprecated from emailbuilder
+- remove drepecated from linkedin driver
+
 ## 0.67.0 (2021-06-28)
 
 ### Refactor
