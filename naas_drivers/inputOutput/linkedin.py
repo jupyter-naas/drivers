@@ -629,7 +629,7 @@ class Company(LinkedIn):
         LinkedIn.__init__(self)
         self.cookies = cookies
         self.headers = headers
-        
+
     def get_info(self, company_url):
         req_url = f"{LINKEDIN_API}/company/getInfo?company_url={company_url}"
         headers = {"Content-Type": "application/json"}
