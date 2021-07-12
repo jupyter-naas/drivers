@@ -281,60 +281,6 @@ class EmailBuilder(InDriver):
             )
         return res
 
-    def address(self, title, content):
-        self.deprecatedPrint("address")
-        return tags.Address(
-            attributes.InlineStyle(
-                font_size="16px",
-                font_style="normal",
-                font_weight="400",
-                line_height="24px",
-            ),
-            tags.Strong(tags.Text(title)),
-            tags.Text(content),
-        )
-
-    def info(self, *elems):
-        self.deprecatedPrint("info")
-        return tags.Div(
-            attributes.InlineStyle(
-                background_color="ghostwhite",
-                border_radius="4px",
-                padding="24px 48px",
-            ),
-            *elems,
-        )
-
-    def space(self):
-        self.deprecatedPrint("space")
-        return tags.Br()
-
-    def separator(self):
-        self.deprecatedPrint("separator")
-        return tags.hr()
-
-    def logo(self, src, link=None, name="Logo", align="center", size="80px"):
-        self.deprecatedPrint("logo")
-        return self.image(src, link, name, width=size, height=size, align=align)
-
-    def header(self, *elems):
-        self.deprecatedPrint("header")
-        return tags.Header(*elems)
-
-    def footer(self, text, first=None, *elems):
-        self.deprecatedPrint("footer")
-        one = [
-            attributes.InlineStyle(
-                font_size="16px",
-                font_weight="400",
-                line_height="24px",
-                margin_top="48px",
-            ),
-            tags.Text(text),
-            first,
-        ]
-        return tags.Footer(tags.P(one), *elems)
-
     def title(
         self,
         title,
@@ -644,6 +590,20 @@ class EmailBuilder(InDriver):
             )
         else:
             return tags.Img(elems_img)
+
+    def footer(self, text, first=None, *elems):
+        self.deprecatedPrint()
+        one = [
+            attributes.InlineStyle(
+                font_size="16px",
+                font_weight="400",
+                line_height="24px",
+                margin_top="48px",
+            ),
+            tags.Text(text),
+            first,
+        ]
+        return tags.Footer(tags.P(one), *elems)
 
     def footer_company(
         self,
