@@ -794,7 +794,7 @@ class EmailBuilder(InDriver):
                         max_width="720px",
                         padding="40px 20px 40px 20px",
                     ),
-                    self.header(logo, self.title(title)) if title else None,
+                    self.title(title) if title else None,
                     self.main(**kwargs),
                     footer,
                 ),
