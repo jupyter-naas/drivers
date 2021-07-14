@@ -434,11 +434,9 @@ class Statements(Transactions):
             ),
             "footer_cs": emailbuilder.footer_company(naas=True),
         }
-        return content
-
-    #         # Generate email in html
-    #         email_content = emailbuilder.generate(display='iframe', **content)
-    #         return email_content
+        # Generate email in html
+        email_content = emailbuilder.generate(display='iframe', **content)
+        return email_content
 
     def transactions(self, date_from=None, date_to=None):
         # Data
@@ -451,10 +449,6 @@ class Statements(Transactions):
             week_ago = (
                 datetime.strptime(date_to, DATE_FORMAT) + timedelta(days=date_from)
             ).strftime(DATE_FORMAT)
-        else:
-            raise (
-                "Date from in wrong format. You must use negative integer or date in format YYYY-MM-DD."
-            )
         # Filter data
         df = df[(df["DATE"] > week_ago) & (df["DATE"] < date_to)]
 
