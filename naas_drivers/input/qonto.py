@@ -1,10 +1,11 @@
 from naas_drivers.driver import InDriver
-from naas_drivers import emailbuilder
 import pandas as pd
 import requests
 import os
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
+from emailbuilder import EmailBuilder
+emailbuilder = EmailBuilder()
 
 DATE_FORMAT = "%Y-%m-%d"
 NUMBER_FORMAT = "{:,.2f} €"
