@@ -117,7 +117,7 @@ class Align(attributes.HtmlTagAttribute):
 
 
 class EmailBuilder(InDriver):
-    """ EmailBuilder generator lib"""
+    """EmailBuilder generator lib"""
 
     deprecated = False
 
@@ -732,7 +732,7 @@ class EmailBuilder(InDriver):
         print(f"Saved as {filename}")
 
     def export(self, html, filenames, css=None):
-        """ create html export and add css to it"""
+        """create html export and add css to it"""
         self.deprecatedPrint()
         if isinstance(filenames, list):
             for filename in filenames:
@@ -794,7 +794,7 @@ class EmailBuilder(InDriver):
                         max_width="720px",
                         padding="40px 20px 40px 20px",
                     ),
-                    self.header(logo, self.title(title)) if title else None,
+                    self.title(title) if title else None,
                     self.main(**kwargs),
                     footer,
                 ),
