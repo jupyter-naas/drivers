@@ -1,3 +1,16 @@
+## 0.68.0 (2021-07-15)
+
+### Fix
+
+- (qonto) get dates
+- (qonto) code smell + email
+- (qonto) remove raise
+- (emailbuilder) remove header in generate (deprecated)
+
+### Feat
+
+- create weekly email with barline, cash sumary, last transactions
+
 ## 0.67.1 (2021-07-12)
 
 ### Fix
