@@ -4,7 +4,7 @@ import requests
 import os
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
-from emailbuilder import EmailBuilder
+from naas_drivers.input.emailbuilder import EmailBuilder
 emailbuilder = EmailBuilder()
 
 DATE_FORMAT = "%Y-%m-%d"
