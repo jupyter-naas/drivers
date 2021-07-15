@@ -201,9 +201,6 @@ class Statements(Transactions):
             f"Solde au {datetime.strptime(date_to, DATE_FORMAT).strftime('%d/%m/%Y')}"
         )
 
-        # Init
-        cash_summary = pd.DataFrame()
-
         # Get data
         df_statement = self.consolidated(
             to_conso=["OPERATION_TYPE"], date_from=date_from, date_to=date_to
@@ -264,6 +261,51 @@ class Statements(Transactions):
             columns={"OPERATION_TYPE": "Type", "AMOUNT": "Montant"}
         )
         return cash_summary
+
+    def transactions(self, date_from=None, date_to=None):
+        # Data
+        df = self.consolidated(
+            to_conso=["LABEL", "OPERATION_TYPE"], date_from=date_from, date_to=date_to
+        )
+
+        # Calc week ago
+        if type(date_from) is int and date_from < 0:
+            week_ago = (
+                datetime.strptime(date_to, DATE_FORMAT) + timedelta(days=date_from)
+            ).strftime(DATE_FORMAT)
+        # Filter data
+        df = df[(df["DATE"] > week_ago) & (df["DATE"] < date_to)]
+
+        # Groupby
+        to_group = ["LABEL", "OPERATION_TYPE", "DATE"]
+        df = df.groupby(to_group, as_index=False).agg({"AMOUNT": "sum"})
+        df["DATE"] = pd.to_datetime(df["DATE"]).dt.strftime("%d/%m/%Y")
+        # Replace value
+        transaction_type = {
+            "income": "Encaissement",
+            "swift_income": "SWIFT",
+            "card": "Carte bleue",
+            "transfer": "Virement",
+            "qonto_fee": "Frais bancaires",
+            "direct_debit": "Prélèvement",
+            "cheque": "Chèque",
+            "recall": "Rappel",
+        }
+        df["OPERATION_TYPE"] = df["OPERATION_TYPE"].replace(transaction_type)
+
+        # Rename columns
+        week_cols = {
+            "LABEL": "Description",
+            "OPERATION_TYPE": "Type",
+            "DATE": "Date",
+            "AMOUNT": "Montant",
+        }
+        df = df.rename(columns=week_cols)
+        df["Montant"] = (
+            df["Montant"].map("{:,.2f} €".format).str.replace(",", " ")
+        )  # .str.replace(".", ",")
+        df = df.sort_values("Date", ascending=False)
+        return df
 
     def barline(
         self,
@@ -434,56 +476,9 @@ class Statements(Transactions):
             ),
             "footer_cs": emailbuilder.footer_company(naas=True),
         }
-        return content
-
-    #         # Generate email in html
-    #         email_content = emailbuilder.generate(display='iframe', **content)
-    #         return email_content
-
-    def transactions(self, date_from=None, date_to=None):
-        # Data
-        df = self.consolidated(
-            to_conso=["LABEL", "OPERATION_TYPE"], date_from=date_from, date_to=date_to
-        )
-
-        # Calc week ago
-        if type(date_from) is int and date_from < 0:
-            week_ago = (
-                datetime.strptime(date_to, DATE_FORMAT) + timedelta(days=date_from)
-            ).strftime(DATE_FORMAT)
-        # Filter data
-        df = df[(df["DATE"] > week_ago) & (df["DATE"] < date_to)]
-
-        # Groupby
-        to_group = ["LABEL", "OPERATION_TYPE", "DATE"]
-        df = df.groupby(to_group, as_index=False).agg({"AMOUNT": "sum"})
-        df["DATE"] = pd.to_datetime(df["DATE"]).dt.strftime("%d/%m/%Y")
-        # Replace value
-        transaction_type = {
-            "income": "Encaissement",
-            "swift_income": "SWIFT",
-            "card": "Carte bleue",
-            "transfer": "Virement",
-            "qonto_fee": "Frais bancaires",
-            "direct_debit": "Prélèvement",
-            "cheque": "Chèque",
-            "recall": "Rappel",
-        }
-        df["OPERATION_TYPE"] = df["OPERATION_TYPE"].replace(transaction_type)
-
-        # Rename columns
-        week_cols = {
-            "LABEL": "Description",
-            "OPERATION_TYPE": "Type",
-            "DATE": "Date",
-            "AMOUNT": "Montant",
-        }
-        df = df.rename(columns=week_cols)
-        df["Montant"] = (
-            df["Montant"].map("{:,.2f} €".format).str.replace(",", " ")
-        )  # .str.replace(".", ",")
-        df = df.sort_values("Date", ascending=False)
-        return df
+        # Generate email in html
+        email_content = emailbuilder.generate(display='iframe', **content)
+        return email_content
 
 
 class Qonto(InDriver):
