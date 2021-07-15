@@ -1,3 +1,14 @@
+## 0.69.0 (2021-07-15)
+
+### Fix
+
+- change headers in requests
+- lint code with black
+
+### Feat
+
+- (linkedin) get company info
+
 ## 0.68.0 (2021-07-15)
 
 ### Fix
