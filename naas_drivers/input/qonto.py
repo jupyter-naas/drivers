@@ -96,13 +96,13 @@ class Transactions(Organizations):
 
 
 class Statements(Transactions):
-    def __get_dates(self, date_from=None, date_to=None):
+    def __get_dates(self, df, date_from=None, date_to=None):
         dates = []
         # Dates
         if date_from is not None and date_to is None:
-            date_to = tmp_df["DATE"].max()
+            date_to = df["DATE"].max()
         if date_to is not None and date_from is None:
-            date_from = tmp_df["DATE"].min()
+            date_from = df["DATE"].min()
         if (date_from and date_to) is not None:
             dates_range = pd.date_range(start=date_from, end=date_to)
             for date in dates_range:
@@ -116,11 +116,11 @@ class Statements(Transactions):
             ibans = df["IBAN"].drop_duplicates().tolist()
             for iban in ibans:
                 tmp_df = df[df.IBAN == iban]
-                dates = self.__get_dates(date_from, date_to)
+                dates = self.__get_dates(tmp_df, date_from, date_to)
                 tmp_df = tmp_df[tmp_df["DATE"].isin(dates)]
                 df_filter = pd.concat([df_filter, tmp_df], axis=0)
         else:
-            dates = self.__get_dates(date_from, date_to)
+            dates = self.__get_dates(df, date_from, date_to)
             df_filter = df[df["DATE"].isin(dates)]
         return df_filter
 
