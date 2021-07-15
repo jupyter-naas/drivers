@@ -1,3 +1,9 @@
+## 0.69.1 (2021-07-15)
+
+### Fix
+
+- (qonto) remove from naas_drivers import emailbuilder
+
 ## 0.69.0 (2021-07-15)
 
 ### Fix
