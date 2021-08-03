@@ -56,14 +56,17 @@ class HSCRUD:
         return data
 
     def __get_by_page(self, params):
-        req = requests.get(
+        res = requests.get(
             url=f"{self.base_url}/",
             headers=self.req_headers,
             params=params,
             allow_redirects=False,
         )
-        req.raise_for_status()
-        return req.json()
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return(e)
+        return res.json()
 
     def get_all(self, columns=None):
         items = []
@@ -91,7 +94,7 @@ class HSCRUD:
         params = self.params
         if columns is not None:
             params["properties"] = columns
-        req = requests.get(
+        res = requests.get(
             url=f"{self.base_url}/{uid}",
             headers=self.req_headers,
             params=params,
@@ -101,49 +104,61 @@ class HSCRUD:
             params.pop("properties")
             self.params = params
         self.params = params
-        req.raise_for_status()
-        return req.json()
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return(e)
+        return res.json()
 
     def patch(self, uid, data):
         data = self.__values_format(data)
-        req = requests.patch(
+        res = requests.patch(
             url=f"{self.base_url}/{uid}",
             headers=self.req_headers,
             params=self.params,
             json=data,
             allow_redirects=False,
         )
-        req.raise_for_status()
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return(e)
         # Message success
         print(f"✔️ {self.msg} (id={uid}) successfully updated.")
-        return req.json()
+        return res.json()
 
     def send(self, data):
         data = self.__values_format(data)
-        req = requests.post(
+        res = requests.post(
             url=f"{self.base_url}/",
             headers=self.req_headers,
             params=self.params,
             json=data,
             allow_redirects=False,
         )
-        req.raise_for_status()
-        res = req.json()
-        uid = res["id"]
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return(e)
+        res_json = res.json()
+        uid = res_json.get("id")
         # Message success
         print(f"✔️ {self.msg} (id={uid}) successfully created.")
         return uid
 
     def delete(self, uid):
-        res = self.get(uid)
-        if res is not None:
-            req = requests.delete(
+        result = self.get(uid)
+        if result is not None:
+            res = requests.delete(
                 url=f"{self.base_url}/{uid}",
                 headers=self.req_headers,
                 params=self.params,
                 allow_redirects=False,
             )
-            req.raise_for_status()
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                return(e)
             # Message success
             print(f"✔️ {self.msg} (id={uid}) successfully deleted.")
             return uid
@@ -266,14 +281,17 @@ class Pipeline:
         self.model_name = self.base_url.split("/")[-1]
 
     def get_all_pipeline(self):
-        req = requests.get(
+        res = requests.get(
             url=f"{self.base_url}/",
             headers=self.req_headers,
             params=self.params,
             allow_redirects=False,
         )
-        req.raise_for_status()
-        return req.json()
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return(e)
+        return res.json()
 
 
 class Pipelines(Pipeline):
@@ -343,15 +361,18 @@ class Association:
                 f"Please chose one in following list: {associates}"
             )
         if object_check and associate_check:
-            req = requests.get(
+            res = requests.get(
                 url=f"{self.base_url}/{object_name}/{object_id}/"
                 f"associations/{associate}",
                 headers=self.req_headers,
                 params=self.params,
                 allow_redirects=False,
             )
-            req.raise_for_status()
-            data = req.json()
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                return(e)
+            data = res.json()
             df = pd.DataFrame.from_records(data["results"])
             if len(df) == 0:
                 print(f"❌ Object id='{object_id}' does not have associates.")
@@ -375,14 +396,17 @@ class Association:
                 f"Please chose one in following list: {associates}"
             )
         if object_check and associate_check:
-            req = requests.put(
+            res = requests.put(
                 url=f"{self.base_url}/{object_name}/{object_id}/associations/"
                 f"{associate}/{id_associate}/{object_name}_to_{associate}",
                 headers=self.req_headers,
                 params=self.params,
                 allow_redirects=False,
             )
-            req.raise_for_status()
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                return(e)
             print(
                 f"✔️ {object_name} '{object_id}' and {associate} "
                 f"'{id_associate}' successfully associated !"
@@ -416,16 +440,19 @@ class Note:
                 "metadata": {"body": content},
             }
         )
-        req = requests.post(
+        res = requests.post(
             self.base_url,
             data=payload,
             headers=self.req_headers,
             params=self.params,
             allow_redirects=False,
         )
-        req.raise_for_status()
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return(e)
         # Message success
-        print("✔️ Note successfully created.")
+        return("✔️ Note successfully created.")
 
 
 class Hubspot(InDriver, OutDriver):
