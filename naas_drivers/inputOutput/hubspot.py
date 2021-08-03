@@ -56,14 +56,17 @@ class HSCRUD:
         return data
 
     def __get_by_page(self, params):
-        req = requests.get(
+        res = requests.get(
             url=f"{self.base_url}/",
             headers=self.req_headers,
             params=params,
             allow_redirects=False,
         )
-        req.raise_for_status()
-        return req.json()
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return(e)
+        return res.json()
 
     def get_all(self, columns=None):
         items = []
