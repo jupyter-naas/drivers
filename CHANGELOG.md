@@ -1,3 +1,10 @@
+## 0.69.3 (2021-08-03)
+
+### Refactor
+
+- get request error
+- get by page
+
 ## 0.69.2 (2021-07-15)
 
 ### Fix
