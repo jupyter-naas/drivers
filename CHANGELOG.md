@@ -1,3 +1,13 @@
+## 0.70.0 (2021-08-04)
+
+### Fix
+
+- lint hubspot
+
+### Feat
+
+- get pipelines on hubspot
+
 ## 0.69.3 (2021-08-03)
 
 ### Refactor
