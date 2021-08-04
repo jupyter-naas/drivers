@@ -9,6 +9,7 @@ import re
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
+
 class HSCRUD:
     # class HSCRUD(CRUD):
     def __init__(self, base_url, req_headers, params):
@@ -66,7 +67,7 @@ class HSCRUD:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         return res.json()
 
     def get_all(self, columns=None):
@@ -114,7 +115,7 @@ class HSCRUD:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         return res.json()
 
     def patch(self, uid, data):
@@ -129,7 +130,7 @@ class HSCRUD:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         # Message success
         print(f"✔️ {self.msg} (id={uid}) successfully updated.")
         return res.json()
@@ -146,7 +147,7 @@ class HSCRUD:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         res_json = res.json()
         uid = res_json.get("id")
         # Message success
@@ -165,7 +166,7 @@ class HSCRUD:
             try:
                 res.raise_for_status()
             except requests.HTTPError as e:
-                return(e)
+                return e
             # Message success
             print(f"✔️ {self.msg} (id={uid}) successfully deleted.")
             return uid
@@ -297,7 +298,7 @@ class Pipeline:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         deal_stages = []
         results = res.json().get("results")
         for res in results:
@@ -316,7 +317,6 @@ class Pipeline:
                     "archived": stage.get("archived"),
                 }
                 deal_stages.append(deal_stage)
-
         # Create DataFrame
         df = pd.DataFrame(deal_stages)
         df.createdAt = pd.to_datetime(df.createdAt).dt.strftime(DATETIME_FORMAT)
@@ -327,7 +327,6 @@ class Pipeline:
             df = df[df.pipeline == str(pipeline)]
         if pipeline_id is not None:
             df = df[df.pipeline_id == str(pipeline_id)]
-
         # Cleaning
         df = df.sort_values(by=["pipeline", "displayOrder"])
         df = df.reset_index(drop=True)
@@ -369,7 +368,7 @@ class Association:
             try:
                 res.raise_for_status()
             except requests.HTTPError as e:
-                return(e)
+                return e
             data = res.json()
             df = pd.DataFrame.from_records(data["results"])
             if len(df) == 0:
@@ -404,7 +403,7 @@ class Association:
             try:
                 res.raise_for_status()
             except requests.HTTPError as e:
-                return(e)
+                return e
             print(
                 f"✔️ {object_name} '{object_id}' and {associate} "
                 f"'{id_associate}' successfully associated !"
@@ -448,9 +447,9 @@ class Note:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         # Message success
-        return("✔️ Note successfully created.")
+        return "✔️ Note successfully created."
 
 
 class Hubspot(InDriver, OutDriver):
