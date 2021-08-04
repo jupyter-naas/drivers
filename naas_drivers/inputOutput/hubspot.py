@@ -7,6 +7,8 @@ import string
 import json
 import re
 
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 
 class HSCRUD:
     # class HSCRUD(CRUD):
@@ -65,7 +67,7 @@ class HSCRUD:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         return res.json()
 
     def get_all(self, columns=None):
@@ -76,7 +78,7 @@ class HSCRUD:
         more_page = True
         while more_page:
             data = self.__get_by_page(params)
-            for row in data["results"]:
+            for row in data.get("results"):
                 properties = row["properties"]
                 items.append(properties)
             if "paging" in data:
@@ -88,6 +90,12 @@ class HSCRUD:
         if columns is not None:
             params.pop("properties")
             self.params = params
+            for col in columns:
+                if col not in df.columns:
+                    index = columns.index(col)
+                    columns.pop(index)
+            # Reorder columns
+            df = df[columns]
         return df
 
     def get(self, uid, columns=None):
@@ -107,7 +115,7 @@ class HSCRUD:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         return res.json()
 
     def patch(self, uid, data):
@@ -122,7 +130,7 @@ class HSCRUD:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         # Message success
         print(f"✔️ {self.msg} (id={uid}) successfully updated.")
         return res.json()
@@ -139,7 +147,7 @@ class HSCRUD:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         res_json = res.json()
         uid = res_json.get("id")
         # Message success
@@ -158,7 +166,7 @@ class HSCRUD:
             try:
                 res.raise_for_status()
             except requests.HTTPError as e:
-                return(e)
+                return e
             # Message success
             print(f"✔️ {self.msg} (id={uid}) successfully deleted.")
             return uid
@@ -280,7 +288,7 @@ class Pipeline:
         self.base_url = base_url
         self.model_name = self.base_url.split("/")[-1]
 
-    def get_all_pipeline(self):
+    def get_all(self, pipeline=None, pipeline_id=None):
         res = requests.get(
             url=f"{self.base_url}/",
             headers=self.req_headers,
@@ -290,47 +298,36 @@ class Pipeline:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
-        return res.json()
-
-
-class Pipelines(Pipeline):
-    def get_all(self):
-        data = self.get_all_pipeline()
-        df = pd.DataFrame.from_records(data["results"])
-        df = df.drop(["stages"], axis=1)
-        df = df.sort_values(by=["displayOrder"]).reset_index(drop=True)
-        return df
-
-
-class Dealstage(Pipeline):
-    def get_all(self):
-        data = self.get_all_pipeline()
-        items = []
-        for row in data["results"]:
-            pipeline = row["label"]
-            stages = row["stages"]
-            id_pipeline = row["id"]
+            return e
+        deal_stages = []
+        results = res.json().get("results")
+        for res in results:
+            stages = res.get("stages")
             for stage in stages:
-                label = stage["label"]
-                display_order = stage["displayOrder"]
-                id_dealstage = stage["id"]
-                created_at = stage["createdAt"]
-                updated_at = stage["updatedAt"]
-                archived = stage["archived"]
-
                 deal_stage = {
-                    "pipeline": pipeline,
-                    "id_pipeline": id_pipeline,
-                    "dealstage": label,
-                    "id_dealstage": id_dealstage,
-                    "displayOrder": display_order,
-                    "createdAt": created_at,
-                    "updatedAt": updated_at,
-                    "archived": archived,
+                    "pipeline": res.get("label"),
+                    "pipeline_id": res.get("id"),
+                    "dealstage_label": stage.get("label"),
+                    "dealstage_id": stage.get("id"),
+                    "displayOrder": stage.get("displayOrder"),
+                    "dealclosed": stage.get("metadata", {}).get("isClosed"),
+                    "probability": stage.get("metadata", {}).get("probability"),
+                    "createdAt": stage.get("createdAt"),
+                    "updatedAt": stage.get("updatedAt"),
+                    "archived": stage.get("archived"),
                 }
-                items.append(deal_stage)
-        df = pd.DataFrame(items)
+                deal_stages.append(deal_stage)
+        # Create DataFrame
+        df = pd.DataFrame(deal_stages)
+        df.createdAt = pd.to_datetime(df.createdAt).dt.strftime(DATETIME_FORMAT)
+        df.updatedAt = pd.to_datetime(df.updatedAt).dt.strftime(DATETIME_FORMAT)
+
+        # Filter on pipeline
+        if pipeline is not None:
+            df = df[df.pipeline == str(pipeline)]
+        if pipeline_id is not None:
+            df = df[df.pipeline_id == str(pipeline_id)]
+        # Cleaning
         df = df.sort_values(by=["pipeline", "displayOrder"])
         df = df.reset_index(drop=True)
         return df
@@ -371,7 +368,7 @@ class Association:
             try:
                 res.raise_for_status()
             except requests.HTTPError as e:
-                return(e)
+                return e
             data = res.json()
             df = pd.DataFrame.from_records(data["results"])
             if len(df) == 0:
@@ -406,7 +403,7 @@ class Association:
             try:
                 res.raise_for_status()
             except requests.HTTPError as e:
-                return(e)
+                return e
             print(
                 f"✔️ {object_name} '{object_id}' and {associate} "
                 f"'{id_associate}' successfully associated !"
@@ -450,9 +447,9 @@ class Note:
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            return e
         # Message success
-        return("✔️ Note successfully created.")
+        return "✔️ Note successfully created."
 
 
 class Hubspot(InDriver, OutDriver):
@@ -477,10 +474,7 @@ class Hubspot(InDriver, OutDriver):
         )
         self.company = HSCRUD(f"{self.obj_url}/company", self.req_headers, self.params)
         self.deals = Deal(f"{self.obj_url}/deals", self.req_headers, self.params)
-        self.pipelines = Pipelines(
-            f"{self.pip_url}/deals", self.req_headers, self.params
-        )
-        self.dealstages = Dealstage(
+        self.pipelines = Pipeline(
             f"{self.pip_url}/deals", self.req_headers, self.params
         )
         self.associations = Association(
