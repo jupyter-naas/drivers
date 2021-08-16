@@ -36,7 +36,6 @@ class Newsapi(InDriver):
                     self.print_error(error_text)
                     return None
             news.append(new_formated)
-
         if limit and isinstance(limit, int) and limit > 0:
             news = news[:limit]
         return pd.DataFrame.from_records(news)
