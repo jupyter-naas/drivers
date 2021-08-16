@@ -25,7 +25,6 @@ class NaasStreamlit(BaseApp):
     def __init__(self, path="app.py", port=9999):
         super().__init__(port)
         self.path = path
-        self.run_app()
 
     def run_app(self, debug=True):
         os.system(f"fuser -n tcp -k {self.port}")
