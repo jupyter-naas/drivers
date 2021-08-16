@@ -1,3 +1,10 @@
+## 0.70.1 (2021-08-16)
+
+### Fix
+
+- lint code, remove line break
+- get() got multiple values for argument fields
+
 ## 0.70.0 (2021-08-04)
 
 ### Fix
