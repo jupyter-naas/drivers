@@ -41,20 +41,20 @@ class Newsapi(InDriver):
         return pd.DataFrame.from_records(news)
 
     def get_sources(
-        self, fields=["image", "title", "source", "link"], limit=20, **kargs
+        self, q, fields=["image", "title", "source", "link"], limit=20, **kargs
     ):
         self.check_connect()
         newsapi = NewsApiClient(api_key=self.__key)
         sources = newsapi.get_sources(**kargs)
         return self.__transformDate(sources.get("sources"), fields, limit)
 
-    def get_top(self, fields=["image", "title", "source", "link"], limit=20, **kargs):
+    def get_top(self, q, fields=["image", "title", "source", "link"], limit=20, **kargs):
         self.check_connect()
         newsapi = NewsApiClient(api_key=self.__key)
         tops = newsapi.get_top_headlines(**kargs)
         return self.__transformDate(tops.get("articles"), fields, limit)
 
-    def get(self, fields=["image", "title", "source", "link"], limit=20, **kargs):
+    def get(self, q, fields=["image", "title", "source", "link"], limit=20, **kargs):
         self.check_connect()
         newsapi = NewsApiClient(api_key=self.__key)
         all_news = newsapi.get_everything(**kargs)
