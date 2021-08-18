@@ -1,3 +1,9 @@
+## 0.70.4 (2021-08-18)
+
+### Fix
+
+- put the query into args
+
 ## 0.70.3 (2021-08-17)
 
 ### Refactor

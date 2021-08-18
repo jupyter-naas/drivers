@@ -37,7 +37,7 @@ from naas_drivers.input.nlp import NLP
 import requests
 import os
 
-__version__ = "0.70.3"
+__version__ = "0.70.4"
 
 __github_repo = "jupyter-naas/drivers"
 
