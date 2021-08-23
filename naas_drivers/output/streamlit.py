@@ -17,7 +17,7 @@ class BaseApp:
         print(f"Web App can be accessed on: {url}")
 
 
-class NaasStreamlit(BaseApp):
+class Streamlit(BaseApp):
     """
     Naas Streamlit app
     """
@@ -26,7 +26,9 @@ class NaasStreamlit(BaseApp):
         super().__init__(port)
         self.path = path
 
-    def run_app(self, debug=True):
+    def add(self, path = "app.py", port = 9999, debug=True):
+        self.path = path
+        self.port = port
         os.system(f"fuser -n tcp -k {self.port}")
         cmd = f"streamlit run {self.path} --server.port {self.port}"
         with subprocess.Popen(
