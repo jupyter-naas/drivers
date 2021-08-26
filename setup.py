@@ -28,7 +28,7 @@ setup(
     },
     install_requires=[
         "pyppeteer==0.2.5",
-        "imap_tools==0.39.0",
+        "imap_tools==0.46.0",
         "slackclient==2.9.3",
         "pymsteams==0.1.14",
         "pdfkit==0.6.1",
