@@ -32,7 +32,7 @@ from naas_drivers.inputOutput.hubspot import Hubspot
 from naas_drivers.inputOutput.thinkific import Thinkific
 from naas_drivers.input.markdown import Markdown
 from naas_drivers.output.streamlit import NaasStreamlit  # noqa: F401
-from naas_drivers.input.nlp import NLP
+from naas_drivers.input.huggingface import HuggingfaceDriver
 
 import requests
 import os
@@ -62,7 +62,7 @@ markdown = Markdown()
 teams = Teams()
 slack = Slack()
 qonto = Qonto()
-nlp = NLP()
+nlp = HuggingfaceDriver()
 
 # Out drivers
 bubble = Bubble()
