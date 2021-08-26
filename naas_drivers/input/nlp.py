@@ -186,7 +186,7 @@ TASK_ALIASES = {
 }
 
 
-class NLP(InDriver):
+class HuggingfaceDriver(InDriver):
     def get(
         self,
         task: str,
