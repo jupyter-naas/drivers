@@ -1,3 +1,13 @@
+## 0.70.6 (2021-08-31)
+
+### Fix
+
+- **Streamlit**: Do not create ngrok tunnel when loading Streamlit class
+
+### Refactor
+
+- change streamlit 'run_app' into 'add' and fix the function
+
 ## 0.70.5 (2021-08-26)
 
 ## 0.70.4 (2021-08-18)

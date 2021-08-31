@@ -37,7 +37,7 @@ from naas_drivers.input.nlp import HuggingfaceDriver
 import requests
 import os
 
-__version__ = "0.70.5"
+__version__ = "0.70.6"
 
 __github_repo = "jupyter-naas/drivers"
 
