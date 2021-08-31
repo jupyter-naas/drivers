@@ -31,13 +31,13 @@ from naas_drivers.inputOutput.notion import Notion
 from naas_drivers.inputOutput.hubspot import Hubspot
 from naas_drivers.inputOutput.thinkific import Thinkific
 from naas_drivers.input.markdown import Markdown
-from naas_drivers.output.streamlit import Streamlit  # noqa: F401
-from naas_drivers.input.nlp import NLP
+from naas_drivers.output.streamlit import Streamlit
+from naas_drivers.input.nlp import HuggingfaceDriver
 
 import requests
 import os
 
-__version__ = "0.70.4"
+__version__ = "0.70.5"
 
 __github_repo = "jupyter-naas/drivers"
 
@@ -62,7 +62,7 @@ markdown = Markdown()
 teams = Teams()
 slack = Slack()
 qonto = Qonto()
-nlp = NLP()
+nlp = HuggingfaceDriver()
 
 # Out drivers
 bubble = Bubble()
