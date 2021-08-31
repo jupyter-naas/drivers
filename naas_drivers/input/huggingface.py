@@ -186,7 +186,7 @@ TASK_ALIASES = {
 }
 
 
-class HuggingfaceDriver(InDriver):
+class Huggingface(InDriver):
     def get(
         self,
         task: str,
