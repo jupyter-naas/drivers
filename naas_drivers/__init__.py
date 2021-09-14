@@ -27,7 +27,7 @@ from naas_drivers.inputOutput.gsheet import Gsheet
 from naas_drivers.inputOutput.mongo import Mongo
 from naas_drivers.inputOutput.toucan import Toucan
 from naas_drivers.inputOutput.linkedin import LinkedIn
-from naas_drivers.inputOutput.notion import Notion
+import naas_drivers.inputOutput.notion as Notion
 from naas_drivers.inputOutput.hubspot import Hubspot
 from naas_drivers.inputOutput.thinkific import Thinkific
 from naas_drivers.input.markdown import Markdown
@@ -80,7 +80,7 @@ jupyter = Jupyter()
 ftp = Ftp()
 git = Git()
 gsheet = Gsheet()
-notion = Notion()
+# notion = Notion()
 mongo = Mongo()
 toucan = Toucan()
 linkedin = LinkedIn()
