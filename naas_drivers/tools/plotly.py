@@ -43,7 +43,7 @@ class Plotly(InDriver):
             if selector:
                 json["screenshot"]["selector"] = selector
             req = requests.post(
-                url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render",
+                url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render", # Sensitive
                 json=json,
             )
             req.raise_for_status()
