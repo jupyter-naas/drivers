@@ -1,3 +1,9 @@
+## 0.70.8 (2021-09-16)
+
+### Refactor
+
+- delete folder input/output and have only one folder (#160)
+
 ## 0.70.7 (2021-08-31)
 
 ### Fix
