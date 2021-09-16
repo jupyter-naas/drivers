@@ -69,7 +69,7 @@ class Ftpbase:
             ftp = (
                 ftplib.FTP_TLS(credentials["url"])
                 if credentials["type"] == "explicit TLS"
-                else ftplib.FTP(credentials["url"])
+                else ftplib.FTP(credentials["url"]) # Sensitive
             )
             ftp.connect(credentials["url"], credentials["port"])
             ftp.set_pasv(True) if credentials[

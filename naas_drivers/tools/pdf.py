@@ -13,7 +13,7 @@ class Pdf(InDriver):
         self.api_url = (
             api_url
             if api_url
-            else os.environ.get("SCREENSHOT_API", "http://naas-screenshot:9000")
+            else os.environ.get("SCREENSHOT_API", "http://naas-screenshot:9000") # Sensitive
         )
         self.connected = True
         return self
