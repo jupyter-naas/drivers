@@ -1,54 +1,536 @@
 from naas_drivers.driver import InDriver, OutDriver
-from notion.client import NotionClient
-import pandas as pd
 import requests
-import os
+from typing import Dict
+import json
+import pandas as pd
+from abc import ABC, abstractmethod
 
+VERSION = "2021-08-16"
+
+"""
+CONNECT
+"""
 
 class Notion(InDriver, OutDriver):
-    def __init__(self):
-        self.auth_proxy = os.getenv("NAAS_AUTH_PROXY")
+    def connect(self, token: str):
 
-    def connect(
-        self,
-        token: str = None,
-        email: str = None,
-        password: str = None,
-    ):
-        if token:
-            self.client = NotionClient(token)
-        elif email and password:
-            self.client = NotionClient(token_v2=self.__token_v2(email, password))
-        else:
-            self.print_error("You should provide, token or email/pasword")
+        # Init headers
+        self.headers = {
+            "Authorization": f"Bearer {token}",
+            "Notion-Version": f"{VERSION}",
+            "Content-Type": "application/json",
+        }
+        
+        # Create a page and database
+        self.page = Page(self.headers)
+        self.database = Database(self.headers) 
+        
+        self.block = Blocks()
+
+        # Set connexion to active
         self.connected = True
         return self
 
-    def __token_v2(
-        self,
-        email: str,
-        password: str,
-    ):
-        url = f"https://www.notion.so/login&filter=token_v2&email={email}&password={password}"
-        cookie_response = requests.get(f"{self.auth_proxy}/token?url={url}")
-        return cookie_response.json()["cookies"][0]["value"]
 
-    def get(self, url: str):
-        self.check_connect()
-        page = self.client.get_block(url)
-        return page
 
-    def get_collection(
-        self,
-        url: str,
-        raw: bool = False,
-    ):
-        self.check_connect()
-        cv = self.client.get_collection_view(url)
-        if raw:
-            return cv
+"""
+REQUEST
+"""
+
+def catch_error(response):
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        if response.status_code == 401:
+            raise Exception(
+                "❌ Connect to Notion with your Token: Notion.connect(YOUR_TOKEN_API)"
+            )
         else:
-            data = [
-                block_row.get_all_properties() for block_row in cv.collection.get_rows()
-            ]
-            return pd.DataFrame(data)
+            raise Exception("❌", err, response.text)
+
+
+class RequestNotionAPI:
+    def __init__(self, headers: Dict, id: str = None) -> None:
+        self.headers = headers
+        self.id = id
+
+
+class RequestDatabase(RequestNotionAPI):
+    URL = "https://api.notion.com/v1/databases"
+
+    def create(self, data):
+        pass
+
+
+class RequestPage(RequestNotionAPI):
+    URL = "https://api.notion.com/v1/pages/"
+
+    def retreive(self) -> Dict:
+        url = self.URL + self.id
+        response = requests.get(url, headers=self.headers)
+        catch_error(response)
+        return response.json()
+
+    def create(self, data) -> Dict:
+        data = json.dumps(data)
+        response = requests.post(self.URL, headers=self.headers, data=data)
+        catch_error(response)
+        print("✅ Page has been created")
+        return response.json()
+
+    def update(self, data):
+        url = self.URL + self.id
+        data = json.dumps(data)
+        response = requests.patch(url, headers=self.headers, data=data)
+        catch_error(response)
+        print("✨ Properties have been updated")
+
+
+class RequestBlock(RequestNotionAPI):
+    URL = "https://api.notion.com/v1/blocks/"
+
+    def update(self, data):
+        url = self.URL + self.id
+        data = json.dumps(data)
+        response = requests.patch(url, headers=self.headers, data=data)
+        catch_error(response)
+        print("✅ Block has been updated")
+
+    def retreive_children(self) -> Dict:
+        url = self.URL + self.id + "/children"
+        response = requests.get(url, headers=self.headers)
+        catch_error(response)
+        return response.json()["results"]
+
+    def append_children(self, data):
+        url = self.URL + self.id + "/children"
+
+        data = {"children": [data]}
+        data = json.dumps(data)
+
+        response = requests.patch(url, headers=self.headers, data=data)
+        catch_error(response)
+        print("✅ Block has been added to your page")
+
+    def delete(self):
+        url = self.URL + self.id
+        response = requests.delete(url, headers=self.headers)
+        catch_error(response)
+        print("🌪 Block has been deleted")
+        
+"""
+Property
+"""
+        
+class Property:
+    """An object describing by an id, type, and value of a page property."""
+
+    def __init__(self, property_object) -> None:
+        self.raw = property_object
+        self.id = property_object["id"]
+        self.type = property_object["type"]
+        self.value = property_object[self.type]
+
+    def extract(self):
+        if self.value is None:
+            return None
+        else:
+            if self.type == "date":
+                if self.value["end"]:
+                    return f'{self.value["start"]} -> {self.value["end"]}'
+                return self.value["start"]
+
+            elif self.type in ["title", "rich_text"]:
+                texts = [text["plain_text"] for text in self.value]
+                return ",".join(texts)
+
+            elif self.type == "select":
+                return self.value["name"]
+
+            elif self.type == "multi_select":
+                selections = [select["name"] for select in self.value]
+                return ", ".join(selections)
+
+            elif self.type in ["number", "url", "phone_number", "email", "checkbox"]:
+                return self.value
+
+            elif self.type == "people":
+                peoples = [
+                    people.get("name") for people in self.value if people.get("name")
+                ]
+                return ", ".join(peoples)
+
+    def insert(self, value):
+        if self.type == "date":
+            if isinstance(value, list) and len(value) == 2:
+                self.value["start"] = value[0]
+                self.value["end"] = value[1]
+            elif isinstance(value, str):
+                self.value["start"] = value
+                self.value["end"] = None
+            else:
+                raise TypeError(
+                    "Date must be a '2021-08-28' or ['2021-08-28', '2021-10-28']"
+                )
+
+        if self.type in ["title", "rich_text"]:
+            if isinstance(value, str):
+                del self.value[1:]
+                self.value[0]["plain_text"] = value
+                self.value[0]["text"]["content"] = value
+            else:
+                raise TypeError(f"{self.type} must be a string")
+
+        if self.type == "select":
+            if isinstance(value, str):
+                self.raw[self.type] = {"name": value}
+            else:
+                raise TypeError(f"{self.type} must be a string")
+
+        if self.type == "multi_select":
+            if isinstance(value, str):
+                self.raw[self.type].clear()
+                self.raw[self.type] = [{"name": value}]
+            elif isinstance(value, list):
+                self.raw[self.type].clear()
+                for elm in value:
+                    self.raw[self.type].append({"name": elm})
+            else:
+                raise TypeError(f"{self.type} must be a string or a list of string")
+
+        elif self.type == "number":
+            if isinstance(value, int):
+                self.raw[self.type] = value
+            else:
+                raise TypeError(f"{self.type} must be an integer")
+
+        elif self.type in ["url", "phone_number", "email"]:
+            if isinstance(value, str):
+                self.raw[self.type] = value
+            else:
+                raise TypeError(f"{self.type} must be a string or a list of string")
+
+            
+"""
+BLOCK
+"""
+class Blocks:
+    
+    def heading1(self, text):
+        return Heading1.create(text)
+    
+    def heading2(self, text):
+        return Heading2.create(text)
+    
+    def heading3(self, text):
+        return Heading3.create(text)
+    
+    def paragraph(self, text):
+        return Paragraph.create(text)
+    
+    def bulleted_list_item(self, text):
+        return BulletedList.create(text)
+    
+    def numbered_list_item(self, text):
+        return NumberedList.create(text)
+    
+    def to_do(self, text):
+        return ToDo.create(text)
+    
+    def child_page(self, text):
+        return ChildPage.create(text)
+    
+    def embed(self, url):
+        return Embed.create(url)
+
+        
+class BlockObject(ABC):
+    type = None
+
+    def __init__(self, dictionary: Dict) -> None:
+        self.object = dictionary.get("object")
+        self.id = dictionary.get("id")
+        self.type = dictionary.get("type")
+        self.created_time = dictionary.get("created_time")
+        self.last_edited_time = dictionary.get("last_edited_time")
+        self.has_children = dictionary.get("has_children")
+        self.value = dictionary.get(self.type)
+
+    def __repr__(self) -> str:
+        return self.get()
+
+    @abstractmethod
+    def get(self):
+        "Implemented in the subclass"
+
+    @abstractmethod
+    def set(self, value):
+        "Implemented in the subclass"
+
+    @abstractmethod
+    def create(self, value):
+        "Implemented in the subclass"
+
+    def update(self):
+        data = {self.type: self.value}
+        RequestBlock(self.headers, self.id).update(data)
+
+    def delete(self):
+        RequestBlock(self.headers, self.id).delete()
+
+
+class TextBLock(BlockObject):
+    type = None
+
+    def get(self):
+        content = [rich_text["plain_text"] for rich_text in self.value["text"]]
+        return " ".join(content)
+
+    def set(self, value: str):
+        del self.value["text"][1:]
+        self.value["text"][0]["text"]["content"] = value
+        self.value["text"][0]["plain_text"] = value
+
+    @classmethod
+    def create(cls, text: str, link: str = None):
+        return {
+            "type": cls.type,
+            cls.type: {
+                "text": [{"type": "text", "text": {"content": text, "link": link}}]
+            },
+        }
+
+
+class Paragraph(TextBLock):
+    type = "paragraph"
+
+
+class Heading1(TextBLock):
+    type = "heading_1"
+
+
+class Heading2(TextBLock):
+    type = "heading_2"
+
+
+class Heading3(TextBLock):
+    type = "heading_3"
+
+
+class BulletedList(TextBLock):
+    type = "bulleted_list_item"
+
+
+class NumberedList(TextBLock):
+    type = "numbered_list_item"
+
+
+class ToDo(TextBLock):
+    type = "to_do"
+
+    @classmethod
+    def create(cls, text: str, checked: bool = False, link: str = None):
+        return {
+            "type": cls.type,
+            cls.type: {
+                "text": [
+                    {
+                        "type": "text",
+                        "text": {"content": text, "link": link},
+                    }
+                ],
+                "checked": checked,
+            },
+        }
+
+
+class Toggle(TextBLock):
+    type = "toggle"
+
+
+class ChildPage(BlockObject):
+    type = "child_page"
+
+    def get(self):
+        return self.value["title"]
+
+    def set(self, value):
+        self.value["title"] = value
+
+    @classmethod
+    def create(cls, title: str):
+        return {
+            "type": cls.type,
+            "properties": {"title": [{"text": {"content": title}}]},
+        }
+
+
+class Embed(BlockObject):
+    type = "embed"
+
+    def get(self):
+        return self.value["url"]
+
+    def set(self, value):
+        self.value["url"] = value
+
+    @staticmethod
+    def create(url: str):
+        return {"type": "embed", "embed": {"url": url}}
+
+
+mapping = {
+    "paragraph": Paragraph,
+    "heading_1": Heading1,
+    "heading_2": Heading2,
+    "heading_3": Heading3,
+    "bulleted_list_item": BulletedList,
+    "numbered_list_item": NumberedList,
+    "to_do": ToDo,
+    "toggle": Toggle,
+    "child_page": ChildPage,
+    "embed": Embed,
+}
+
+
+def extract_block(block_object):
+    block_type = block_object.get("type")
+    return mapping[block_type](block_object)
+
+
+def insert_block(block_object, value):
+    block_type = block_object.get("type")
+    return mapping[block_type](block_object).set(value)
+
+
+"""
+PAGE
+"""
+
+class PageProperties:
+    def __init__(self, properties: Dict, headers: Dict):
+        self.headers = headers
+
+        self.raw = properties
+        self._properties = properties["properties"]
+        self.parent_id = properties["id"]
+
+    def __getitem__(self, key):
+        return Property(self._properties[key]).extract()
+
+    def __setitem__(self, key, value):
+        Property(self._properties[key]).insert(value)
+
+    def __repr__(self) -> str:
+        return f"{self.get()}"
+
+    def get(self) -> pd.Series:
+        data = {key: self[key] for key in self._properties.keys()}
+        return pd.Series(data)
+
+    def update(self) -> None:
+        RequestPage(self.headers, self.parent_id).update(self.raw)
+
+
+class PageContent:
+    def __init__(self, blocks, page_id, headers) -> None:
+        self.raw = blocks
+        self.page_id = page_id
+        self.headers = headers
+
+    def __getitem__(self, index):
+        return extract_block(self.raw[index])
+
+    def __setitem__(self, index, value):
+        insert_block(self.raw[index], value)
+
+    def __repr__(self) -> str:
+        return f"{self.get()}"
+
+    def _repr_html_(self):
+        return self.get().to_html()
+
+    def get(self) -> pd.DataFrame:
+        result = []
+        for block in self.raw:
+            result.append(
+                {
+                    "type": block.get("type"),
+                    "content": extract_block(block),
+                    "id": block.get("id"),
+                }
+            )
+        return pd.DataFrame(result)
+
+    def append(self, block: Dict) -> None:
+        if block["type"] == "child_page":
+            block.pop("type")
+            block["parent"] = {"page_id": self.page_id}
+            RequestPage(self.headers).create(block)
+        else:
+            RequestBlock(self.headers, self.page_id).append_children(block)
+
+    # WORK IN PROGRESS
+    def update(self):
+        # TODO
+        pass
+    
+"""
+LOW CODE OBJECT
+"""
+
+class Database:
+    def __init__(self, headers) -> None: 
+        self.headers = headers
+    
+    def get(self, database_url) -> None:
+        self.url = database_url
+        return self
+        # need to retreive the content of database
+
+    @property
+    def id(self):
+        path = self.url.split("/")[-1]
+        return path.split("?")[0]
+
+    def create_page(self):
+        data = {
+            "parent": {"database_id": self.id},
+            "properties": {"title": [{"text": {"content": "New page"}}]},
+        }
+        raw_page = RequestPage(self.headers).create(data)
+        return Page(self.headers).get(raw_page["url"])
+
+
+
+class Page:
+    def __init__(self, headers) -> None:
+        self.headers = headers
+        
+    def get(self, page_url: str):
+        self.url = page_url
+        self.id = page_url.split("-")[-1]
+
+        self._properties = RequestPage(self.headers, self.id).retreive()
+        self.created_time = self._properties["created_time"]
+        self.last_edited_time = self._properties["last_edited_time"]
+        self.archived = self._properties["archived"]
+        self.icon = self._properties["icon"]
+        self.cover = self._properties["cover"]
+        self.properties = PageProperties(self._properties, self.headers)
+        self.parent = self._properties["parent"]
+
+        self._content = RequestBlock(self.headers, self.id).retreive_children()
+        self.content = PageContent(self._content, self.id, self.headers)
+        return self
+
+    def refresh(self):
+        """Retreive Page properties & content."""
+        refresh_page = self.__init__(self.url)
+        return refresh_page
+
+    # WORK IN PROGRESS
+    def delete(self):
+        """Archiving workspace level pages via API not supported."""
+        RequestBlock(self.headers, self.id).delete()
+  
