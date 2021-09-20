@@ -1,3 +1,9 @@
+## 0.70.9 (2021-09-20)
+
+### Refactor
+
+- notion driver api
+
 ## 0.70.8 (2021-09-16)
 
 ### Refactor
