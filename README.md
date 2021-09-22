@@ -11,26 +11,23 @@
 <a href="http://commitizen.github.io/cz-cli/"><img alt="Commitizen friendly" src="https://img.shields.io/badge/commitizen-friendly-brightgreen.svg"></a>
 ![PyPI](https://img.shields.io/pypi/v/naas_drivers)
 
-# Welcome to Naas Drivers
+# Welcome to Naas Drivers 🏎
 
-Simple formulas to build highly efficient scripts
+Simple formulas to build highly efficient scripts.
 
 # Documentation
 
-You can check the documentation there:
+You can check the documentation here: https://docs.naas.ai
 
-https://docs.naas.ai
-
-## Why Naas Drivers?
+## Low code philosophy
 
 We came from excel with the conviction that Python is awesome and much more powerful.
-But the numbers of lines you have to write in Python can be overwelming when you start. 
+But the number of lines you have to write in Python can be overwelming. 
 
 So we created simple low code formulas that tech and non-tech people can use to facilitate integrations with third party tools.
 
-Simple formula to interact with powerfull tools.
-<br/>
-→ Each driver returns a dataframe to get a strandardized output accross integrations.
+Simple formulas to interact with powerfull tools.
+Each driver returns a dataframe to get a strandardized output accross integrations.
 
 # Issue
 If you found a bug or need a new feature, please raise an issue.
