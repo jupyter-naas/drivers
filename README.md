@@ -33,20 +33,6 @@ If you found a bug or need a new feature, please raise an issue.
 
 `python -m pip install naas_drivers`
 
-Few drivers need specific env var set, that will be notified in the documentation:
-
-<p>
-  <a href="https://docs.naas.ai" title="Redirect to Documentation">
-    <img width="200px" src="https://raw.githubusercontent.com/jupyter-naas/drivers/main/images/gitbook.svg" alt="Gitbooks drivers" />
-  </a>
- </p>
-
-## Dev
-
-### Install 
-
-`python -m pip install -e .`
-
 ### Check lint
 
 `python3 -m black naas` format better
