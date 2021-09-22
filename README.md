@@ -13,17 +13,17 @@
 
 # Welcome to Naas Drivers 🏎
 
-Simple formulas to build highly efficient scripts.
+Simple formulas to build highly efficient scripts.<br>
 You can check the documentation here: https://docs.naas.ai
 
 ## Low code philosophy
 
 We came from excel with the conviction that Python is awesome and much more powerful.
-But the number of lines you have to write in Python can be overwelming. 
+But the number of lines you have to write in Python can be overwelming. <br>
 
-So we created simple low code formulas that tech and non-tech people can use to facilitate integrations with third party tools.
+So we created simple low code formulas that tech and non-tech people can use to facilitate integrations with third party tools.<br>
 
-Simple formulas to interact with powerfull tools.
+Simple formulas to interact with powerfull tools.<br>
 Each driver returns a dataframe to get a strandardized output accross integrations.
 
 ## Issues
@@ -35,7 +35,7 @@ If you found a bug or need a new feature, please raise an issue.
 
 ### Check lint
 
-`python3 -m black naas` format better
+`python3 -m black naas` format better <br>
 `python3 -m flake8 naas` check if any left error
 
 ### Publish
