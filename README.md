@@ -14,9 +14,6 @@
 # Welcome to Naas Drivers 🏎
 
 Simple formulas to build highly efficient scripts.
-
-# Documentation
-
 You can check the documentation here: https://docs.naas.ai
 
 ## Low code philosophy
@@ -29,7 +26,7 @@ So we created simple low code formulas that tech and non-tech people can use to 
 Simple formulas to interact with powerfull tools.
 Each driver returns a dataframe to get a strandardized output accross integrations.
 
-# Issue
+## Issue
 If you found a bug or need a new feature, please raise an issue.
 
 ## Install
@@ -44,18 +41,18 @@ Few drivers need specific env var set, that will be notified in the documentatio
   </a>
  </p>
 
-# Dev
+## Dev
 
-## Install 
+### Install 
 
 `python -m pip install -e .`
 
-## Check lint
+### Check lint
 
 `python3 -m black naas` format better
 `python3 -m flake8 naas` check if any left error
 
-## Publish
+### Publish
 
 This auto publish on pypip by github action on main branch.
 
