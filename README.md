@@ -26,7 +26,7 @@ So we created simple low code formulas that tech and non-tech people can use to 
 Simple formulas to interact with powerfull tools.
 Each driver returns a dataframe to get a strandardized output accross integrations.
 
-## Issue
+## Issues
 If you found a bug or need a new feature, please raise an issue.
 
 ## Install
