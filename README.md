@@ -17,20 +17,20 @@ Simple formulas to build highly efficient scripts
 
 # Documentation
 
-Yu can check the documentation there:
+You can check the documentation there:
 
 https://docs.naas.ai
 
 ## Why Naas Drivers?
 
-We came from excel with the conviction that Python is awesome .
-Python can be use by developpers, or in low-code way.
+We came from excel with the conviction that Python is awesome and much more powerful.
+But the numbers of lines you have to write in Python can be overwelming when you start. 
 
-<br/>
-That what we try to achieve with naas_drivers.
+So we created simple low code formulas that tech and non-tech people can use to facilitate integrations with third party tools.
+
 Simple formula to interact with powerfull tools.
 <br/>
-Each driver try to return dataframe to strandardise the output.
+→ Each driver returns a dataframe to get a strandardized output accross integrations.
 
 # Issue
 If you found a bug or need a new feature, please raise an issue.
