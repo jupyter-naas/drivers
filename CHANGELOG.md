@@ -1,3 +1,13 @@
+## 0.70.10 (2021-09-27)
+
+### Fix
+
+- rename class and path in init.py
+
+### Refactor
+
+- rename of the driver zappier -> zapier
+
 ## 0.70.9 (2021-09-20)
 
 ### Refactor
