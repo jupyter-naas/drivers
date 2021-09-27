@@ -1,3 +1,11 @@
+## 0.70.11 (2021-09-27)
+
+### Fix
+
+- lint error in slack.py, variable not used
+- lint error in slack.py, variable not used
+- error in the driver
+
 ## 0.70.10 (2021-09-27)
 
 ### Fix
