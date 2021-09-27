@@ -37,9 +37,6 @@ class Slack(OutDriver):
             attachments = None
             if image:
                 attachments = self.__upload_or_link(image)
-            response = self.client.chat_postMessage(
-                channel=channel, text=text, attachments=attachments
-            )
             print("Message send")
         except SlackApiError as e:
             # You will get a SlackApiError if "ok" is False
