@@ -2,7 +2,7 @@ from naas_drivers.driver import OutDriver
 import requests
 
 
-class Zappier(OutDriver):
+class Zapier(OutDriver):
     def connect(self, url):
         self._key = url
         self.connected = True

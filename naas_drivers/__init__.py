@@ -16,7 +16,7 @@ from naas_drivers.tools.bubble import Bubble
 from naas_drivers.tools.healthcheck import Healthcheck
 from naas_drivers.tools.ifttt import Ifttt
 from naas_drivers.tools.integromat import Integromat
-from naas_drivers.tools.zappier import Zappier
+from naas_drivers.tools.zapier import Zapier
 from naas_drivers.tools.email import Email
 from naas_drivers.tools.bobapp import Bobapp
 from naas_drivers.tools.airtable import Airtable
@@ -70,7 +70,7 @@ email = Email()
 healthcheck = Healthcheck()
 ifttt = Ifttt()
 integromat = Integromat()
-zappier = Zappier()
+zapier = Zapier()
 streamlit = Streamlit()
 
 # InOut drivers
