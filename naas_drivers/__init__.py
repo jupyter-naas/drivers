@@ -36,8 +36,6 @@ from naas_drivers.tools.huggingface import Huggingface
 from naas_drivers.tools.naas_auth import NaasAuth
 from naas_drivers.tools.naas_credits import NaasCredits
 
-print('hello drivers')
-
 import requests
 import os
 
