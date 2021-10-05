@@ -33,6 +33,8 @@ from naas_drivers.tools.thinkific import Thinkific
 from naas_drivers.tools.markdown import Markdown
 from naas_drivers.tools.streamlit import Streamlit
 from naas_drivers.tools.huggingface import Huggingface
+from naas_drivers.tools.naas_auth import NaasAuth
+from naas_drivers.tools.naas_credits import NaasCredits
 
 import requests
 import os
@@ -63,6 +65,7 @@ teams = Teams()
 slack = Slack()
 qonto = Qonto()
 huggingface = Huggingface()
+naasauth = NaasAuth()
 
 # Out drivers
 bubble = Bubble()
@@ -86,6 +89,7 @@ toucan = Toucan()
 linkedin = LinkedIn()
 hubspot = Hubspot()
 thinkific = Thinkific()
+naascredits = NaasCredits()
 
 __doc_url = "https://naas.gitbook.io/drivers/"
 
