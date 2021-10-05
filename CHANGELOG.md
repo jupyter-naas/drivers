@@ -1,3 +1,9 @@
+## 0.71.0 (2021-10-05)
+
+### Feat
+
+- Add naas-auth and naas-credits drivers. (#172)
+
 ## 0.70.11 (2021-09-27)
 
 ### Fix
