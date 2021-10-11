@@ -37,7 +37,7 @@ setup(
         "airtable-python-wrapper==0.15.2",
         "notion==0.0.28",
         "pyjwt==2.1.0",
-        "tensorflow==2.4.1",
+        "tensorflow==2.6.0",
         "pysftp==0.2.9",
         "htmlbuilder==0.1.2",
         "vaderSentiment==3.3.2",
