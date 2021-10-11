@@ -393,7 +393,10 @@ class Message(LinkedIn):
                     "com.linkedin.voyager.messaging.create.MessageCreate": {
                         "body": content,
                         "attachments": [],
-                        "attributedBody": {"text": content, "attributes": [],},
+                        "attributedBody": {
+                            "text": content,
+                            "attributes": [],
+                        },
                         "mediaAttachments": [],
                     }
                 }
@@ -602,7 +605,10 @@ class Post(LinkedIn):
         return df.reset_index(drop=True)
 
     def share_text_post(
-        self, share_commentary: str, profile_url: str, visibility: str = "PUBLIC",
+        self,
+        share_commentary: str,
+        profile_url: str,
+        visibility: str = "PUBLIC",
     ) -> None:
         """Function utilizing LinkedIn's UGC Posts API to allow Naas users to
         share LinkedIn text posts.
@@ -612,7 +618,7 @@ class Post(LinkedIn):
         - profile_url: The URL of the LinkedIn profile that will be posting.
         - visibility: Can be set as "PUBLIC" (viewable by anyone on LinkedIn)
             or "CONNECTIONS" (viewable by 1st-degree connections only).
-        
+
         Notes:
         - Post text must be less than or equal to 1300 characters.
         - Function currently only supports user posts, not organization posts.
