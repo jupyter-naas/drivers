@@ -604,7 +604,7 @@ class Post(LinkedIn):
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
 
-    def share_text_post(
+    def create(
         self,
         share_commentary: str,
         profile_url: str,
