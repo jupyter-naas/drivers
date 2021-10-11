@@ -5,6 +5,7 @@ import time
 import urllib
 from datetime import datetime, timedelta
 import secrets
+import logging
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -601,46 +602,60 @@ class Post(LinkedIn):
         return df.reset_index(drop=True)
 
     def share_text_post(
-        self, shareCommentary: str, profile_url: str, visibility: str = "PUBLIC",
+        self, share_commentary: str, profile_url: str, visibility: str = "PUBLIC",
     ) -> None:
         """Function utilizing LinkedIn's Share API to allow Naas users to share
         LinkedIn updates.
 
         Arguments:
-        - shareCommentary:
-        - visibility:
+        - share_commentary: Text of post you plan to share on LinkedIn
+        - profile_url: The URL of the LinkedIn profile that will be posting.
+        - visibility: Can be set as "PUBLIC" (viewable by anyone on LinkedIn)
+            or "CONNECTIONS" (viewable by 1st-degree connections only).
         
-        Note:
-        Post text must be less than or equal to 1300 characters.
+        Notes:
+        - Post text must be less than or equal to 1300 characters.
+        - Function currently only supports user posts, not organization posts.
 
         Documentation can be found here:
         https://docs.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/share-on-linkedin?context=linkedin/consumer/context
         """
-        # confirm user
+        logging.info("Confirming provided profile url.")
         profile_urn = self.get_profile_urn(profile_url)
-        author = f"urn:li:person:{profile_urn}"
+        if profile_urn is None:
+            raise Exception("Please enter a valid profile_url.")
+        else:
+            author = f"urn:li:person:{profile_urn}"
+        logging.info("Profile url confirmed, and profile urn extracted.")
 
-        # checking post length
-        text_length = len(shareCommentary)
+        logging.info("Confirming share_commentary not greater than 1300 characters")
+        text_length = len(share_commentary)
         if text_length > 1300:
             raise Exception(
                 f"LinkedIn posts must be below 1300 characters. Provided text is {text_length} characters."
             )
+        logging.info(f"share_commentary is {text_length} characters.")
 
-        # post via linkedin api
+        logging.info("Preparing to share LinkedIn text post.")
         req_url = f"{LINKEDIN_API}/ugcPosts"
         request_post_json = {
             "author": author,
             "lifecycleState": "PUBLISHED",
             "specificContent": {
                 "com.linkedin.ugc.ShareContent": {
-                    "shareCommentary": {"text": shareCommentary},
+                    "shareCommentary": {"text": share_commentary},
                     "shareMediaCategory": "NONE",
                 }
             },
             "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": visibility},
         }
         res = requests.post(req_url, json=request_post_json, headers=self.headers)
+        if res.status_code == 201:
+            logging.info("LinkedIn text post share successful.")
+        else:
+            raise Exception(
+                f"Warning: LinkedIn text post share failed, received status code {res.status_code}."
+            )
 
 
 class Event(LinkedIn):
