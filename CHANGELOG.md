@@ -1,3 +1,9 @@
+## 0.72.1 (2021-10-11)
+
+### Fix
+
+- **Dependency**: Bump tensorflow to 2.6.0
+
 ## 0.72.0 (2021-10-08)
 
 ### Feat
