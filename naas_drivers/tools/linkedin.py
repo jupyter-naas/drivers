@@ -600,16 +600,47 @@ class Post(LinkedIn):
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
 
-    def share_post(self, post_text: str) -> None:
+    def share_text_post(
+        self, shareCommentary: str, profile_url: str, visibility: str = "PUBLIC",
+    ) -> None:
         """Function utilizing LinkedIn's Share API to allow Naas users to share
-        LinkedIn updates. Documentation can be found here:
-        https://docs.microsoft.com/en-us/linkedin/marketing/integrations/community-management/shares
+        LinkedIn updates.
 
-        There are the ugcPosts API and shares API, where ugcPosts are for video,
-        and shares API is for text posts, articles, and images. Note that UGC
-        Posts will eventually replace the shares API once it has further
-        functionality.
+        Arguments:
+        - shareCommentary:
+        - visibility:
+        
+        Note:
+        Post text must be less than or equal to 1300 characters.
+
+        Documentation can be found here:
+        https://docs.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/share-on-linkedin?context=linkedin/consumer/context
         """
+        # confirm user
+        profile_urn = self.get_profile_urn(profile_url)
+        author = f"urn:li:person:{profile_urn}"
+
+        # checking post length
+        text_length = len(shareCommentary)
+        if text_length > 1300:
+            raise Exception(
+                f"LinkedIn posts must be below 1300 characters. Provided text is {text_length} characters."
+            )
+
+        # post via linkedin api
+        req_url = f"{LINKEDIN_API}/ugcPosts"
+        request_post_json = {
+            "author": author,
+            "lifecycleState": "PUBLISHED",
+            "specificContent": {
+                "com.linkedin.ugc.ShareContent": {
+                    "shareCommentary": {"text": shareCommentary},
+                    "shareMediaCategory": "NONE",
+                }
+            },
+            "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": visibility},
+        }
+        res = requests.post(req_url, json=request_post_json, headers=self.headers)
 
 
 class Event(LinkedIn):
