@@ -604,8 +604,8 @@ class Post(LinkedIn):
     def share_text_post(
         self, share_commentary: str, profile_url: str, visibility: str = "PUBLIC",
     ) -> None:
-        """Function utilizing LinkedIn's Share API to allow Naas users to share
-        LinkedIn updates.
+        """Function utilizing LinkedIn's UGC Posts API to allow Naas users to
+        share LinkedIn text posts.
 
         Arguments:
         - share_commentary: Text of post you plan to share on LinkedIn
