@@ -392,10 +392,7 @@ class Message(LinkedIn):
                     "com.linkedin.voyager.messaging.create.MessageCreate": {
                         "body": content,
                         "attachments": [],
-                        "attributedBody": {
-                            "text": content,
-                            "attributes": [],
-                        },
+                        "attributedBody": {"text": content, "attributes": [],},
                         "mediaAttachments": [],
                     }
                 }
@@ -602,6 +599,17 @@ class Post(LinkedIn):
             res_json = res.json()
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
+
+    def share_post(self, post_text: str) -> None:
+        """Function utilizing LinkedIn's Share API to allow Naas users to share
+        LinkedIn updates. Documentation can be found here:
+        https://docs.microsoft.com/en-us/linkedin/marketing/integrations/community-management/shares
+
+        There are the ugcPosts API and shares API, where ugcPosts are for video,
+        and shares API is for text posts, articles, and images. Note that UGC
+        Posts will eventually replace the shares API once it has further
+        functionality.
+        """
 
 
 class Event(LinkedIn):
