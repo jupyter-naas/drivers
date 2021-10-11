@@ -623,7 +623,7 @@ class Post(LinkedIn):
         logging.info("Confirming provided profile url.")
         profile_urn = self.get_profile_urn(profile_url)
         if profile_urn is None:
-            raise Exception("Please enter a valid profile_url.")
+            raise AssertionError("Please enter a valid profile_url.")
         else:
             author = f"urn:li:person:{profile_urn}"
         logging.info("Profile url confirmed, and profile urn extracted.")
@@ -631,7 +631,7 @@ class Post(LinkedIn):
         logging.info("Confirming share_commentary not greater than 1300 characters")
         text_length = len(share_commentary)
         if text_length > 1300:
-            raise Exception(
+            raise AssertionError(
                 f"LinkedIn posts must be below 1300 characters. Provided text is {text_length} characters."
             )
         logging.info(f"share_commentary is {text_length} characters.")
@@ -653,7 +653,7 @@ class Post(LinkedIn):
         if res.status_code == 201:
             logging.info("LinkedIn text post share successful.")
         else:
-            raise Exception(
+            raise Warning(
                 f"Warning: LinkedIn text post share failed, received status code {res.status_code}."
             )
 
