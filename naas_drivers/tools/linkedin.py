@@ -208,6 +208,24 @@ class Profile(LinkedIn):
         time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
+    def get_resume(self, profile_url=None, profile_urn=None):
+        res_json = {}
+        if profile_urn is None:
+            profile_urn = LinkedIn.get_profile_urn(self, profile_url)
+            if profile_urn is None:
+                return "Please enter a valid profile_url or profile_urn"
+        req_url = f"{LINKEDIN_API}/profile/getResume?profile_urn={profile_urn}"
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(req_url, json=self.cookies, headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return e
+        else:
+            res_json = res.json()
+        df = pd.DataFrame(res_json)
+        return df.reset_index(drop=True)
+
     def get_posts_stats(self, profile_url=None, profile_urn=None):
         res_json = {}
         if profile_urn is None:
