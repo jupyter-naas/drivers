@@ -1,536 +1,927 @@
 from naas_drivers.driver import InDriver, OutDriver
-import requests
-from typing import Dict
+from notion_client import Client
+import dataclasses
+from dataclasses import dataclass, field, make_dataclass
+from dacite import from_dict
+from typing import List, Optional, Union
+from numbers import Number
+from enum import Enum
 import json
-import pandas as pd
-from abc import ABC, abstractmethod
+import logging
 
 VERSION = "2021-08-16"
 
-"""
-CONNECT
-"""
+global notion_instance
 
 class Notion(InDriver, OutDriver):
-    def connect(self, token: str):
+    __client = None
 
-        # Init headers
-        self.headers = {
-            "Authorization": f"Bearer {token}",
-            "Notion-Version": f"{VERSION}",
-            "Content-Type": "application/json",
-        }
+    def __init__(self):
+        """
+        Classes / Methods to query notion
+        """
+        self.databases = self.Databases(self)
+        self.pages = self.Pages(self)
+        self.blocks = self.Blocks(self)
         
-        # Create a page and database
-        self.page = Page(self.headers)
-        self.database = Database(self.headers) 
+        """
+        Data classes representing Page/Database/Blocks.
+        """
+        self.Page = Page
+        self.Database = Database
+        self.Block = Block
         
-        self.block = Blocks()
-
-        # Set connexion to active
-        self.connected = True
+        """
+        Global to allow all dataclasses to access notion client and make requests
+        from a dataclass directly.
+        """
+        global notion_instance
+        notion_instance = self
+    
+    @staticmethod
+    def instance():
+        return notion_instance
+    
+    @property
+    def client(self):
+        return self.__client
+    
+    def connect(self, token: str, log_level: int = logging.WARNING):
+        self.__client = Client(auth=token, log_level=log_level)
         return self
+    
+    def to_json(self, source):
+        return json.dumps(source, cls=EnhancedJSONEncoder, ensure_ascii=False)
 
-
-
-"""
-REQUEST
-"""
-
-def catch_error(response):
-    try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        if response.status_code == 401:
-            raise Exception(
-                "❌ Connect to Notion with your Token: Notion.connect(YOUR_TOKEN_API)"
-            )
-        else:
-            raise Exception("❌", err, response.text)
-
-
-class RequestNotionAPI:
-    def __init__(self, headers: Dict, id: str = None) -> None:
-        self.headers = headers
-        self.id = id
-
-
-class RequestDatabase(RequestNotionAPI):
-    URL = "https://api.notion.com/v1/databases"
-
-    def create(self, data):
-        pass
-
-
-class RequestPage(RequestNotionAPI):
-    URL = "https://api.notion.com/v1/pages/"
-
-    def retreive(self) -> Dict:
-        url = self.URL + self.id
-        response = requests.get(url, headers=self.headers)
-        catch_error(response)
-        return response.json()
-
-    def create(self, data) -> Dict:
-        data = json.dumps(data)
-        response = requests.post(self.URL, headers=self.headers, data=data)
-        catch_error(response)
-        print("✅ Page has been created")
-        return response.json()
-
-    def update(self, data):
-        url = self.URL + self.id
-        data = json.dumps(data)
-        response = requests.patch(url, headers=self.headers, data=data)
-        catch_error(response)
-        print("✨ Properties have been updated")
-
-
-class RequestBlock(RequestNotionAPI):
-    URL = "https://api.notion.com/v1/blocks/"
-
-    def update(self, data):
-        url = self.URL + self.id
-        data = json.dumps(data)
-        response = requests.patch(url, headers=self.headers, data=data)
-        catch_error(response)
-        print("✅ Block has been updated")
-
-    def retreive_children(self) -> Dict:
-        url = self.URL + self.id + "/children"
-        response = requests.get(url, headers=self.headers)
-        catch_error(response)
-        return response.json()["results"]
-
-    def append_children(self, data):
-        url = self.URL + self.id + "/children"
-
-        data = {"children": [data]}
-        data = json.dumps(data)
-
-        response = requests.patch(url, headers=self.headers, data=data)
-        catch_error(response)
-        print("✅ Block has been added to your page")
-
-    def delete(self):
-        url = self.URL + self.id
-        response = requests.delete(url, headers=self.headers)
-        catch_error(response)
-        print("🌪 Block has been deleted")
+    def to_dict(self, source):
+        return del_none(json.loads(self.to_json(source)))
+    
+    class __InnerBase():
+        __parent = None
         
-"""
-Property
-"""
+        def __init__(self, parent):
+            self.__parent = parent
         
-class Property:
-    """An object describing by an id, type, and value of a page property."""
+        @property
+        def client(self):
+            return self.__parent.client
+        
+        @property
+        def parent(self):
+            return self.__parent
+    
+    class Databases(__InnerBase):
+        
+        def __from_dict(self, data):
+            return from_dict(data_class=Database, data=data)
+        
+        def query(self, database_id, query = {}):
+            ret = []
+            results = self.client.databases.query(database_id=database_id, **query).get('results')
+            for r in results:
+                ret.append(from_dict(data_class=Page, data=r))
+            return ret
+    
+        def create(self, db):
+            payload = self.parent.to_dict(db)
+            return self.__from_dict(self.client.databases.create(**payload))
+    
+        def update(self, db):
+            payload = self.parent.to_dict(db)
+            return self.__from_dict(self.client.databases.update(database_id=db.id, **payload))
+    
+        def retrieve(self, database_id):
+            raw = self.client.databases.retrieve(database_id)
+            return self.__from_dict(raw)
 
-    def __init__(self, property_object) -> None:
-        self.raw = property_object
-        self.id = property_object["id"]
-        self.type = property_object["type"]
-        self.value = property_object[self.type]
+    class Pages(__InnerBase):
+        
+        def __from_dict(self, data):
+            return from_dict(data_class=Page, data=data)
+        
+        def create(self, page):
+            payload = self.parent.to_dict(page)
+            return self.__from_dict(self.client.pages.create(**payload))
+    
+        def retrieve(self, page_id : str):
+            page = self.client.pages.retrieve(page_id=page_id)
+            return self.__from_dict(page)
 
-    def extract(self):
-        if self.value is None:
-            return None
+        def update(self, page):
+            payload = self.parent.to_dict(page)
+            return self.__from_dict(self.client.pages.update(page_id=page.id, **payload))
+    
+    class Blocks(__InnerBase):
+        
+        def __from_dict(self, data):
+            return from_dict(data_class=Block, data=data)
+    
+        def retrieve(self, block_id: str):
+            block = self.client.blocks.retrieve(block_id=block_id)
+            return self.__from_dict(block)
+        
+        def children(self, block_id : str):
+            ret = []
+            for r in self.client.blocks.children.list(block_id=block_id).get('results'):
+                ret.append(self.__from_dict(r))
+            return ret
+        
+        def append(self, block_id, blocks):
+            if type(blocks) != list:
+                blocks = [blocks]
+            payload = self.parent.to_dict(blocks)
+            return self.__from_dict(self.client.blocks.children.append(block_id=block_id, children=payload))
+        
+        def update(self, block):
+            payload = self.parent.to_dict(block)
+            return self.__from_dict(self.client.blocks.update(block_id=block.id, **payload))
+        
+        def delete(self, block_id):
+            return self.__from_dict(self.client.blocks.delete(block_id=f'/{block_id}')) # TODO: Remove '/' when PR is merged.
+        
+        
+
+"""Notion Data classes"""
+
+class __BaseDataClass:
+    """
+    __BaseDataClass is used to make it easy from any @dataclass to access notion client.
+    It allows to update/create/delete/query objects directly from a dataclass.
+    """
+    def to_json(self, source=None):
+        if source is None:
+            source = self
+        return json.dumps(source, cls=EnhancedJSONEncoder)
+    
+    @property
+    def notion(self):
+        return Notion.instance()
+@dataclass
+class FileExternal:
+    url: Optional[str]
+    
+@dataclass
+class File(__BaseDataClass):
+    type: str
+    url: Optional[str]
+    expiry_time: Optional[str]
+    name: Optional[str]
+    external: Optional[FileExternal]
+
+@dataclass
+class Emoji(__BaseDataClass):
+    emoji: str
+    type: str = 'emoji'
+
+@dataclass
+class Parent(__BaseDataClass):
+    type: str
+    workspace: Optional[bool] = None
+    page_id: Optional[str] = None
+    database_id : Optional[str] = None
+    
+    @classmethod
+    def new_page_parent(cls, page_id):
+        return cls(type='page_id', page_id=page_id)
+        
+
+    @classmethod
+    def new_workspace_parent(cls):
+        return cls(type='workspace', workspace=True)
+    
+    @classmethod
+    def new_database_parent(cls, database_id):
+        return cls(type='database_id', database_id=database_id)
+    
+@dataclass
+class Link(__BaseDataClass):
+    type: str
+    url: str
+
+@dataclass
+class Text(__BaseDataClass):
+    content: str
+    link: Optional[Link] = None
+
+@dataclass
+class Annotation(__BaseDataClass):
+    bold: bool = False
+    italic: bool = False
+    strikethrough: bool = False
+    underline: bool = False
+    code: bool = False
+    color: str = 'default'
+
+@dataclass
+class Person(__BaseDataClass):
+    email: str
+
+@dataclass
+class User(__BaseDataClass):
+    object: str
+    id: str
+    type: Optional[str]
+    name: Optional[str]
+    avatar_url: Optional[str]
+    person: Optional[Person]
+    bot: Optional[object]
+    
+    def __post_init__(self):
+        if self.type == 'person':
+            self.person = Person('')
+        if self.type == 'bot':
+            self.bot = {}
+
+@dataclass
+class Date(__BaseDataClass):
+    start: str
+    end: Optional[str]
+
+@dataclass
+class Equation(__BaseDataClass):
+    expression: str
+        
+@dataclass
+class RichText(__BaseDataClass):
+    plain_text: str
+    href: Optional[str] = None
+    annotations: Annotation = field(default_factory=Annotation)
+    type: str = 'text'
+    text: Optional[Text] = None
+    user: Optional[User] = None
+    page: Optional[object] = None
+    database: Optional[object] = None
+    date: Optional[Date] = None
+    equation: Optional[Equation] = None
+        
+    @classmethod
+    def new_text(cls, content):
+        return cls(plain_text=content, text=Text(content=content))
+
+"""
+Database and Database properties
+
+This section is containing all classes related to Properties (https://developers.notion.com/reference/database#property-object)
+"""
+
+@dataclass
+class Property(__BaseDataClass):
+    id: Optional[str]
+    type: str # TODO: Consider using enum to improve typing.
+
+
+@dataclass
+class DatabaseProperty(Property):
+    name: str
+    
+    
+@dataclass
+class DatabasePropertyTitle(DatabaseProperty):
+    title: object = field(default_factory=dict)
+    
+
+@dataclass
+class DatabasePropertyText(DatabaseProperty):
+    rich_text: object = field(default_factory=dict)
+
+@dataclass
+class DatabasePropertyNumber_Configuration:
+    format: str = 'number'
+
+@dataclass
+class DatabasePropertyNumber(DatabaseProperty):
+    number: DatabasePropertyNumber_Configuration = field(default_factory=dict)
+
+@dataclass
+class DatabasePropertySelect_Configuration_Option:
+    name: str
+    id: str
+    color: str # TODO: enum
+        
+@dataclass
+class DatabasePropertySelect_Configuration:
+    options: List[DatabasePropertySelect_Configuration_Option] = field(default_factory=list)
+        
+@dataclass
+class DatabasePropertySelect(DatabaseProperty):
+    select: DatabasePropertySelect_Configuration = field(default_factory=DatabasePropertySelect_Configuration)
+
+@dataclass
+class DatabasePropertyMultiSelect(DatabaseProperty):
+    multi_select: DatabasePropertySelect_Configuration = field(default_factory=DatabasePropertySelect_Configuration) # TODO: Create own childs? Not reuse DatabasePropertySelect_Configuration class.
+
+
+@dataclass
+class DatabasePropertyDate(DatabaseProperty):
+    date: object = field(default_factory=dict)
+    
+@dataclass
+class DatabasePropertyPeople(DatabaseProperty):
+    people: object = field(default_factory=dict)
+
+@dataclass
+class DatabasePropertyFiles(DatabaseProperty):
+    files: object = field(default_factory=dict)
+
+@dataclass
+class DatabasePropertyCheckbox(DatabaseProperty):
+    checkbox: object = field(default_factory=dict)
+
+@dataclass
+class DatabasePropertyUrl(DatabaseProperty):
+    url: object = field(default_factory=dict)
+    
+@dataclass
+class DatabasePropertyEmail(DatabaseProperty):
+    email: object = field(default_factory=dict)
+        
+@dataclass
+class DatabasePropertyPhoneNumber(DatabaseProperty):
+    phone_number: object = field(default_factory=dict)
+
+@dataclass
+class DatabasePropertyFormula_Configuration:
+    expression: str = ''
+        
+@dataclass
+class DatabasePropertyFormula(DatabaseProperty):
+    formula: DatabasePropertyFormula_Configuration = field(default_factory=DatabasePropertyFormula_Configuration)
+
+@dataclass
+class DatabasePropertyRelation_Configuration:
+    database_id: str
+    synced_property_name: Optional[str]
+    synced_property_id: Optional[str]
+        
+@dataclass
+class DatabasePropertyRelation(DatabaseProperty):
+    relation: DatabasePropertyRelation_Configuration = field(default_factory=DatabasePropertyRelation_Configuration)
+
+@dataclass
+class DatabasePropertyRollup_Configuration:
+    relation_property_name: str
+    relation_property_id: str
+    rollup_property_name: str
+    rollup_property_id: str
+    function: str
+    
+@dataclass
+class DatabasePropertyRollup(DatabaseProperty):
+    rollup: DatabasePropertyRollup_Configuration
+
+@dataclass
+class DatabasePropertyCreatedBy(DatabaseProperty):
+    created_by: object = field(default_factory=dict)
+
+@dataclass
+class DatabasePropertyCreatedTime(DatabaseProperty):
+    created_time: object = field(default_factory=dict)
+    
+    
+@dataclass
+class DatabasePropertyLastEditedTime(DatabaseProperty):
+    last_edited_time: object = field(default_factory=dict)
+        
+    
+@dataclass
+class DatabasePropertyLastEditedBy(DatabaseProperty):
+    last_edited_by: object = field(default_factory=dict)
+        
+class DatabasePropertyFactory():
+    """
+    This class is a helper to create the proper DatabaseProperty type automaticaly.
+    """
+    __rel_map = {
+        "title": DatabasePropertyTitle,
+        "rich_text": DatabasePropertyText,
+        "number": DatabasePropertyNumber,
+        "select": DatabasePropertySelect,
+        "multi_select": DatabasePropertyMultiSelect,
+        "date": DatabasePropertyDate,
+        "people": DatabasePropertyPeople,
+        "files": DatabasePropertyFiles,
+        "checkbox": DatabasePropertyCheckbox,
+        "url": DatabasePropertyUrl,
+        "email": DatabasePropertyEmail,
+        "phone_number": DatabasePropertyPhoneNumber,
+        "formula": DatabasePropertyFormula,
+        "relation": DatabasePropertyRelation,
+        "rollup": DatabasePropertyRollup,
+        "created_by": DatabasePropertyCreatedBy,
+        "created_time": DatabasePropertyCreatedTime,
+        "last_edited_time": DatabasePropertyLastEditedTime,
+        "last_edited_by": DatabasePropertyLastEditedBy
+    }
+    
+    @staticmethod
+    def new(data):
+        data_type = data.get('type')
+        if data_type and data_type in DatabasePropertyFactory.__rel_map:
+            return from_dict(data_class=DatabasePropertyFactory.__rel_map[data_type], data=data)
         else:
-            if self.type == "date":
-                if self.value["end"]:
-                    return f'{self.value["start"]} -> {self.value["end"]}'
-                return self.value["start"]
-
-            elif self.type in ["title", "rich_text"]:
-                texts = [text["plain_text"] for text in self.value]
-                return ",".join(texts)
-
-            elif self.type == "select":
-                return self.value["name"]
-
-            elif self.type == "multi_select":
-                selections = [select["name"] for select in self.value]
-                return ", ".join(selections)
-
-            elif self.type in ["number", "url", "phone_number", "email", "checkbox"]:
-                return self.value
-
-            elif self.type == "people":
-                peoples = [
-                    people.get("name") for people in self.value if people.get("name")
-                ]
-                return ", ".join(peoples)
-
-    def insert(self, value):
-        if self.type == "date":
-            if isinstance(value, list) and len(value) == 2:
-                self.value["start"] = value[0]
-                self.value["end"] = value[1]
-            elif isinstance(value, str):
-                self.value["start"] = value
-                self.value["end"] = None
-            else:
-                raise TypeError(
-                    "Date must be a '2021-08-28' or ['2021-08-28', '2021-10-28']"
-                )
-
-        if self.type in ["title", "rich_text"]:
-            if isinstance(value, str):
-                del self.value[1:]
-                self.value[0]["plain_text"] = value
-                self.value[0]["text"]["content"] = value
-            else:
-                raise TypeError(f"{self.type} must be a string")
-
-        if self.type == "select":
-            if isinstance(value, str):
-                self.raw[self.type] = {"name": value}
-            else:
-                raise TypeError(f"{self.type} must be a string")
-
-        if self.type == "multi_select":
-            if isinstance(value, str):
-                self.raw[self.type].clear()
-                self.raw[self.type] = [{"name": value}]
-            elif isinstance(value, list):
-                self.raw[self.type].clear()
-                for elm in value:
-                    self.raw[self.type].append({"name": elm})
-            else:
-                raise TypeError(f"{self.type} must be a string or a list of string")
-
-        elif self.type == "number":
-            if isinstance(value, int):
-                self.raw[self.type] = value
-            else:
-                raise TypeError(f"{self.type} must be an integer")
-
-        elif self.type in ["url", "phone_number", "email"]:
-            if isinstance(value, str):
-                self.raw[self.type] = value
-            else:
-                raise TypeError(f"{self.type} must be a string or a list of string")
+            raise Exception(f'DatabaseProperty "{data_type}" not implemented yet.')
 
             
-"""
-BLOCK
-"""
-class Blocks:
+@dataclass
+class Database(__BaseDataClass):
+    title: List[RichText]
+    properties: object
+    parent: Parent
+    icon: Optional[Union[File, Emoji]] = None
+    cover: Optional[File] = None
+    created_time: str = None
+    last_edited_time: str = None
+    url: str = None
+    object: str = 'database'
+    id: str = None
     
-    def heading1(self, text):
-        return Heading1.create(text)
+    """
+    __post_init__ is called right after the object is created.
     
-    def heading2(self, text):
-        return Heading2.create(text)
+    We use it here to keep self.properties as a Dictionnary but we
+    want to convert values as Data Classes instances.
+    """
+    def __post_init__(self):
+        for k in self.properties:
+            self.properties[k] = DatabasePropertyFactory.new(self.properties[k])
     
-    def heading3(self, text):
-        return Heading3.create(text)
-    
-    def paragraph(self, text):
-        return Paragraph.create(text)
-    
-    def bulleted_list_item(self, text):
-        return BulletedList.create(text)
-    
-    def numbered_list_item(self, text):
-        return NumberedList.create(text)
-    
-    def to_do(self, text):
-        return ToDo.create(text)
-    
-    def child_page(self, text):
-        return ChildPage.create(text)
-    
-    def embed(self, url):
-        return Embed.create(url)
-
-        
-class BlockObject(ABC):
-    type = None
-
-    def __init__(self, dictionary: Dict) -> None:
-        self.object = dictionary.get("object")
-        self.id = dictionary.get("id")
-        self.type = dictionary.get("type")
-        self.created_time = dictionary.get("created_time")
-        self.last_edited_time = dictionary.get("last_edited_time")
-        self.has_children = dictionary.get("has_children")
-        self.value = dictionary.get(self.type)
-
-    def __repr__(self) -> str:
-        return self.get()
-
-    @abstractmethod
-    def get(self):
-        "Implemented in the subclass"
-
-    @abstractmethod
-    def set(self, value):
-        "Implemented in the subclass"
-
-    @abstractmethod
-    def create(self, value):
-        "Implemented in the subclass"
-
-    def update(self):
-        data = {self.type: self.value}
-        RequestBlock(self.headers, self.id).update(data)
-
-    def delete(self):
-        RequestBlock(self.headers, self.id).delete()
-
-
-class TextBLock(BlockObject):
-    type = None
-
-    def get(self):
-        content = [rich_text["plain_text"] for rich_text in self.value["text"]]
-        return " ".join(content)
-
-    def set(self, value: str):
-        del self.value["text"][1:]
-        self.value["text"][0]["text"]["content"] = value
-        self.value["text"][0]["plain_text"] = value
-
     @classmethod
-    def create(cls, text: str, link: str = None):
-        return {
-            "type": cls.type,
-            cls.type: {
-                "text": [{"type": "text", "text": {"content": text, "link": link}}]
-            },
-        }
-
-
-class Paragraph(TextBLock):
-    type = "paragraph"
-
-
-class Heading1(TextBLock):
-    type = "heading_1"
-
-
-class Heading2(TextBLock):
-    type = "heading_2"
-
-
-class Heading3(TextBLock):
-    type = "heading_3"
-
-
-class BulletedList(TextBLock):
-    type = "bulleted_list_item"
-
-
-class NumberedList(TextBLock):
-    type = "numbered_list_item"
-
-
-class ToDo(TextBLock):
-    type = "to_do"
-
-    @classmethod
-    def create(cls, text: str, checked: bool = False, link: str = None):
-        return {
-            "type": cls.type,
-            cls.type: {
-                "text": [
-                    {
-                        "type": "text",
-                        "text": {"content": text, "link": link},
-                    }
-                ],
-                "checked": checked,
-            },
-        }
-
-
-class Toggle(TextBLock):
-    type = "toggle"
-
-
-class ChildPage(BlockObject):
-    type = "child_page"
-
-    def get(self):
-        return self.value["title"]
-
-    def set(self, value):
-        self.value["title"] = value
-
-    @classmethod
-    def create(cls, title: str):
-        return {
-            "type": cls.type,
-            "properties": {"title": [{"text": {"content": title}}]},
-        }
-
-
-class Embed(BlockObject):
-    type = "embed"
-
-    def get(self):
-        return self.value["url"]
-
-    def set(self, value):
-        self.value["url"] = value
-
-    @staticmethod
-    def create(url: str):
-        return {"type": "embed", "embed": {"url": url}}
-
-
-mapping = {
-    "paragraph": Paragraph,
-    "heading_1": Heading1,
-    "heading_2": Heading2,
-    "heading_3": Heading3,
-    "bulleted_list_item": BulletedList,
-    "numbered_list_item": NumberedList,
-    "to_do": ToDo,
-    "toggle": Toggle,
-    "child_page": ChildPage,
-    "embed": Embed,
-}
-
-
-def extract_block(block_object):
-    block_type = block_object.get("type")
-    return mapping[block_type](block_object)
-
-
-def insert_block(block_object, value):
-    block_type = block_object.get("type")
-    return mapping[block_type](block_object).set(value)
-
-
-"""
-PAGE
-"""
-
-class PageProperties:
-    def __init__(self, properties: Dict, headers: Dict):
-        self.headers = headers
-
-        self.raw = properties
-        self._properties = properties["properties"]
-        self.parent_id = properties["id"]
-
-    def __getitem__(self, key):
-        return Property(self._properties[key]).extract()
-
-    def __setitem__(self, key, value):
-        Property(self._properties[key]).insert(value)
-
-    def __repr__(self) -> str:
-        return f"{self.get()}"
-
-    def get(self) -> pd.Series:
-        data = {key: self[key] for key in self._properties.keys()}
-        return pd.Series(data)
-
-    def update(self) -> None:
-        RequestPage(self.headers, self.parent_id).update(self.raw)
-
-
-class PageContent:
-    def __init__(self, blocks, page_id, headers) -> None:
-        self.raw = blocks
-        self.page_id = page_id
-        self.headers = headers
-
-    def __getitem__(self, index):
-        return extract_block(self.raw[index])
-
-    def __setitem__(self, index, value):
-        insert_block(self.raw[index], value)
-
-    def __repr__(self) -> str:
-        return f"{self.get()}"
-
-    def _repr_html_(self):
-        return self.get().to_html()
-
-    def get(self) -> pd.DataFrame:
-        result = []
-        for block in self.raw:
-            result.append(
-                {
-                    "type": block.get("type"),
-                    "content": extract_block(block),
-                    "id": block.get("id"),
-                }
-            )
-        return pd.DataFrame(result)
-
-    def append(self, block: Dict) -> None:
-        if block["type"] == "child_page":
-            block.pop("type")
-            block["parent"] = {"page_id": self.page_id}
-            RequestPage(self.headers).create(block)
+    def new(cls, title : str, page_id:str = None):
+        parent = None
+        if page_id:
+            parent = Parent.new_page_parent(page_id=page_id)
         else:
-            RequestBlock(self.headers, self.page_id).append_children(block)
-
-    # WORK IN PROGRESS
-    def update(self):
-        # TODO
-        pass
+            parent = Parent.new_workspace_parent()
+            
+        return cls(title=[RichText.new_text(content=title)], parent=parent, properties={})
     
-"""
-LOW CODE OBJECT
-"""
-
-class Database:
-    def __init__(self, headers) -> None: 
-        self.headers = headers
+    @classmethod
+    def from_dict(cls, data):
+        return from_dict(data_class=cls, data=data)
     
-    def get(self, database_url) -> None:
-        self.url = database_url
-        return self
-        # need to retreive the content of database
-
-    @property
-    def id(self):
-        path = self.url.split("/")[-1]
-        return path.split("?")[0]
-
-    def create_page(self):
+    def set_emoji_icon(self, data): # TODO: Fix, seems like there is an issue with notion-client / httpx maybe.
+        self.icon = Emoji(data)
+    
+    def add_property(self, col_name, type_name):
         data = {
-            "parent": {"database_id": self.id},
-            "properties": {"title": [{"text": {"content": "New page"}}]},
+            "type": type_name,
+            "name": col_name,
+            "id": ''
         }
-        raw_page = RequestPage(self.headers).create(data)
-        return Page(self.headers).get(raw_page["url"])
+        self.properties[col_name] = DatabasePropertyFactory.new(data)
+    
+    def query(self, query = {}):
+        return self.notion.databases.query(self.id, query)
+    
+    def update(self):
+        return self.notion.databases.update(self)
+       
+    def create(self):
+        return self.notion.databases.create(self)
 
+"""
+Page and Page properties
+"""
 
+@dataclass
+class PageProperty(Property):
+    pass
 
-class Page:
-    def __init__(self, headers) -> None:
-        self.headers = headers
+@dataclass
+class PagePropertyTitle(PageProperty):
+    title: Optional[List[RichText]]
         
-    def get(self, page_url: str):
-        self.url = page_url
-        self.id = page_url.split("-")[-1]
+    def set_text(self, content):
+        self.title = [RichText.new_text(content)]
 
-        self._properties = RequestPage(self.headers, self.id).retreive()
-        self.created_time = self._properties["created_time"]
-        self.last_edited_time = self._properties["last_edited_time"]
-        self.archived = self._properties["archived"]
-        self.icon = self._properties["icon"]
-        self.cover = self._properties["cover"]
-        self.properties = PageProperties(self._properties, self.headers)
-        self.parent = self._properties["parent"]
+@dataclass
+class PagePropertyText(PageProperty):
+    rich_text: Optional[List[RichText]]
 
-        self._content = RequestBlock(self.headers, self.id).retreive_children()
-        self.content = PageContent(self._content, self.id, self.headers)
-        return self
+@dataclass
+class PagePropertyNumber(PageProperty):
+    number: Optional[Number]
 
-    def refresh(self):
-        """Retreive Page properties & content."""
-        refresh_page = self.__init__(self.url)
-        return refresh_page
+@dataclass
+class PagePropertySelect_Value:
+    name: str
+    id : str = None
+    color: str = 'default'
+    
+@dataclass
+class PagePropertySelect(PageProperty):
+    select: Optional[PagePropertySelect_Value] = field(default_factory=PagePropertySelect_Value)
 
-    # WORK IN PROGRESS
+@dataclass
+class PagePropertyMultiSelect(PageProperty):
+    multi_select: Optional[List[PagePropertySelect_Value]] = field(default_factory=list) # TODO: Create own Value type.
+
+@dataclass
+class PagePropertyDate_Value:
+    start: str
+    end: Optional[str]
+        
+@dataclass
+class PagePropertyDate(PageProperty):
+    date: Optional[PagePropertyDate_Value] = field(default_factory=PagePropertyDate_Value)
+
+@dataclass
+class PagePropertyFormula(PageProperty):
+    type: str
+    string: Optional[str]
+    number: Optional[Number]
+    boolean: Optional[bool]
+    date: Optional[PagePropertyDate_Value]
+
+@dataclass
+class PagePropertyRelation(PageProperty):
+    relation : List[object] = field(default_factory=list)
+
+@dataclass
+class PagePropertyRollup(PageProperty):
+    type: str
+    number: Optional[Number]
+    date: Optional[PagePropertyDate_Value]
+    array: Optional[List[object]]
+
+@dataclass
+class PagePropertyPeople(PageProperty):
+    people: Optional[List[User]]
+    
+@dataclass
+class PagePropertyFiles(PageProperty):
+    files: Optional[List[File]]
+
+@dataclass
+class PagePropertyCheckbox(PageProperty):
+    checkbox: bool
+
+@dataclass
+class PagePropertyUrl(PageProperty):
+    url: Optional[str]
+
+@dataclass
+class PagePropertyEmail(PageProperty):
+    email: Optional[str]
+
+@dataclass
+class PagePropertyPhoneNumber(PageProperty):
+    phone_number: Optional[str]
+         
+@dataclass
+class PagePropertyCreatedBy(PageProperty):
+    created_by: User
+            
+@dataclass
+class PagePropertyCreatedTime(PageProperty):
+    created_time: str
+
+@dataclass
+class PagePropertyLastEditedTime(PageProperty):
+    last_edited_time: str
+
+@dataclass
+class PagePropertyLastEditedBy(PageProperty):
+    last_edited_by: User
+        
+class PagePropertyFactory():
+    """
+    This class is a helper to create the proper PageProperty type automaticaly.
+    """
+    __rel_map = {
+        "title": PagePropertyTitle,
+        "rich_text": PagePropertyText,
+        "number": PagePropertyNumber,
+        "select": PagePropertySelect,
+        "multi_select": PagePropertyMultiSelect,
+        "date": PagePropertyDate,
+        "people": PagePropertyPeople,
+        "files": PagePropertyFiles,
+        "checkbox": PagePropertyCheckbox,
+        "url": PagePropertyUrl,
+        "email": PagePropertyEmail,
+        "phone_number": PagePropertyPhoneNumber,
+        "formula": PagePropertyFormula,
+        "relation": PagePropertyRelation,
+        "rollup": PagePropertyRollup,
+        "created_by": PagePropertyCreatedBy,
+        "created_time": PagePropertyCreatedTime,
+        "last_edited_time": PagePropertyLastEditedTime,
+        "last_edited_by": PagePropertyLastEditedBy
+    }
+    
+    @staticmethod
+    def new(data):
+        data_type = data.get('type')
+        if data_type and data_type in PagePropertyFactory.__rel_map:
+            return from_dict(data_class=PagePropertyFactory.__rel_map[data_type], data=data)
+        else:
+            raise Exception(f'PageProperty "{data_type}" not implemented yet.')
+
+
+@dataclass
+class Page(__BaseDataClass):
+    properties: object
+    parent: Parent
+    blocks : Optional[List['Block']] = None
+    archived : bool = False
+    icon: Optional[Union[File, Emoji]] = None
+    cover: Optional[File] = None
+    created_time: str = None
+    last_edited_time: str = None
+    url: str = None
+    object: str = 'page'
+    id: str = None
+
+    """
+    __post_init__ is called right after the object is created.
+    
+    We use it here to keep self.properties as a Dictionnary but we
+    want to convert values as Data Classes instances.
+    """
+    def __post_init__(self):
+        for k in self.properties:
+            self.properties[k] = PagePropertyFactory.new(self.properties[k])
+        self.refresh_blocks()
+    
+    def refresh_blocks(self):
+        self.blocks = self.notion.blocks.children(self.id)
+
+    @classmethod
+    def new(cls, page_id:str = None, database_id : str = None):
+        parent = None
+        if page_id:
+            parent = Parent.new_page_parent(page_id=page_id)
+        elif database_id:
+            parent = Parent.new_database_parent(database_id=database_id)
+        else:
+            parent = Parent.new_workspace_parent()
+        #  For some reasons, not explained in Notion API Documentation, when creating a new page
+        # the property 'type' of a Parent object must be omitted.
+        parent.type = None
+            
+        return cls(parent=parent, properties={})
+    
+    def add_block(self, block_type:str):
+        new_block = Block.new(type=block_type)
+        new_block = new_block.append_to(page_id=self.id)
+        self.refresh_blocks()
+        return new_block
+        
+    
+    def update(self):
+        return self.notion.pages.update(self)
+    
+    def create(self):
+        return self.notion.pages.create(self)
+
+    
+"""
+Block and Blocks properties.
+"""
+
+@dataclass
+class Block(__BaseDataClass):
+    type : str
+    paragraph: Optional['BlockParagraph'] = None
+    heading_1: Optional['BlockHeadingOne'] = None
+    heading_2: Optional['BlockHeadingTwo'] = None
+    heading_3: Optional['BlockHeadingThree'] = None
+    callout: Optional['BlockCallout'] = None
+    quote: Optional['BlockQuote'] = None
+    bulleted_list_item: Optional['BlockBulletedListItem'] = None
+    numbered_list_item: Optional['BlockNumberedListItem'] = None
+    to_do: Optional['BlockToDo'] = None
+    toggle: Optional['BlockToggle'] = None
+    code: Optional['BlockCode'] = None
+    child_page: Optional['BlockChildPage'] = None
+    child_database: Optional['BlockChildDatabase'] = None
+    embed: Optional['BlockEmbed'] = None
+    image: Optional['BlockImage'] = None
+    video: Optional['BlockVideo'] = None
+    file: Optional['BlockFile'] = None
+    pdf: Optional['BlockPdf'] = None
+    bookmark: Optional['BlockBookmark'] = None
+    equation: Optional['BlockEquation'] = None
+    divider: Optional['BlockDivider'] = None
+    table_of_contents: Optional['BlockTableOfContents'] = None
+    has_children : bool = False
+    archived : bool = False
+    created_time: str = None
+    last_edited_time: str = None
+    object: str = 'block'
+    id: str = None
+    
+    @classmethod
+    def new(cls, type: str):
+        return from_dict(data_class=cls, data={"type": type, type: {}})
+    
+    # TODO: To delete
+    #def __post_init__(self):
+     #   setattr(self, self.type, BlockTypeFactory.new(self))
+
+    def append_to(self, page_id):
+        return self.notion.blocks.append(page_id, self)
+        
+    def update(self):
+        return self.notion.blocks.update(self)
+
     def delete(self):
-        """Archiving workspace level pages via API not supported."""
-        RequestBlock(self.headers, self.id).delete()
-  
+        return self.notion.blocks.delete(self.id)
+        
+@dataclass
+class BlockParagraph(__BaseDataClass):
+    children: Optional[List[Block]]
+    text: List[RichText] = field(default_factory=list)
+    
+    def add(self, content):
+        self.text.append(RichText.new_text(content=content))
+
+@dataclass
+class BlockHeadingOne(__BaseDataClass):
+    text: List[RichText] = field(default_factory=list)
+
+@dataclass
+class BlockHeadingTwo(__BaseDataClass):
+    text: List[RichText] = field(default_factory=list)
+
+@dataclass
+class BlockHeadingThree(__BaseDataClass):
+    text: List[RichText] = field(default_factory=list)
+
+@dataclass
+class BlockCallout(__BaseDataClass):
+    icon: Optional[Union[File, Emoji]]
+    children: Optional[List[Block]]
+    text: List[RichText] = field(default_factory=list)
+
+
+@dataclass
+class BlockQuote(__BaseDataClass):
+    children: Optional[List[Block]]
+    text: List[RichText] = field(default_factory=list)
+
+
+@dataclass
+class BlockBulletedListItem(__BaseDataClass):
+    children: Optional[List[Block]]
+    text: List[RichText] = field(default_factory=list)
+
+@dataclass
+class BlockNumberedListItem(__BaseDataClass):
+    children: Optional[List[Block]]
+    text: List[RichText] = field(default_factory=list)
+
+@dataclass
+class BlockToDo(__BaseDataClass):
+    checked : Optional[bool]
+    children: Optional[List[Block]]
+    text: List[RichText] = field(default_factory=list)
+
+
+@dataclass
+class BlockToggle(__BaseDataClass):
+    children: Optional[List[Block]]
+    text: List[RichText] = field(default_factory=list)
+
+@dataclass
+class BlockCode(__BaseDataClass):
+    language: Optional[str]
+    text: List[RichText] = field(default_factory=list)
+
+@dataclass
+class BlockChildPage(__BaseDataClass):
+    title: Optional[str]
+        
+@dataclass
+class BlockChildDatabase(__BaseDataClass):
+    title: Optional[str]
+
+@dataclass
+class BlockEmbed(__BaseDataClass):
+    url: Optional[str]
+
+@dataclass
+class BlockImage(__BaseDataClass):
+    image: Optional[File]
+
+@dataclass
+class BlockVideo(__BaseDataClass):
+    video: Optional[File]
+
+@dataclass
+class BlockFile(__BaseDataClass):
+    video: Optional[File]
+
+@dataclass
+class BlockPdf(__BaseDataClass):
+    video: Optional[File]
+        
+@dataclass
+class BlockBookmark(__BaseDataClass):
+    caption: List[RichText]
+    url: str = ''
+
+@dataclass
+class BlockEquation(__BaseDataClass):
+    expression: str = ''
+
+@dataclass
+class BlockDivider(__BaseDataClass):
+    divider: object = field(default_factory=dict)
+        
+@dataclass
+class BlockTableOfContents(__BaseDataClass):
+    table_of_contents: object = field(default_factory=dict)
+
+class BlockTypes(Enum):
+    paragraph = "paragraph"
+    heading_1 = "heading_1"
+    heading_2 = "heading_2"
+    heading_3 = "heading_3"
+    callout = "callout"
+    quote = "quote"
+    bulleted_list_item = "bulleted_list_item"
+    numbered_list_item = "numbered_list_item"
+    to_do = "to_do"
+    toggle = "toggle"
+    code = "code"
+    child_page = "child_page"
+    child_database = "child_database"
+    embed = "embed"
+    image = "image"
+    video = "video"
+    file = "file"
+    pdf = "pdf"
+    bookmark = "bookmark"
+    equation = "equation"
+    divider = "divider"
+    table_of_contents = "table_of_contents"
+    unsupported = "unsupported"
+        
+# TODO: To delete, never used
+class BlockTypeFactory:
+    """
+    This class is a helper to create the proper BlockType automaticaly.
+    """
+    
+    __rel_map = {
+        "paragraph": BlockParagraph,
+        "heading_1": BlockHeadingOne,
+        "heading_2": BlockHeadingTwo,
+        "heading_3": BlockHeadingThree,
+        "callout": BlockCallout, # Seems to be missing documentation as of 21/10/17
+        "quote": BlockQuote, # Seems to be missing documentation as of 21/10/17
+        "bulleted_list_item": BlockBulletedListItem,
+        "numbered_list_item": BlockNumberedListItem,
+        "to_do": BlockToDo,
+        "toggle": BlockToggle,
+        "code": BlockCode, # Seems to be missing documentation as of 21/10/17
+        "child_page": BlockChildPage,
+        "child_database": BlockChildDatabase,
+        "embed": BlockEmbed,
+        "image": BlockImage,
+        #"video": BlockVideo,
+        "video": File,
+        "file": BlockFile,
+        "pdf": BlockPdf,
+        "bookmark": BlockBookmark,
+        "equation": BlockEquation, # Seems to be missing documentation as of 21/10/17
+        "divider": BlockDivider, # Seems to be missing documentation as of 21/10/17
+        "table_of_contents": BlockTableOfContents, # Seems to be missing documentation as of 21/10/17
+       # "unsupported": BlockUnsupported
+    }
+    
+    @staticmethod
+    def new(data):
+        data_type = getattr(data, 'type')
+        if data_type and data_type in BlockTypeFactory.__rel_map:
+            return from_dict(data_class=BlockTypeFactory.__rel_map[data_type], data=getattr(data, data_type))
+        else:
+            raise Exception(f'BlockType "{data_type}" not implemented yet.')     
+
+"""Dataclass json encoder"""
+class EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        return super().default(o)
+
+def del_none(d):
+    """
+    Delete keys with the value ``None`` in a dictionary, recursively.
+
+    This alters the input so you may wish to ``copy`` the dict first.
+    """
+    # For Python 3, write `list(d.items())`; `d.items()` won’t work
+    # For Python 2, write `d.items()`; `d.iteritems()` won’t work
+    if type(d) is dict:
+        for key, value in list(d.items()):
+            if value is None:
+                del d[key]
+            elif isinstance(value, dict) or isinstance(value, list):
+                del_none(value)
+    elif type(d) is list:
+        for e in d:
+            del_none(e)
+    return d  # For convenience
