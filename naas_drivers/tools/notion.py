@@ -117,7 +117,6 @@ class Notion(InDriver, OutDriver):
                     filtered_properties[p] = prop
             copied.properties = filtered_properties
             payload = self.parent.to_dict(copied)
-            print(copied.properties)
             return self.__from_dict(self.client.pages.update(page_id=copied.id, **payload))
     
     class Blocks(__InnerBase):
@@ -208,8 +207,8 @@ class Parent(__BaseDataClass):
     
 @dataclass
 class Link(__BaseDataClass):
-    type: str
     url: str
+    type: str = 'url'
 
 @dataclass
 class Text(__BaseDataClass):
