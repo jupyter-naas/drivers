@@ -8,6 +8,7 @@ from numbers import Number
 from enum import Enum
 import json
 import logging
+from copy import deepcopy
 
 VERSION = "2021-08-16"
 
@@ -107,9 +108,17 @@ class Notion(InDriver, OutDriver):
             page = self.client.pages.retrieve(page_id=page_id)
             return self.__from_dict(page)
 
-        def update(self, page):
-            payload = self.parent.to_dict(page)
-            return self.__from_dict(self.client.pages.update(page_id=page.id, **payload))
+        def update(self, page): #  TODO: Improve readability.
+            copied = deepcopy(page)
+            filtered_properties = {}
+            for p in copied.properties:
+                prop = copied.properties[p]
+                if prop.type not in ['last_edited_by', 'last_edited_time', 'created_by', 'created_time'] and getattr(prop, prop.type) != None:
+                    filtered_properties[p] = prop
+            copied.properties = filtered_properties
+            payload = self.parent.to_dict(copied)
+            print(copied.properties)
+            return self.__from_dict(self.client.pages.update(page_id=copied.id, **payload))
     
     class Blocks(__InnerBase):
         
@@ -130,7 +139,11 @@ class Notion(InDriver, OutDriver):
             if type(blocks) != list:
                 blocks = [blocks]
             payload = self.parent.to_dict(blocks)
-            return self.__from_dict(self.client.blocks.children.append(block_id=block_id, children=payload))
+            print(payload)
+            ret = []
+            for b in self.client.blocks.children.append(block_id=block_id, children=payload).get('results'):
+                ret.append(self.__from_dict(b))
+            return ret
         
         def update(self, block):
             payload = self.parent.to_dict(block)
@@ -158,15 +171,15 @@ class __BaseDataClass:
         return Notion.instance()
 @dataclass
 class FileExternal:
-    url: Optional[str]
+    url: Optional[str] = ''
     
 @dataclass
 class File(__BaseDataClass):
-    type: str
     url: Optional[str]
     expiry_time: Optional[str]
     name: Optional[str]
-    external: Optional[FileExternal]
+    external: Optional[FileExternal] = field(default_factory=FileExternal)
+    type: str = 'external'
 
 @dataclass
 class Emoji(__BaseDataClass):
@@ -642,10 +655,11 @@ class Page(__BaseDataClass):
     def __post_init__(self):
         for k in self.properties:
             self.properties[k] = PagePropertyFactory.new(self.properties[k])
-        self.refresh_blocks()
+        #self.get_blocks()
     
-    def refresh_blocks(self):
+    def get_blocks(self):
         self.blocks = self.notion.blocks.children(self.id)
+        return self.blocks
 
     @classmethod
     def new(cls, page_id:str = None, database_id : str = None):
@@ -665,7 +679,7 @@ class Page(__BaseDataClass):
     def add_block(self, block_type:str):
         new_block = Block.new(type=block_type)
         new_block = new_block.append_to(page_id=self.id)
-        self.refresh_blocks()
+        self.get_blocks()
         return new_block
         
     
@@ -697,14 +711,14 @@ class Block(__BaseDataClass):
     child_page: Optional['BlockChildPage'] = None
     child_database: Optional['BlockChildDatabase'] = None
     embed: Optional['BlockEmbed'] = None
-    image: Optional['BlockImage'] = None
-    video: Optional['BlockVideo'] = None
-    file: Optional['BlockFile'] = None
-    pdf: Optional['BlockPdf'] = None
+    image: Optional['File'] = None
+    video: Optional['File'] = None
+    file: Optional['File'] = None
+    pdf: Optional['File'] = None
     bookmark: Optional['BlockBookmark'] = None
     equation: Optional['BlockEquation'] = None
-    divider: Optional['BlockDivider'] = None
-    table_of_contents: Optional['BlockTableOfContents'] = None
+    divider: Optional[dict] = None
+    table_of_contents: Optional[dict] = None
     has_children : bool = False
     archived : bool = False
     created_time: str = None
@@ -786,40 +800,40 @@ class BlockToggle(__BaseDataClass):
 
 @dataclass
 class BlockCode(__BaseDataClass):
-    language: Optional[str]
+    language: Optional[str] = 'plain text'
     text: List[RichText] = field(default_factory=list)
 
 @dataclass
 class BlockChildPage(__BaseDataClass):
-    title: Optional[str]
+    title: Optional[str] = 'New page'
         
 @dataclass
 class BlockChildDatabase(__BaseDataClass):
-    title: Optional[str]
+    title: Optional[str] = ''
 
 @dataclass
 class BlockEmbed(__BaseDataClass):
-    url: Optional[str]
+    url: Optional[str] = ''
 
 @dataclass
 class BlockImage(__BaseDataClass):
-    image: Optional[File]
+    image: Optional[File] = field(default_factory=File)
 
 @dataclass
 class BlockVideo(__BaseDataClass):
-    video: Optional[File]
+    video: Optional[File] = field(default_factory=File)
 
 @dataclass
 class BlockFile(__BaseDataClass):
-    video: Optional[File]
+    file: Optional[File] = field(default_factory=File)
 
 @dataclass
 class BlockPdf(__BaseDataClass):
-    video: Optional[File]
+    pdf: Optional[File] = field(default_factory=File)
         
 @dataclass
 class BlockBookmark(__BaseDataClass):
-    caption: List[RichText]
+    caption: List[RichText] = field(default_factory=list)
     url: str = ''
 
 @dataclass
@@ -880,15 +894,15 @@ class BlockTypeFactory:
         "child_page": BlockChildPage,
         "child_database": BlockChildDatabase,
         "embed": BlockEmbed,
-        "image": BlockImage,
+        "image": File,
         #"video": BlockVideo,
         "video": File,
-        "file": BlockFile,
-        "pdf": BlockPdf,
+        "file": File,
+        "pdf": File,
         "bookmark": BlockBookmark,
         "equation": BlockEquation, # Seems to be missing documentation as of 21/10/17
-        "divider": BlockDivider, # Seems to be missing documentation as of 21/10/17
-        "table_of_contents": BlockTableOfContents, # Seems to be missing documentation as of 21/10/17
+        "divider": dict, # Seems to be missing documentation as of 21/10/17
+        "table_of_contents": dict, # Seems to be missing documentation as of 21/10/17
        # "unsupported": BlockUnsupported
     }
     
