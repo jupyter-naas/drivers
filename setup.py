@@ -88,6 +88,8 @@ setup(
         "streamlit==0.82.0",
         "transformers==4.6.1",
         "pyngrok==5.0.5",
+        "dacite==1.6.0",
+        "notion-client==0.7.1"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
