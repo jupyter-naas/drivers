@@ -620,6 +620,15 @@ class Database(__BaseDataClass):
     def set_emoji_icon(self, data): # TODO: Fix, seems like there is an issue with notion-client / httpx maybe.
         self.icon = Emoji(data)
     
+    def duplicate(self):
+        new_db = self.create()
+        pages = self.query()
+        for page in pages:
+            page.parent.database_id = new_db.id
+            page.duplicate()
+        
+        return new_db
+    
     def add_property(self, col_name, type_name):
         data = {
             "type": type_name,
