@@ -9,6 +9,8 @@ from enum import Enum
 import json
 import logging
 from copy import deepcopy
+import pandas as pd
+import threading
 
 VERSION = "2021-08-16"
 
@@ -173,7 +175,8 @@ class Notion(InDriver, OutDriver):
 
         def children(self, block_id: str):
             ret = []
-            for r in self.client.blocks.children.list(block_id=block_id).get("results"):
+            blocks = self.client.blocks.children.list(block_id=block_id).get('results')
+            for r in blocks:
                 ret.append(self.__from_dict(r))
             return ret
 
@@ -382,6 +385,10 @@ class Equation(__BaseDataClass):
     def new(cls, expression: str) -> "Equation":
         return from_dict(data_class=cls, expression=expression)
 
+@dataclass
+class UserMention(__BaseDataClass):
+    type: str
+    user: User
 
 @dataclass
 class RichText(__BaseDataClass):
@@ -390,7 +397,7 @@ class RichText(__BaseDataClass):
     annotations: Annotation = field(default_factory=Annotation)
     type: str = "text"
     text: Optional[Text] = None
-    user: Optional[User] = None
+    mention: Optional[UserMention] = None
     page: Optional[object] = None
     database: Optional[object] = None
     date: Optional[Date] = None
@@ -403,8 +410,7 @@ class RichText(__BaseDataClass):
     @classmethod
     def new_text(cls, content):
         return cls(plain_text=content, text=Text(content=content))
-
-
+    
 """
 Database and Database properties
 
@@ -671,11 +677,11 @@ class Database(__BaseDataClass):
             parent = Parent.new_page_parent(page_id=page_id)
         else:
             parent = Parent.new_workspace_parent()
-
-        return cls(
-            title=[RichText.new_text(content=title)], parent=parent, properties={}
-        )
-
+            
+        new_db = cls(title=[RichText.new(title)], parent=parent, properties={})
+        new_db.add_property('Name', 'title')
+        return new_db
+    
     @classmethod
     def from_dict(cls, data):
         return from_dict(data_class=cls, data=data)
@@ -684,12 +690,33 @@ class Database(__BaseDataClass):
         self, data
     ):  # TODO: Fix, seems like there is an issue with notion-client / httpx maybe.
         self.icon = Emoji(data)
-
+    
+    def duplicate(self):
+        new_db = self.create()
+        pages = self.query()
+        for page in pages:
+            page.parent.database_id = new_db.id
+            page.duplicate()
+        
+        return new_db
+    
     def add_property(self, col_name, type_name):
         data = {"type": type_name, "name": col_name, "id": ""}
         self.properties[col_name] = DatabasePropertyFactory.new(data)
-
-    def query(self, query={}):
+    
+    def df(self):
+        pages = self.query()
+        frames = []
+        
+        for page in pages:
+            frame = {}
+            for prop in page.properties:
+                frame[prop] = str(page.properties[prop])
+            frames.append(frame)
+        
+        return pd.DataFrame(frames)
+    
+    def query(self, query = {}):
         return self.notion.databases.query(self.id, query)
 
     def update(self):
@@ -720,6 +747,9 @@ class PagePropertyTitle(PageProperty):
 
     def set_text(self, content: str):
         self.title = [RichText.new_text(content)]
+    
+    def __str__(self):
+        return ' '.join([v.plain_text for v in self.title])
 
 
 @dataclass
@@ -730,8 +760,10 @@ class PagePropertyText(PageProperty):
     @classmethod
     def new(cls, content: str) -> "PagePropertyText":
         return cls(rich_text=[RichText.new(content)])
-
-
+    
+    def __str__(self):
+        return ' '.join([v.plain_text for v in self.rich_text])
+    
 @dataclass
 class PagePropertyNumber(PageProperty):
     number: Optional[Number] = None
@@ -740,8 +772,11 @@ class PagePropertyNumber(PageProperty):
     @classmethod
     def new(cls, number: Number) -> "PagePropertyNumber":
         return cls(number=number)
-
-
+    
+    def __str__(self):
+        return str(self.number)
+    
+    
 @dataclass
 class PagePropertySelect_Value:
     name: str
@@ -763,8 +798,10 @@ class PagePropertySelect(PageProperty):
     @classmethod
     def new(cls, select: str, color: str = "default") -> "PagePropertySelect":
         return cls(select=PagePropertySelect_Value.new(name=select, color=color))
-
-
+    
+    def __str__(self):
+        return str(self.select.name) if self.select else ''
+    
 @dataclass
 class PagePropertyMultiSelect(PageProperty):
     multi_select: Optional[List[PagePropertySelect_Value]] = field(
@@ -773,14 +810,12 @@ class PagePropertyMultiSelect(PageProperty):
     type: str = "multi_select"
 
     @classmethod
-    def new(
-        cls, values: List[str], color: str = "default"
-    ) -> "PagePropertyMultiSelect":
-        return cls(
-            multi_select=[PagePropertySelect_Value.new(v, color) for v in values]
-        )
+    def new(cls, values:List[str], color:str = 'default') -> 'PagePropertyMultiSelect':
+        return cls(multi_select=[PagePropertySelect_Value.new(v, color) for v in values])
 
-
+    def __str__(self):
+        return ', '.join([v.name for v in self.multi_select])
+        
 @dataclass
 class PagePropertyDate_Value:
     start: str = None
@@ -802,7 +837,9 @@ class PagePropertyDate(PageProperty):
     def new(cls, date: str) -> "PagePropertyDate":
         return cls(date=PagePropertyDate_Value.new(date))
 
-
+    def __str__(self):
+        return str(self.date.start) if self.date else ''
+    
 @dataclass
 class PagePropertyFormula(PageProperty):
     string: Optional[str] = None
@@ -816,6 +853,8 @@ class PagePropertyFormula(PageProperty):
     # TODO: classmethod new
 
 
+    #TODO: classmethod new
+    
 @dataclass
 class PagePropertyRelation(PageProperty):
     relation: List[object] = field(default_factory=list)
@@ -844,8 +883,10 @@ class PagePropertyPeople(PageProperty):
     @classmethod
     def new(cls, people: List[str]) -> "PagePropertyPeople":
         return cls(people=[User.new(v) for v in people])
-
-
+    
+    def __str__(self):
+        return ' '.join([v.name for v in self.people])
+    
 @dataclass
 class PagePropertyFiles(PageProperty):
     files: Optional[List[File]] = field(default_factory=list)
@@ -854,8 +895,10 @@ class PagePropertyFiles(PageProperty):
     @classmethod
     def new(cls, files: List[str]) -> "PagePropertyFiles":
         return cls(files=[File.new(v) for v in files])
-
-
+    
+    def __str__(self):
+        return ', '.join([v.name for v in self.files])
+    
 @dataclass
 class PagePropertyCheckbox(PageProperty):
     checkbox: bool = None
@@ -865,7 +908,9 @@ class PagePropertyCheckbox(PageProperty):
     def new(cls, checkbox: bool) -> "PagePropertyCheckbox":
         return cls(checkbox=checkbox)
 
-
+    def __str__(self):
+        return str(self.checkbox)
+    
 @dataclass
 class PagePropertyUrl(PageProperty):
     url: Optional[str] = None
@@ -874,8 +919,10 @@ class PagePropertyUrl(PageProperty):
     @classmethod
     def new(cls, url: str) -> "PagePropertyUrl":
         return cls(url=url)
-
-
+        
+    def __str__(self):
+        return str(self.url)
+    
 @dataclass
 class PagePropertyEmail(PageProperty):
     email: Optional[str] = None
@@ -884,8 +931,10 @@ class PagePropertyEmail(PageProperty):
     @classmethod
     def new(cls, email: str) -> "PagePropertyEmail":
         return cls(email=email)
-
-
+    
+    def __str__(self):
+        return str(self.email)
+    
 @dataclass
 class PagePropertyPhoneNumber(PageProperty):
     phone_number: Optional[str] = None
@@ -895,6 +944,8 @@ class PagePropertyPhoneNumber(PageProperty):
     def new(cls, phone_number: str) -> "PagePropertyPhoneNumber":
         return cls(phone_number=phone_number)
 
+    def __str__(self):
+        return str(self.phone_number)
 
 @dataclass
 class PagePropertyCreatedBy(PageProperty):
@@ -902,17 +953,25 @@ class PagePropertyCreatedBy(PageProperty):
     type: str = "created_by"
 
 
+    def __str__(self):
+        return str(self.created_by.name) if self.created_by else ''
+        
 @dataclass
 class PagePropertyCreatedTime(PageProperty):
     created_time: str = None
     type: str = "created_time"
 
 
+    def __str__(self):
+        return str(self.created_time)
+
 @dataclass
 class PagePropertyLastEditedTime(PageProperty):
     last_edited_time: str = None
-    type: str = "last_edited_time"
-
+    type:str = 'last_edited_time'
+        
+    def __str__(self):
+        return str(self.last_edited_time)
 
 @dataclass
 class PagePropertyLastEditedBy(PageProperty):
@@ -920,7 +979,10 @@ class PagePropertyLastEditedBy(PageProperty):
     type: str = "last_edited_by"
 
 
-class PagePropertyFactory:
+    def __str__(self):
+        return str(self.last_edited_by.name) if self.last_edited_by else ''
+        
+class PagePropertyFactory():
     """
     This class is a helper to create the proper PageProperty type automaticaly.
     """
@@ -994,6 +1056,50 @@ class Page(__BaseDataClass):
         self.blocks = self.notion.blocks.children(self.id)
         return self.blocks
 
+    def duplicate(self):
+        page = deepcopy(self)
+        page.id = None
+        page.parent.type = None
+        
+        to_delete = []
+        for col_name in page.properties:
+            prop = page.properties[col_name]
+            if prop.type in ['last_edited_time', 'created_time', 'created_by', 'last_edited_by']:
+                to_delete.append(col_name)
+            elif getattr(prop, prop.type) is None:
+                to_delete.append(col_name)
+        
+        for col_name in to_delete:
+            del page.properties[col_name]
+        
+        block_tree = BlockTree(self.notion.blocks.get(self.id))
+        new_page = page.create()
+        block_tree.duplicate(new_page.id)
+        
+        return new_page
+        
+    
+    def df(self, pivot=False):
+        copied = deepcopy(self.properties)
+        if pivot is False:
+            d = []
+            for i in copied:
+                p = copied[i]
+
+                d.append({
+                    "Name": i,
+                    "Type": p.type,
+                    "Value": str(p)
+                })
+            return pd.DataFrame(self.notion.to_dict(d))
+        else:
+            frame = {}
+            for i in copied:
+                p = copied[i]
+                frame[i] = str(p)
+            return pd.DataFrame(self.notion.to_dict([frame]))
+            
+    
     @classmethod
     def new(cls, page_id: str = None, database_id: str = None):
         parent = None
@@ -1148,9 +1254,11 @@ class Page(__BaseDataClass):
         return self.__generic_block_setter("divider", *k)
 
     def table_of_contents(self, *k):
-        return self.__generic_block_setter("table_of_contents", *k)
-
-
+        return self.__generic_block_setter('table_of_contents', *k)
+    
+    def child_database(self, *k):
+        return self.__generic_block_setter('child_database', *k)
+    
 """
 Block and Blocks properties.
 """
@@ -1194,6 +1302,10 @@ class Block(__BaseDataClass):
             return from_dict(data_class=cls, data={"type": type, type: prop})
         return from_dict(data_class=cls, data={"type": type, type: {}})
 
+   # def __post_init__(self):
+   #     if self.has_children is True:
+   #         self.children = self.notion.blocks.children(block_id=self.id)
+    
     # TODO: To delete
     # def __post_init__(self):
     #   setattr(self, self.type, BlockTypeFactory.new(self))
@@ -1327,8 +1439,11 @@ class BlockChildPage(__BaseDataClass):
 
 @dataclass
 class BlockChildDatabase(__BaseDataClass):
-    title: Optional[str] = ""
-
+    title: Optional[str] = ''
+        
+    @classmethod
+    def new(cls, title:str) -> 'BlockChildDatabase':
+        return cls(title=title)
 
 @dataclass
 class BlockEmbed(__BaseDataClass):
@@ -1515,3 +1630,52 @@ def del_none(d):
         for e in d:
             del_none(e)
     return d  # For convenience
+
+class BlockTree:
+    block : Block = None
+    children : List['BlockTree'] = None
+    
+    def __init__(self, block : Block):
+        self.block = block
+        if self.block.has_children is True:
+            self.children = []
+            blocks = Notion.instance().blocks.children(self.block.id)
+            for b in blocks:
+                self.children.append(BlockTree(b))
+    
+    def copy(self):
+        copied_block = deepcopy(self.block)
+        copied_block.id = None
+        copied_block.created_time = None
+        copied_block.last_edited_time = None
+        return copied_block
+
+    
+    def duplicate_children(self, parent_id):
+        if self.children is not None:
+            to_append = []
+            for child in self.children:
+                to_append.append(child.copy())
+            new_blocks = Notion.instance().block.append(parent_id, to_append)
+            count = 0
+            for child in self.children:
+                child.duplicate_children(new_blocks[count].id)
+                count = count + 1         
+    
+    def duplicate(self, parent_id):
+        if self.children is not None:
+            to_append = []
+            for child in self.children:
+                to_append.append(child.copy())
+            new_blocks = Notion.instance().block.append(parent_id, to_append)
+            
+            threads = []
+            count = 0
+            for child in self.children:
+                x = threading.Thread(target=child.duplicate_children, args=(new_blocks[count].id,))
+                threads.append(x)
+                x.start()
+                count = count + 1
+                
+            for t in threads:
+                t.join()  
