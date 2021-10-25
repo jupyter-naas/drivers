@@ -974,6 +974,8 @@ class Page(__BaseDataClass):
         new_page = page.create()
         block_tree.duplicate(new_page.id)
         
+        return new_page
+        
     
     def df(self, pivot=False):
         copied = deepcopy(self.properties)
