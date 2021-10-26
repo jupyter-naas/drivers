@@ -1,3 +1,9 @@
+## 0.74.2 (2021-10-26)
+
+### Fix
+
+- **Notion**: Do not handle "files" as database/page icon for now. (#185)
+
 ## 0.74.1 (2021-10-25)
 
 ### Fix

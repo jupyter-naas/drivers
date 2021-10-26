@@ -39,7 +39,7 @@ from naas_drivers.tools.naas_credits import NaasCredits
 import requests
 import os
 
-__version__ = "0.74.1"
+__version__ = "0.74.2"
 
 __github_repo = "jupyter-naas/drivers"
 
