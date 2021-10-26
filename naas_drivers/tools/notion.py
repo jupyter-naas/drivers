@@ -17,6 +17,18 @@ VERSION = "2021-08-16"
 global notion_instance
 
 
+def ensure_page_id(page_id):
+    if "http" in page_id:
+        page_id = page_id.split("/")[-1].split("-")[-1]
+    return page_id
+
+
+def ensure_database_id(database_id):
+    if "http" in database_id:
+        database_id = database_id.split("/")[-1].split("?")[0]
+    return database_id
+
+
 class Notion(InDriver, OutDriver):
     __client = None
 
@@ -86,13 +98,8 @@ class Notion(InDriver, OutDriver):
         def __from_dict(self, data):
             return from_dict(data_class=Database, data=data)
 
-        def __ensure_database_id(self, database_id):
-            if "http" in database_id:
-                database_id = database_id.split("/")[-1].split("?")[0]
-            return database_id
-
         def query(self, database_id, query={}):
-            database_id = self.__ensure_database_id(database_id)
+            database_id = ensure_database_id(database_id)
             ret = []
             results = self.client.databases.query(database_id=database_id, **query).get(
                 "results"
@@ -115,7 +122,7 @@ class Notion(InDriver, OutDriver):
             return self.retrieve(database_id)
 
         def retrieve(self, database_id):
-            database_id = self.__ensure_database_id(database_id)
+            database_id = ensure_database_id(database_id)
             raw = self.client.databases.retrieve(database_id)
             return self.__from_dict(raw)
 
@@ -123,17 +130,18 @@ class Notion(InDriver, OutDriver):
         def __from_dict(self, data):
             return from_dict(data_class=Page, data=data)
 
-        def __ensure_page_id(self, page_id):
-            if "http" in page_id:
-                page_id = page_id.split("/")[-1].split("-")[-1]
-            return page_id
-
-        def create(self, page):
+        def create_from_page(self, page):
             payload = self.parent.to_dict(page)
             return self.__from_dict(self.client.pages.create(**payload))
 
+        def create(self, database_id, title):
+            database_id = ensure_database_id(database_id)
+            new_page = Page.new(database_id=database_id)
+            new_page.title("Name", title)
+            return new_page.create()
+
         def retrieve(self, page_id: str):
-            page_id = self.__ensure_page_id(page_id)
+            page_id = ensure_page_id(page_id)
             page = self.client.pages.retrieve(page_id=page_id)
             return self.__from_dict(page)
 
@@ -673,6 +681,21 @@ class Database(__BaseDataClass):
         for k in self.properties:
             self.properties[k] = DatabasePropertyFactory.new(self.properties[k])
 
+    def __repr__(self):
+        try:
+            display(self.df())  # noqa: F821
+            return ""
+        except:  # noqa: E722
+            return str(self)
+
+    def schema(self):
+        copied = deepcopy(self.properties)
+        d = []
+        for i in copied:
+            p = copied[i]
+            d.append({"Name": i, "Type": p.type})
+        return pd.DataFrame(self.notion.to_dict(d))
+
     @classmethod
     def new(cls, title: str, page_id: str = None):
         parent = None
@@ -1070,6 +1093,13 @@ class Page(__BaseDataClass):
         for k in self.properties:
             self.properties[k] = PagePropertyFactory.new(self.properties[k])
 
+    def __repr__(self):
+        try:
+            display(self.df())  # noqa: F821
+            return ""
+        except:  # noqa: E722
+            return str(self)
+
     def get_blocks(self):
         self.blocks = self.notion.blocks.children(self.id)
         return self.blocks
@@ -1151,7 +1181,7 @@ class Page(__BaseDataClass):
         return ret
 
     def create(self):
-        return self.notion.pages.create(self)
+        return self.notion.pages.create_from_page(self)
 
     """
     Properties setters
