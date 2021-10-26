@@ -662,7 +662,7 @@ class Database(__BaseDataClass):
     title: List[RichText]
     properties: object
     parent: Parent
-    icon: Optional[Emoji] = None  # TODO: Handle File
+    #icon: Optional[Emoji] = None  # TODO: Handle File
     cover: Optional[File] = None
     created_time: str = None
     last_edited_time: str = None
@@ -712,10 +712,10 @@ class Database(__BaseDataClass):
     def from_dict(cls, data):
         return from_dict(data_class=cls, data=data)
 
-    def set_emoji_icon(
-        self, data
-    ):  # TODO: Fix, seems like there is an issue with notion-client / httpx maybe.
-        self.icon = Emoji(data)
+    #def set_emoji_icon(
+    #    self, data
+    #):  # TODO: Fix, seems like there is an issue with notion-client / httpx maybe.
+    #    self.icon = Emoji(data)
 
     def duplicate(self):
         new_db = self.create()
@@ -1074,7 +1074,7 @@ class Page(__BaseDataClass):
     parent: Parent
     blocks: Optional[List["Block"]] = field(default_factory=list)
     archived: bool = False
-    icon: Optional[Emoji] = None  # TODO: Handle File
+    #icon: Optional[Emoji] = None  # TODO: Handle File
     cover: Optional[File] = None
     created_time: str = None
     last_edited_time: str = None
