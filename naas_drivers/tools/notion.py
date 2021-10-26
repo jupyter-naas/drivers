@@ -654,7 +654,7 @@ class Database(__BaseDataClass):
     title: List[RichText]
     properties: object
     parent: Parent
-    icon: Optional[Union[File, Emoji]] = None
+    icon: Optional[Emoji] = None  # TODO: Handle File
     cover: Optional[File] = None
     created_time: str = None
     last_edited_time: str = None
@@ -1051,7 +1051,7 @@ class Page(__BaseDataClass):
     parent: Parent
     blocks: Optional[List["Block"]] = field(default_factory=list)
     archived: bool = False
-    icon: Optional[Union[File, Emoji]] = None
+    icon: Optional[Emoji] = None  # TODO: Handle File
     cover: Optional[File] = None
     created_time: str = None
     last_edited_time: str = None
