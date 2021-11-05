@@ -1,3 +1,9 @@
+## 0.76.1 (2021-11-05)
+
+### Fix
+
+- comment huggingface driver to avoid bug
+
 ## 0.76.0 (2021-11-05)
 
 ### Fix
