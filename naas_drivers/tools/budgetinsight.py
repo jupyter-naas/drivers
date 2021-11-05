@@ -3,6 +3,7 @@ import requests
 from datetime import datetime
 
 DATE_FORMAT = "%Y-%m-%d"
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 NUMBER_FORMAT = "{:,.2f} €"
 
 
@@ -299,7 +300,7 @@ class Accounts(BudgetInsight):
         df_statement = df_statement.drop_duplicates(
             subset=["ACCOUNT_NUMBER"]
         ).reset_index(drop=True)
-        df_statement["DATE_EXTRACTION"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        df_statement["DATE_EXTRACTION"] = datetime.now().strftime(DATETIME_FORMAT)
         return df_statement
 
 
@@ -354,5 +355,5 @@ class Transactions(BudgetInsight):
         df_statement = df_statement.drop_duplicates(
             subset=["ACCOUNT_NUMBER", "ID_TRANSACTION"]
         ).reset_index(drop=True)
-        df_statement["DATE_EXTRACTION"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        df_statement["DATE_EXTRACTION"] = datetime.now().strftime(DATETIME_FORMAT)
         return df_statement
