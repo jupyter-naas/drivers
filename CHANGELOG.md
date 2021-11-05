@@ -1,3 +1,16 @@
+## 0.76.0 (2021-11-05)
+
+### Fix
+
+- except ValueError:
+- error variable e not used
+- lint + datetime format
+
+### Feat
+
+- init budgetinsight driver
+- add budgetinsight in init drivers
+
 ## 0.75.0 (2021-11-05)
 
 ### Feat
