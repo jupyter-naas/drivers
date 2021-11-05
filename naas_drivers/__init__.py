@@ -35,6 +35,7 @@ from naas_drivers.tools.streamlit import Streamlit
 from naas_drivers.tools.huggingface import Huggingface
 from naas_drivers.tools.naas_auth import NaasAuth
 from naas_drivers.tools.naas_credits import NaasCredits
+from naas_drivers.tools.budgetinsight import BudgetInsight
 
 import requests
 import os
@@ -46,7 +47,7 @@ __github_repo = "jupyter-naas/drivers"
 if os.environ.get("NAAS_DRIVER_LIGHT_INIT"):
     exit()
 
-# In drivers
+# All drivers
 optimise = Optimise()
 cityfalcon = Cityfalcon()
 geolocator = Geolocator()
@@ -66,8 +67,6 @@ slack = Slack()
 qonto = Qonto()
 huggingface = Huggingface()
 naasauth = NaasAuth()
-
-# Out drivers
 bubble = Bubble()
 email = Email()
 healthcheck = Healthcheck()
@@ -75,8 +74,6 @@ ifttt = Ifttt()
 integromat = Integromat()
 zapier = Zapier()
 streamlit = Streamlit()
-
-# InOut drivers
 bobapp = Bobapp()
 airtable = Airtable()
 jupyter = Jupyter()
@@ -90,6 +87,7 @@ linkedin = LinkedIn()
 hubspot = Hubspot()
 thinkific = Thinkific()
 naascredits = NaasCredits()
+budgetinsight = BudgetInsight()
 
 __doc_url = "https://naas.gitbook.io/drivers/"
 
