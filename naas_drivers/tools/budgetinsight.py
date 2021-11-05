@@ -143,7 +143,7 @@ class Connections(BudgetInsight):
         res = requests.delete(req_url, headers=self.headers)
         try:
             res.raise_for_status()
-        except requests.HTTPError as e:
+        except:
             print(
                 f"❌ Connection (id={connection_id}) does not exist. Please enter a valid id."
             )
