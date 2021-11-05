@@ -1,3 +1,9 @@
+## 0.74.5 (2021-11-05)
+
+### Fix
+
+- change current page type to int to get all pages
+
 ## 0.74.4 (2021-10-26)
 
 ### Fix
