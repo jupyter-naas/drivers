@@ -1,9 +1,9 @@
-from naas_drivers.driver import InDriver
 import pandas as pd
 import requests
 import os
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
+import urllib
 from naas_drivers.tools.emailbuilder import EmailBuilder
 emailbuilder = EmailBuilder()
 
@@ -24,24 +24,21 @@ class Organizations:
         self.user_id = user_id
 
     def get(self):
+        res = requests.get(url=f"{self.url}/{self.user_id}", headers=self.req_headers)
         try:
-            req = requests.get(
-                url=f"{self.url}/{self.user_id}", headers=self.req_headers
-            )
-            req.raise_for_status()
-            items = req.json()["organization"]["bank_accounts"]
-            df = pd.DataFrame.from_records(items)
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return e
+        res_json = res.json()
 
-            # Formating CS
-            df["date"] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-            df = df.drop(["slug", "balance_cents", "authorized_balance_cents"], axis=1)
-            df.columns = df.columns.str.upper()
-            return df
-        except requests.HTTPError as err:
-            err_code = err.response.status_code
-            err_msg = err.response.json()
-            to_print = f"{err_code}: {err_msg}"
-            print(to_print)
+        items = res_json.get("organization", {}).get("bank_accounts")
+        df = pd.DataFrame.from_records(items)
+
+        # Formating CS
+        df["date"] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        df = df.drop(["slug", "balance_cents", "authorized_balance_cents"], axis=1)
+        df.columns = df.columns.str.upper()
+        return df
 
 
 class Transactions(Organizations):
@@ -55,24 +52,32 @@ class Transactions(Organizations):
             iban = row["IBAN"]
 
             # Get transactions
-            current_page = "1"
             has_more = True
+            current_page = 1
             while has_more:
-                req = requests.get(
-                    url=f"{self.base_url}/transactions?current_page={current_page}?per_page=100&iban={iban}",
+                params = {
+                    "current_page": current_page,
+                    "iban": iban,
+                }
+                res = requests.get(
+                    url=f"{self.base_url}/transactions?{urllib.parse.urlencode(params, safe='(),')}",
                     headers=self.req_headers,
                 )
-                items = req.json()
-                transactions = items["transactions"]
+                try:
+                    res.raise_for_status()
+                except requests.HTTPError as e:
+                    return e
+                items = res.json()
+                transactions = items.get("transactions")
                 df = pd.DataFrame.from_records(transactions)
                 df["iban"] = iban
                 df_transaction = pd.concat([df_transaction, df], axis=0)
                 # Check if next page exists
-                next_page = items["meta"]["next_page"]
+                next_page = items.get("meta").get("next_page")
                 if next_page is None:
                     has_more = False
                 else:
-                    current_page = str(next_page)
+                    current_page = int(next_page)
         # Formatting
         to_keep = [
             "iban",
@@ -100,15 +105,14 @@ class Statements(Transactions):
     def __get_dates(self, df, date_from=None, date_to=None):
         dates = []
         # Dates
-        if date_from is not None and date_to is None:
+        if date_to is None:
             date_to = df["DATE"].max()
-        if date_to is not None and date_from is None:
+        if date_from is None:
             date_from = df["DATE"].min()
-        if (date_from and date_to) is not None:
-            dates_range = pd.date_range(start=date_from, end=date_to)
-            for date in dates_range:
-                date = str(date.strftime(DATE_FORMAT))
-                dates.append(date)
+        dates_range = pd.date_range(start=date_from, end=date_to)
+        for date in dates_range:
+            date = str(date.strftime(DATE_FORMAT))
+            dates.append(date)
         return dates
 
     def __filter_dates(self, df, date_from=None, date_to=None):
@@ -125,57 +129,22 @@ class Statements(Transactions):
             df_filter = df[df["DATE"].isin(dates)]
         return df_filter
 
-    def detailed(self, date_from=None, date_to=None):
-        df = self.get_all()
-        df = df.rename(columns={"EMITTED_AT": "DATE"})
-        df["DATE"] = pd.to_datetime(
-            df["DATE"], format="%Y-%m-%dT%H:%M:%S.%fZ"
-        ).dt.strftime(DATE_FORMAT)
+    def aggregated(self, date_from=None, date_to=None):
+        df = self.consolidated(date_from=date_from, date_to=date_to)
+        return df
 
-        # Calc positions
-        to_sort = ["IBAN", "DATE", "TRANSACTION_ID"]
-        df = df.sort_values(by=to_sort).reset_index(drop=True)
-        to_group = ["IBAN", "TRANSACTION_ID"]
-        df["POSITION"] = df.groupby(to_group, as_index=True).agg({"AMOUNT": "cumsum"})
-        to_keep = [
+    def detailed(self, date_from=None, date_to=None):
+        to_group = [
             "IBAN",
-            "DATE",
             "TRANSACTION_ID",
             "LABEL",
             "REFERENCE",
             "OPERATION_TYPE",
             "AMOUNT",
-            "POSITION",
             "CURRENCY",
         ]
-        df = df[to_keep]
-        return self.__filter_dates(df, date_from, date_to)
-
-    def aggregated(self, date_from=None, date_to=None):
-        df = self.get_all()
-        df = df.rename(columns={"EMITTED_AT": "DATE"})
-        df["DATE"] = pd.to_datetime(
-            df["DATE"], format="%Y-%m-%dT%H:%M:%S.%fZ"
-        ).dt.strftime(DATE_FORMAT)
-
-        # Aggregation
-        to_group = ["IBAN", "DATE", "CURRENCY"]
-        df = df.groupby(to_group, as_index=False).agg({"AMOUNT": "sum"})
-
-        # Calc positions
-        to_sort = ["IBAN", "DATE"]
-        df = df.sort_values(by=to_sort).reset_index(drop=True)
-        to_group = ["IBAN"]
-        df["POSITION"] = df.groupby(to_group, as_index=True).agg({"AMOUNT": "cumsum"})
-        to_keep = [
-            "IBAN",
-            "DATE",
-            "AMOUNT",
-            "POSITION",
-            "CURRENCY",
-        ]
-        df = df[to_keep]
-        return self.__filter_dates(df, date_from, date_to)
+        df = self.consolidated(to_group, date_from, date_to)
+        return df
 
     def consolidated(self, to_conso=[], date_from=None, date_to=None):
         df = self.get_all()
@@ -194,17 +163,21 @@ class Statements(Transactions):
         return self.__filter_dates(df, date_from, date_to)
 
     def summary(self, date_from=None, date_to=None):
+        # Get data
+        df_statement = self.consolidated(
+            to_conso=["OPERATION_TYPE"], date_from=date_from, date_to=date_to
+        )
 
+        # Create
+        if date_from is None:
+            date_from = df_statement.DATE.unique().min()
+        if date_to is None:
+            date_to = df_statement.DATE.unique().max()
         first_text = (
             f"Solde au {datetime.strptime(date_from, DATE_FORMAT).strftime('%d/%m/%Y')}"
         )
         current_text = (
             f"Solde au {datetime.strptime(date_to, DATE_FORMAT).strftime('%d/%m/%Y')}"
-        )
-
-        # Get data
-        df_statement = self.consolidated(
-            to_conso=["OPERATION_TYPE"], date_from=date_from, date_to=date_to
         )
         # > Get first position
         first_position = round(df_statement["POSITION"].tolist()[0], 2)
@@ -321,7 +294,8 @@ class Statements(Transactions):
         cashout_color="#ea484f",
     ):
         # Data linechart
-        df_line = self.consolidated(date_from=date_from, date_to=date_to)
+        df = self.consolidated(date_from=date_from, date_to=date_to)
+        df_line = df.copy()
         df_line = df_line[["DATE", "POSITION"]]
         df_line["DATE"] = pd.to_datetime(df_line["DATE"])
 
@@ -342,10 +316,17 @@ class Statements(Transactions):
         cashin = df_bar[df_bar["FLOWS"] == "CASH_IN"]
         cashout = df_bar[df_bar["FLOWS"] == "CASH_OUT"]
 
-        # Set up title
+        # Title
         if title is None:
+            # Get date from and date to if None
+            if date_from is None:
+                date_from = df.DATE.unique().min()
+            if date_to is None:
+                date_to = df.DATE.unique().max()
+            # Format date
             date_from = datetime.strptime(date_from, DATE_FORMAT).strftime("%d/%m/%Y")
             date_to = datetime.strptime(date_to, DATE_FORMAT).strftime("%d/%m/%Y")
+            # Create title
             title = f"Evolution du {date_from} au {date_to}"
         # Init fig
         fig = go.Figure()
@@ -478,11 +459,11 @@ class Statements(Transactions):
             "footer_cs": emailbuilder.footer_company(naas=True),
         }
         # Generate email in html
-        email_content = emailbuilder.generate(display='iframe', **content)
+        email_content = emailbuilder.generate(display="iframe", **content)
         return email_content
 
 
-class Qonto(InDriver):
+class Qonto:
     user_id = None
     api_token = None
 
