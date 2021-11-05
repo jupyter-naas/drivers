@@ -32,7 +32,7 @@ from naas_drivers.tools.hubspot import Hubspot
 from naas_drivers.tools.thinkific import Thinkific
 from naas_drivers.tools.markdown import Markdown
 from naas_drivers.tools.streamlit import Streamlit
-from naas_drivers.tools.huggingface import Huggingface
+#from naas_drivers.tools.huggingface import Huggingface
 from naas_drivers.tools.naas_auth import NaasAuth
 from naas_drivers.tools.naas_credits import NaasCredits
 from naas_drivers.tools.budgetinsight import BudgetInsight
@@ -65,7 +65,7 @@ markdown = Markdown()
 teams = Teams()
 slack = Slack()
 qonto = Qonto()
-huggingface = Huggingface()
+#huggingface = Huggingface()
 naasauth = NaasAuth()
 bubble = Bubble()
 email = Email()
