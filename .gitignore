@@ -1,4 +1,6 @@
 dist
 naas_drivers.egg-info
-naas_drivers/__pycache__
+__pycache__
+.ipynb_checkpoints
 .idea
+
