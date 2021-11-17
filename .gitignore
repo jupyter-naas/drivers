@@ -1,6 +1,7 @@
+__pycache__
+.eggs
+.idea
+.vscode
+build
 dist
 naas_drivers.egg-info
-__pycache__
-.ipynb_checkpoints
-.idea
-
