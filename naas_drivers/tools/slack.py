@@ -40,8 +40,8 @@ class Slack(OutDriver):
             response = self.client.chat_postMessage(
                 channel=channel, text=text, attachments=attachments
             )
-            assert response["message"]["text"] == text
-            print("Message sent")
+            response.get("message").get("text") == text
+            print("✉️ Message sent")
         except SlackApiError as e:
             # You will get a SlackApiError if "ok" is False
             assert e.response["ok"] is False
