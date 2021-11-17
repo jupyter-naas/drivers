@@ -41,7 +41,7 @@ class Taggun(OutDriver):
         self._incognito = incognito
         return self
 
-    def hashFile(self):
+    def hash_file(self):
         '''
         Create a hash of the file to be sent. Taggun allows user-submitted data
         for reinforcement learning. This requires a unique identifier for the file.
