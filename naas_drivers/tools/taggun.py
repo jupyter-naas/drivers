@@ -63,7 +63,7 @@ class Taggun(OutDriver):
             parsed data as a dict from Taggun
         '''
         self.check_connect()
-        self.hashFile()
+        self.hash_file()
 
         with open(self._filePath, "rb") as f:
             headers = {"apikey": self._key}
