@@ -40,7 +40,7 @@ from naas_drivers.tools.budgetinsight import BudgetInsight
 import requests
 import os
 
-__version__ = "0.76.3"
+__version__ = "0.77.0"
 
 __github_repo = "jupyter-naas/drivers"
 

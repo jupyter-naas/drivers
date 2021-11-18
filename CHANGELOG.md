@@ -1,3 +1,9 @@
+## 0.77.0 (2021-11-18)
+
+### Feat
+
+- **Plan**: Add naascredits.get_plan() to get current plan from the api (#195)
+
 ## 0.76.3 (2021-11-08)
 
 ### Fix
