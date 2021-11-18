@@ -24,6 +24,13 @@ class NaasCredits(InDriver, OutDriver):
         self.__headers = naas_auth.headers
         return self
 
+    def get_plan(self):
+        res = r.get(
+            f"{AUTH_API_PROTOCOL}://{CREDITS_API_FQDN}/plan", headers=self.headers
+        )
+        res.raise_for_status()
+        return res.json()
+
     def get_balance(self):
         res = r.get(
             f"{AUTH_API_PROTOCOL}://{CREDITS_API_FQDN}/balance", headers=self.headers
