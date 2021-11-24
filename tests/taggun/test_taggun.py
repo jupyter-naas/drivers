@@ -23,9 +23,9 @@ def test_taggun():
 
     tg = Taggun()
     tg.connect(
-        TAGGUN_KEY, "tests/taggun/sample receipt.jpg"
+        TAGGUN_KEY
     )
-    data = tg.send()
+    data = tg.send("tests/taggun/sample receipt.jpg")
     pprint(data)
     assert True
 

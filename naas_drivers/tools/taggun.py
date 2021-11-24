@@ -22,13 +22,12 @@ class Taggun(OutDriver):
 
     data = None
 
-    def connect(self, key, file, mode="simple", incognito=False):
+    def connect(self, key, mode="simple", incognito=False):
         '''
         Initialize all the necessary elements to make an api request
 
         Args:
             key (string): Taggun API key
-            file (string): Path to the file being sent for parsing
             mode (string): Either simple or verbose. default simple
             incognite (bool): If true, taggun will not store a copy of the
                 uploaded file for reinforcement learning. default false
@@ -36,12 +35,10 @@ class Taggun(OutDriver):
         self._key = key
         self.connected = True
         self._url = f"https://api.taggun.io/api/receipt/v1/{mode}/file"
-        self._fileName = os.path.basename(file)
-        self._filePath = file
         self._incognito = incognito
         return self
 
-    def hash_file(self):
+    def hash_file(self, file):
         '''
         Create a hash of the file to be sent. Taggun allows user-submitted data
         for reinforcement learning. This requires a unique identifier for the file.
@@ -51,19 +48,24 @@ class Taggun(OutDriver):
         Returns:
             hash of the file
         '''
-        with open(self._filePath, "rb") as f:
+        with open(file, "rb") as f:
             self._hash = hashlib.sha256(f.read()).hexdigest()
         return self._hash
 
-    def send(self):
+    def send(self, file):
         '''
         Dispatch the api request to Taggun and receive parsed data
+
+        Args:
+        file (string): Path to the file being sent for parsing
 
         Returns:
             parsed data as a dict from Taggun
         '''
+        self._fileName = os.path.basename(file)
+        self._filePath = file
         self.check_connect()
-        self.hash_file()
+        self.hash_file(self._filePath)
 
         with open(self._filePath, "rb") as f:
             headers = {"apikey": self._key}
