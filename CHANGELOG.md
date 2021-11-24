@@ -1,3 +1,9 @@
+## 0.77.1 (2021-11-24)
+
+### Fix
+
+- linkedin get company info
+
 ## 0.77.0 (2021-11-18)
 
 ### Feat
