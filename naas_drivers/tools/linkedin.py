@@ -658,6 +658,4 @@ class Company(LinkedIn):
             return e
         else:
             res_json = res.json()
-        for index in res_json.keys():
-            res_json[index] = [res_json[index]]
         return pd.DataFrame(res_json).reset_index(drop=True)

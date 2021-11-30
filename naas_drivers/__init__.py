@@ -41,7 +41,7 @@ from naas_drivers.tools.taggun import Taggun
 import requests
 import os
 
-__version__ = "0.76.3"
+__version__ = "0.77.1"
 
 __github_repo = "jupyter-naas/drivers"
 
