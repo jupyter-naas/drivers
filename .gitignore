@@ -5,3 +5,9 @@ __pycache__
 build
 dist
 naas_drivers.egg-info
+naas_drivers/__pycache__
+.idea
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
