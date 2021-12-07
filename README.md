@@ -46,3 +46,4 @@ This auto publish on pypip by github action on main branch.
 * [Jeremy Ravenel](https://github.com/jravenel)
 * [Maxime Jublou](https://github.com/Dr0p42)
 * [Martin Donadieu](https://github.com/riderx)
+* [Florent Ravenel](https://github.com/FlorentLvr)
