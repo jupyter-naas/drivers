@@ -1,5 +1,4 @@
 import requests
-import os
 import pydash as _
 import pandas as pd
 import datetime
