@@ -162,7 +162,7 @@ class Video(Youtube):
                     result = string.split(variable)[0]
                     try:
                         result = int(result[-2:])
-                    except ValueError as e:
+                    except ValueError:
                         result = int(result[-1:])
                 return result
 
