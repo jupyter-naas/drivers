@@ -53,7 +53,7 @@ setup(
         "pandas-datareader==0.9.0",
         "patsy==0.5.1",
         "pmdarima==1.8.2",
-        "pydash==5.1.0"
+        "pydash==5.1.0",
         "python-dateutil==2.8.1",
         "python-dotenv==0.17.0",
         "pytz==2021.1",
