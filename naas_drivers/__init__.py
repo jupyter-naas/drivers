@@ -41,7 +41,7 @@ from naas_drivers.tools.youtube import Youtube
 import requests
 import os
 
-__version__ = "0.78.0"
+__version__ = "0.78.1"
 
 __github_repo = "jupyter-naas/drivers"
 
