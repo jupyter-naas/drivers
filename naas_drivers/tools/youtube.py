@@ -30,7 +30,7 @@ class Channel(Youtube):
         self.base_params = base_params
 
     def __get_channel_id_from_url(self, channel_url):
-        channel_id = channel_url.split("/")[-1].split("/")[0]
+        channel_id = channel_url.split("channel/")[-1].split("/")[0]
         return channel_id
 
     def __get_uploads_id_from_channel(self, channel_url):
@@ -48,6 +48,12 @@ class Channel(Youtube):
         return playlist_id
 
     def get_statistics(self, channel_url):
+        if "www.youtube.com/channel" not in channel_url:
+            return (
+                "❌ Channel url not valid. "
+                "Please get url with channel id. "
+                "It must start with 'www.youtube.com/channel'"
+            )
         channel_id = self.__get_channel_id_from_url(channel_url)
         params = {"part": "statistics,snippet", "id": channel_id}
         params.update(self.base_params)
@@ -73,6 +79,12 @@ class Channel(Youtube):
         return df
 
     def get_uploads(self, channel_url, number=100):
+        if "www.youtube.com/channel" not in channel_url:
+            return (
+                "❌ Channel url not valid. "
+                "Please get url with channel id. "
+                "It must start with 'www.youtube.com/channel'"
+            )
         playlist_id = self.__get_uploads_id_from_channel(channel_url)
         videos = []
         data = []
@@ -150,7 +162,7 @@ class Video(Youtube):
                     result = string.split(variable)[0]
                     try:
                         result = int(result[-2:])
-                    except:
+                    except ValueError as e:
                         result = int(result[-1:])
                 return result
 
