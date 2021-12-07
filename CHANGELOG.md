@@ -1,3 +1,16 @@
+## 0.78.0 (2021-12-07)
+
+### Fix
+
+- remove os
+- remove e not referenced
+- lint + check channel url
+
+### Feat
+
+- youtube driver get stats from video, channel + get uploads
+- init driver youtube
+
 ## 0.77.3 (2021-12-01)
 
 ## 0.77.2 (2021-12-01)
