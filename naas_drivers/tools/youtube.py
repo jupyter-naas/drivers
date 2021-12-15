@@ -241,6 +241,14 @@ class Transcript:
         for i in json:
             para += i["text"]
             para += " "
+        print("🎬 Transcript:", len(para), "characters")
         summaries = self.__pipeline_summarization(para)
         summary = " ".join(summaries)
-        return summary.replace(" .", ".")
+        summary = (
+            summary.replace(" .", ".")
+            .replace("\xa0", " ")
+            .replace("\n", " ")
+            .replace("  ", " ")
+        )
+        print("👉 Summary:", len(summary), "characters")
+        return summary.strip()
