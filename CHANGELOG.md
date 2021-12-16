@@ -1,3 +1,9 @@
+## 0.80.0 (2021-12-16)
+
+### Feat
+
+- add driver for Taggun api
+
 ## 0.79.0 (2021-12-16)
 
 ### Feat
