@@ -1,3 +1,8 @@
+__pycache__
+.eggs
+.idea
+.vscode
+build
 dist
 naas_drivers.egg-info
 naas_drivers/__pycache__
@@ -5,3 +10,4 @@ naas_drivers/__pycache__
 
 # Jupyter Notebook
 .ipynb_checkpoints
+

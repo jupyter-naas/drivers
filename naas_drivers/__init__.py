@@ -36,6 +36,7 @@ from naas_drivers.tools.streamlit import Streamlit
 from naas_drivers.tools.naas_auth import NaasAuth
 from naas_drivers.tools.naas_credits import NaasCredits
 from naas_drivers.tools.budgetinsight import BudgetInsight
+from naas_drivers.tools.taggun import Taggun
 from naas_drivers.tools.youtube import Youtube
 
 import requests
@@ -89,6 +90,7 @@ hubspot = Hubspot()
 thinkific = Thinkific()
 naascredits = NaasCredits()
 budgetinsight = BudgetInsight()
+taggun = Taggun()
 youtube = Youtube()
 
 __doc_url = "https://naas.gitbook.io/drivers/"
