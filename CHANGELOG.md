@@ -1,3 +1,48 @@
+## 0.79.0 (2021-12-16)
+
+### Feat
+
+- youtube get and summarize transcript
+- add package to setup
+- youtube improve summary
+- add youtube_transcript_api to setup
+- get and summarize transcript
+
+### Fix
+
+- **Linter**: Fix issues where Black was moving the #noqa
+- **Flake8**: Add noqa for a specific case where black does not align with flake8
+- lint
+- lint
+- lint E203
+- lint
+- lint row 217
+
+## 0.78.2 (2021-12-07)
+
+### Fix
+
+- update pydash
+
+## 0.78.1 (2021-12-07)
+
+### Fix
+
+- add pydash to setup
+
+## 0.78.0 (2021-12-07)
+
+### Fix
+
+- remove os
+- remove e not referenced
+- lint + check channel url
+
+### Feat
+
+- youtube driver get stats from video, channel + get uploads
+- init driver youtube
+
 ## 0.77.3 (2021-12-01)
 
 ## 0.77.2 (2021-12-01)

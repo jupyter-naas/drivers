@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="naas-drivers",
-    version="0.77.3",
+    version="0.79.0",
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
     license="BSD",
@@ -53,6 +53,7 @@ setup(
         "pandas-datareader==0.9.0",
         "patsy==0.5.1",
         "pmdarima==1.8.2",
+        "pydash==5.1.0",
         "python-dateutil==2.8.1",
         "python-dotenv==0.17.0",
         "pytz==2021.1",
@@ -89,7 +90,8 @@ setup(
         "transformers==4.6.1",
         "pyngrok==5.0.5",
         "dacite==1.6.0",
-        "notion-client==0.7.1"
+        "notion-client==0.7.1",
+        "youtube_transcript_api==0.4.3"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
