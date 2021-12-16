@@ -214,8 +214,7 @@ class Transcript:
         text_len = len(text)
 
         while count * chunk_size < text_len:
-            chunks.append(text[count * chunk_size:
-                               count * chunk_size + chunk_size])
+            chunks.append(text[count * chunk_size : count * chunk_size + chunk_size])  # noqa: E203
             count += 1
         return chunks
 
