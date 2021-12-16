@@ -1,3 +1,23 @@
+## 0.79.0 (2021-12-16)
+
+### Feat
+
+- youtube get and summarize transcript
+- add package to setup
+- youtube improve summary
+- add youtube_transcript_api to setup
+- get and summarize transcript
+
+### Fix
+
+- **Linter**: Fix issues where Black was moving the #noqa
+- **Flake8**: Add noqa for a specific case where black does not align with flake8
+- lint
+- lint
+- lint E203
+- lint
+- lint row 217
+
 ## 0.78.2 (2021-12-07)
 
 ### Fix
