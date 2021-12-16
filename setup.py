@@ -90,7 +90,8 @@ setup(
         "transformers==4.6.1",
         "pyngrok==5.0.5",
         "dacite==1.6.0",
-        "notion-client==0.7.1"
+        "notion-client==0.7.1",
+        "youtube_transcript_api==0.4.3"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

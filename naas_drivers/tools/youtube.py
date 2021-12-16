@@ -2,11 +2,17 @@ import requests
 import pydash as _
 import pandas as pd
 import datetime
+from youtube_transcript_api import YouTubeTranscriptApi
+from transformers import pipeline
+from tqdm import tqdm
 
 YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3"
 
 
 class Youtube:
+    def __init__(self):
+        self.transcript = Transcript()
+
     def connect(self, api_key: str):
         # Init lk attribute
         self.api_key = api_key
@@ -21,6 +27,10 @@ class Youtube:
         # Set connexion to active
         self.connected = True
         return self
+
+    def get_video_id_from_url(self, video_url):
+        video_id = video_url.split("watch?v=")[-1].split("&")[0]
+        return video_id
 
 
 class Channel(Youtube):
@@ -133,12 +143,8 @@ class Video(Youtube):
         Youtube.__init__(self)
         self.base_params = base_params
 
-    def __get_video_id_from_url(self, video_url):
-        video_id = video_url.split("watch?v=")[-1].split("&")[0]
-        return video_id
-
     def get_statistics(self, video_url):
-        video_id = self.__get_video_id_from_url(video_url)
+        video_id = Youtube.get_video_id_from_url(self, video_url)
         params = {"part": "statistics,snippet,contentDetails", "id": video_id}
         params.update(self.base_params)
         res = requests.get(f"{YOUTUBE_API_URL}/videos", params=params)
@@ -199,3 +205,52 @@ class Video(Youtube):
         df = pd.DataFrame([data])
         df["PUBLISHEDAT"] = pd.to_datetime(df["PUBLISHEDAT"])
         return df
+
+
+class Transcript:
+    def __text_to_chunks(self, text, chunk_size):
+        chunks = []
+        count = 0
+        text_len = len(text)
+
+        while count * chunk_size < text_len:
+            chunks.append(
+                text[count * chunk_size : count * chunk_size + chunk_size]  # noqa: E203
+            )
+            count += 1
+        return chunks
+
+    def __pipeline_summarization(self, text):
+        chunks = self.__text_to_chunks(text, 1024)
+        summaries = []
+        summarization = pipeline("summarization")
+
+        for chunk in tqdm(chunks):
+            summaries.append(summarization(chunk)[0]["summary_text"])
+        return summaries
+
+    def get(self, video_url):
+        video_id = Youtube.get_video_id_from_url(self, video_url)
+        try:
+            json = YouTubeTranscriptApi.get_transcript(video_id)
+        except Exception as e:
+            return e
+        return json
+
+    def summarize(self, video_url):
+        json = self.get(video_url)
+        para = ""
+        for i in json:
+            para += i["text"]
+            para += " "
+        print("🎬 Transcript:", len(para), "characters")
+        summaries = self.__pipeline_summarization(para)
+        summary = " ".join(summaries)
+        summary = (
+            summary.replace(" .", ".")
+            .replace("\xa0", " ")
+            .replace("\n", " ")
+            .replace("  ", " ")
+        )
+        print("👉 Summary:", len(summary), "characters")
+        return summary.strip()
