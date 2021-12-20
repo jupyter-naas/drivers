@@ -72,19 +72,26 @@ class GoogleAnalytics(InDriver, OutDriver):
             columns={"ga:yearMonth": "year_month", "ga:users": "unique_visitors"}, inplace=True)
         return unique_visitors
 
-    def get_traffic_data(self, start_date: str, end_date: str) -> pd.DataFrame:
+    def get_bounce_rate(self, start_date: str, end_date: str) -> pd.DataFrame:
         """
-        Get traffic data from Google Analytics.
-
-        Args:
-            start_date: First day to consider in the report.
-            end_date: Last day to consider in the report.
-
-        Returns a pandas DataFrame with the traffic data.
+        Get the number of unique visitors.
         """
-        body = self._get_body(self.view_id, start_date, end_date)
+        # Setup Request Parameters
+        date_ranges = {"startDate": start_date, "endDate": end_date}
+        metrics = {"expression": "ga:bounceRate"}
+        pivots_dimensions = {"name": "ga:channelGrouping"}
+        dimensions = {"name": "ga:yearMonth"}
+        # Create body
+        body = self._get_body(self.view_id, date_ranges, metrics, pivots_dimensions, dimensions)
+        # Fetch Data
         response = self.service.reports().batchGet(body=body).execute()
-        return self.format_pivot(response)
+        # Format Output
+        bounce_rate = self.format_summary(response)
+        bounce_rate['ga:bounceRate'] /= 100
+        bounce_rate.reset_index(inplace=True)
+        bounce_rate.rename(
+            columns={"ga:yearMonth": "year_month", "ga:bounceRate": "bounce_rate"}, inplace=True)
+        return bounce_rate
 
     @staticmethod
     def format_summary(response):
@@ -92,7 +99,7 @@ class GoogleAnalytics(InDriver, OutDriver):
         Format summary table.
         """
         row_index_names = response['reports'][0]['columnHeader']['dimensions']
-        row_index = [ element['dimensions'] for element in response['reports'][0]['data']['rows']]
+        row_index = [element['dimensions'] for element in response['reports'][0]['data']['rows']]
         row_index_named = pd.MultiIndex.from_arrays(np.transpose(np.array(row_index)), 
                                                     names = np.array(row_index_names))
         # extract column names
