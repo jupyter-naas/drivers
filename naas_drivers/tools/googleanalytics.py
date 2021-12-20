@@ -134,6 +134,9 @@ class GoogleAnalytics(InDriver, OutDriver):
         pageview.columns = ['pages', 'pageview']
         return pageview
 
+    def get_per_country(self, start_date: str, end_date: str):
+        pass
+
     @staticmethod
     def format_summary(response):
         """
