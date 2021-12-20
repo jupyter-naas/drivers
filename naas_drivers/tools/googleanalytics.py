@@ -1,5 +1,6 @@
 """Google Analytics Driver."""
 import os
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -25,17 +26,51 @@ class GoogleAnalytics(InDriver, OutDriver):
         return self
 
     @staticmethod
-    def _get_body(view_id: str, start_date: str, end_date: str) -> dict:
+    def _get_body(view_id: str,
+                  date_ranges: List[dict],
+                  metrics: List[dict],
+                  pivots_dimensions: List[dict],
+                  dimensions: List[dict]=[{'name': 'ga:yearMonth'}]) -> dict:
+        """
+        Create the body of the request to Google Analytics Reporting API V4.
+
+        Args:
+            view_id: your access point for reports; a defined view of data from a property.
+            date_ranges: e.g. [{"startDates": "2020-01-01", "endDates": "2020-12-31"}]
+            metrics: e.g. [{'expression': 'ga:users'}, {"expression": "ga:bounceRate"}]
+            pivot_dimension: e.g. [{"name": "ga:channelGrouping"}]
+            dimensions: e.g. [{'name': 'ga:yearMonth'}]
+
+        Returns response in JSON format.
+        """
         return {'reportRequests': [{'viewId': view_id, 
-                            'dateRanges': [{'startDate': start_date, 'endDate': end_date}],
-                            'metrics': [{'expression': 'ga:users'}, 
-                                        {"expression": "ga:bounceRate"}],
-                            'dimensions': [{'name': 'ga:yearMonth'}],
-                            "pivots": [{"dimensions": [{"name": "ga:channelGrouping"}],
-                                        "metrics": [{"expression": "ga:users"},
-                                                    {"expression": "ga:bounceRate"}]
+                            'dateRanges': date_ranges,
+                            'metrics': metrics,
+                            'dimensions': dimensions,
+                            "pivots": [{"dimensions": pivots_dimensions,
+                                        "metrics": metrics
                                        }]
                           }]}
+
+    def get_unique_visitors(self, start_date: str, end_date: str) -> pd.DataFrame:
+        """
+        Get the number of unique visitors.
+        """
+        # Setup Request Parameters
+        date_ranges = {"startDate": start_date, "endDate": end_date}
+        metrics = [{"expression": "ga:users"}]
+        pivots_dimensions = [{"name": "ga:channelGrouping"}]
+        dimensions = [{"name": "ga:yearMonth"}]
+        # Create body
+        body = self._get_body(self.view_id, date_ranges, metrics, pivots_dimensions, dimensions)
+        # Fetch Data
+        response = self.service.reports().batchGet(body=body).execute()
+        # Format Output
+        unique_visitors = self.format_summary(response)
+        unique_visitors.reset_index(inplace=True)
+        unique_visitors.rename(
+            columns={"ga:yearMonth": "year_month", "ga:users": "unique_visitors"}, inplace=True)
+        return unique_visitors
 
     def get_traffic_data(self, start_date: str, end_date: str) -> pd.DataFrame:
         """
