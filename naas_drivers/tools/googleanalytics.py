@@ -15,10 +15,13 @@ class GoogleAnalytics(InDriver, OutDriver):
     Google Analytics driver.
     """
 
-    def __init__(self, view_id: str) -> None:
+    def __init__(self) -> None:
+        pass
+
+    def connect(self, view_id: str, json_path: str):
         self.view_id = view_id
         credentials = service_account.Credentials.from_service_account_file(
-            os.getenv("GCP_SERVICE_ACCOUNT_JSON"),
+            json_path,
             scopes = ['https://www.googleapis.com/auth/analytics.readonly'])
         self.service = build('analyticsreporting', 'v4', credentials=credentials)
 
