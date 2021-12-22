@@ -115,7 +115,7 @@ class GoogleAnalytics(InDriver, OutDriver):
 
     def get_pageview(self, start_date: str, end_date: str) -> pd.DataFrame:
         """
-        
+        Get the views of pages.
         """
         # Setup Request Parameters
         date_ranges = {"startDate": start_date, "endDate": end_date}
@@ -134,8 +134,22 @@ class GoogleAnalytics(InDriver, OutDriver):
         pageview.columns = ['pages', 'pageview']
         return pageview
 
-    def get_per_country(self, start_date: str, end_date: str):
-        pass
+    def get_country(self, start_date: str, end_date: str):
+        # Setup Request Parameters
+        date_ranges = {"startDate": start_date, "endDate": end_date}
+        metrics = {"expression": "ga:sessions"}
+        pivots_dimensions = {"name": "ga:country"}
+        dimensions = 'ga:year'
+        # Create body
+        body = self._get_body(self.view_id, date_ranges, metrics, pivots_dimensions, dimensions)
+        # Fetch Data
+        response = self.service.reports().batchGet(body=body).execute()
+        country = self.format_pivot(response)
+        country.columns = [c[0] for c in country.columns]
+        country = country.T
+        country.reset_index(inplace=True)
+        country.columns = ["country", "session"]
+        return country
 
     @staticmethod
     def format_summary(response):
