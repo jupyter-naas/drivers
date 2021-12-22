@@ -1,4 +1,5 @@
 """Google Analytics Driver."""
+import re
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -7,6 +8,12 @@ from google.oauth2 import service_account
 from apiclient.discovery import build
 
 from naas_drivers.driver import InDriver, OutDriver
+
+# Helper function
+def ga_naming_to_title(ga_nanimg: str):
+    name = ga_nanimg.split(":")[-1]
+    splited_name = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)', name)
+    return " ".join([name.title() for name in splited_name])
 
 
 class GoogleAnalytics(InDriver, OutDriver):
@@ -96,10 +103,8 @@ class Views:
                                         pivots_dimensions="ga:channelGrouping",
                                         dimensions="ga:yearMonth", start_date=start_date,
                                         end_date=end_date, format_type="summary")
-        # Format Output
         unique_visitors.reset_index(inplace=True)
-        unique_visitors.rename(
-            columns={"ga:yearMonth": "year_month", "ga:users": "unique_visitors"}, inplace=True)
+        unique_visitors.columns = [ga_naming_to_title(col) for col in unique_visitors.columns]
         return unique_visitors
 
     def get_bounce_rate(
@@ -111,10 +116,9 @@ class Views:
                                     pivots_dimensions="ga:channelGrouping",
                                     dimensions="ga:yearMonth", start_date=start_date,
                                     end_date=end_date, format_type="summary")
-        bounce_rate['ga:bounceRate'] /= 100
         bounce_rate.reset_index(inplace=True)
-        bounce_rate.rename(
-            columns={"ga:yearMonth": "year_month", "ga:bounceRate": "bounce_rate"}, inplace=True)
+        bounce_rate.columns = [ga_naming_to_title(col) for col in bounce_rate.columns]
+        bounce_rate['Bounce Rate'] /= 100
         return bounce_rate
 
     def get_time_landing(self,
@@ -133,8 +137,9 @@ class Views:
             avg_time_landing = avg_time_landing.loc[:, landing_path]
         else:
             raise KeyError(f"Landing Path ({landing_path}) is not an available url pattern.")
-        avg_time_landing.index.rename("year_month", inplace=True)
+        avg_time_landing.index.rename("Year Month", inplace=True)
         avg_time_landing.rename(columns={"ga:avgTimeOnPage": "avg_time_landing"}, inplace=True)
+        avg_time_landing.reset_index(inplace=True)
         return avg_time_landing
 
     def get_pageview(self, view_id: str, start_date: str=None, end_date: str=None) -> pd.DataFrame:
@@ -148,7 +153,7 @@ class Views:
         pageview.columns = [page[0] for page in pageview.columns]
         pageview = pageview.head(1).T
         pageview.reset_index(inplace=True)
-        pageview.columns = ['pages', 'pageview']
+        pageview.columns = ['Pages', 'Pageview']
         return pageview
 
     def get_country(self, view_id: str, metrics: str="ga:sessions",
@@ -160,10 +165,10 @@ class Views:
                                          pivots_dimensions="ga:country",
                                          dimensions="ga:year", start_date=start_date,
                                          end_date=end_date, format_type="pivot")
-        country.columns = [c[0] for c in country.columns]
+        country.columns = [ga_naming_to_title(c[0]) for c in country.columns]
         country = country.T
         country.reset_index(inplace=True)
-        country.columns = ["country", "session"]
+        country.columns = ["Country", ga_naming_to_title(metrics)]
         return country
 
     @staticmethod
