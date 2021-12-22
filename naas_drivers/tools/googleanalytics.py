@@ -12,7 +12,7 @@ from naas_drivers.driver import InDriver, OutDriver
 # Helper function
 def ga_naming_to_title(ga_nanimg: str):
     name = ga_nanimg.split(":")[-1]
-    splited_name = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)', name)
+    splited_name = re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)", name)
     return " ".join([name.title() for name in splited_name])
 
 
@@ -20,29 +20,31 @@ class GoogleAnalytics(InDriver, OutDriver):
     """
     Google Analytics driver.
     """
+
     def __init__(self) -> None:
         self.views = Views(self)
 
     def connect(self, json_path: str):
         credentials = service_account.Credentials.from_service_account_file(
-            json_path,
-            scopes = ['https://www.googleapis.com/auth/analytics.readonly'])
-        self.service = build('analyticsreporting', 'v4', credentials=credentials)
+            json_path, scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+        )
+        self.service = build("analyticsreporting", "v4", credentials=credentials)
         return self
-    
+
 
 class Views:
-    
     def __init__(self, parent) -> None:
         self.parent = parent
 
     @staticmethod
-    def _get_body(view_id: str,
-                  start_date: str,
-                  end_date: str,
-                  metrics: str,
-                  pivots_dimensions: str,
-                  dimensions: str='ga:yearMonth') -> dict:
+    def _get_body(
+        view_id: str,
+        start_date: str,
+        end_date: str,
+        metrics: str,
+        pivots_dimensions: str,
+        dimensions: str = "ga:yearMonth",
+    ) -> dict:
         """
         Create the body of the request to Google Analytics Reporting API V4.
 
@@ -55,36 +57,51 @@ class Views:
 
         Returns response in JSON format.
         """
-        return {'reportRequests': [{'viewId': view_id,
-                            'dateRanges': {"startDate": start_date, "endDate": end_date},
-                            'metrics': [{"expression": metrics}],
-                            'dimensions': {"name": dimensions},
-                            "pivots": [{"dimensions": {"name": pivots_dimensions},
-                                        "metrics": [{"expression": metrics}]
-                                       }]
-                          }]}
+        return {
+            "reportRequests": [
+                {
+                    "viewId": view_id,
+                    "dateRanges": {"startDate": start_date, "endDate": end_date},
+                    "metrics": [{"expression": metrics}],
+                    "dimensions": {"name": dimensions},
+                    "pivots": [
+                        {
+                            "dimensions": {"name": pivots_dimensions},
+                            "metrics": [{"expression": metrics}],
+                        }
+                    ],
+                }
+            ]
+        }
 
-    def get_data(self,
-                 view_id: str,
-                 metrics: str,
-                 pivots_dimensions: str,
-                 dimensions: str='ga:yearMonth',
-                 start_date: str=None,
-                 end_date: str=None,
-                 format_type: str="summary") -> pd.DataFrame:
+    def get_data(
+        self,
+        view_id: str,
+        metrics: str,
+        pivots_dimensions: str,
+        dimensions: str = "ga:yearMonth",
+        start_date: str = None,
+        end_date: str = None,
+        format_type: str = "summary",
+    ) -> pd.DataFrame:
         """
         Get data from Google Analytics Reporting API V4.
         """
         if format_type not in ("summary", "pivot"):
             raise ValueError(
-                f"format_type must be either <summary> or <pivot> but is: {format_type}")
+                f"format_type must be either <summary> or <pivot> but is: {format_type}"
+            )
         # Default date values
-        start_date = start_date if start_date else (
-            datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
+        start_date = (
+            start_date
+            if start_date
+            else (datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
+        )
         end_date = end_date if end_date else datetime.today().strftime("%Y-%m-%d")
         # Create body
-        body = self._get_body(view_id, start_date, end_date,
-                              metrics, pivots_dimensions, dimensions)
+        body = self._get_body(
+            view_id, start_date, end_date, metrics, pivots_dimensions, dimensions
+        )
         # Fetch Data
         try:
             response = self.parent.service.reports().batchGet(body=body).execute()
@@ -95,76 +112,119 @@ class Views:
             return self.format_summary(response)
         return self.format_pivot(response)
 
-    def get_unique_visitors(self, view_id: str, start_date: str=None, end_date: str=None) -> pd.DataFrame:
+    def get_unique_visitors(
+        self, view_id: str, start_date: str = None, end_date: str = None
+    ) -> pd.DataFrame:
         """
         Get the number of unique visitors.
         """
-        unique_visitors = self.get_data(view_id, metrics="ga:users",
-                                        pivots_dimensions="ga:channelGrouping",
-                                        dimensions="ga:yearMonth", start_date=start_date,
-                                        end_date=end_date, format_type="summary")
+        unique_visitors = self.get_data(
+            view_id,
+            metrics="ga:users",
+            pivots_dimensions="ga:channelGrouping",
+            dimensions="ga:yearMonth",
+            start_date=start_date,
+            end_date=end_date,
+            format_type="summary",
+        )
         unique_visitors.reset_index(inplace=True)
-        unique_visitors.columns = [ga_naming_to_title(col) for col in unique_visitors.columns]
+        unique_visitors.columns = [
+            ga_naming_to_title(col) for col in unique_visitors.columns
+        ]
         return unique_visitors
 
     def get_bounce_rate(
-            self, view_id=str, start_date: str=None, end_date: str=None) -> pd.DataFrame:
+        self, view_id=str, start_date: str = None, end_date: str = None
+    ) -> pd.DataFrame:
         """
         Get the number of unique visitors.
         """
-        bounce_rate = self.get_data(view_id, metrics="ga:bounceRate",
-                                    pivots_dimensions="ga:channelGrouping",
-                                    dimensions="ga:yearMonth", start_date=start_date,
-                                    end_date=end_date, format_type="summary")
+        bounce_rate = self.get_data(
+            view_id,
+            metrics="ga:bounceRate",
+            pivots_dimensions="ga:channelGrouping",
+            dimensions="ga:yearMonth",
+            start_date=start_date,
+            end_date=end_date,
+            format_type="summary",
+        )
         bounce_rate.reset_index(inplace=True)
         bounce_rate.columns = [ga_naming_to_title(col) for col in bounce_rate.columns]
-        bounce_rate['Bounce Rate'] /= 100
+        bounce_rate["Bounce Rate"] /= 100
         return bounce_rate
 
-    def get_time_landing(self,
-                         view_id: str,
-                         landing_path: str="/",
-                         start_date: str=None,
-                         end_date: str=None) -> pd.DataFrame:
+    def get_time_landing(
+        self,
+        view_id: str,
+        landing_path: str = "/",
+        start_date: str = None,
+        end_date: str = None,
+    ) -> pd.DataFrame:
         """
         Get the average time on landing page.
         """
-        avg_time_landing = self.get_data(view_id, metrics="ga:avgTimeOnPage",
-                                         pivots_dimensions="ga:landingPagePath",
-                                         dimensions="ga:yearMonth", start_date=start_date,
-                                         end_date=end_date, format_type="pivot")
+        avg_time_landing = self.get_data(
+            view_id,
+            metrics="ga:avgTimeOnPage",
+            pivots_dimensions="ga:landingPagePath",
+            dimensions="ga:yearMonth",
+            start_date=start_date,
+            end_date=end_date,
+            format_type="pivot",
+        )
         if landing_path in avg_time_landing.columns:
             avg_time_landing = avg_time_landing.loc[:, landing_path]
         else:
-            raise KeyError(f"Landing Path ({landing_path}) is not an available url pattern.")
+            raise KeyError(
+                f"Landing Path ({landing_path}) is not an available url pattern."
+            )
         avg_time_landing.index.rename("Year Month", inplace=True)
-        avg_time_landing.rename(columns={"ga:avgTimeOnPage": "avg_time_landing"}, inplace=True)
+        avg_time_landing.rename(
+            columns={"ga:avgTimeOnPage": "avg_time_landing"}, inplace=True
+        )
         avg_time_landing.reset_index(inplace=True)
         return avg_time_landing
 
-    def get_pageview(self, view_id: str, start_date: str=None, end_date: str=None) -> pd.DataFrame:
+    def get_pageview(
+        self, view_id: str, start_date: str = None, end_date: str = None
+    ) -> pd.DataFrame:
         """
         Get the views of pages.
         """
-        pageview = self.get_data(view_id, metrics="ga:pageviews",
-                                         pivots_dimensions="ga:pagePath",
-                                         dimensions="ga:year", start_date=start_date,
-                                         end_date=end_date, format_type="pivot")
+        pageview = self.get_data(
+            view_id,
+            metrics="ga:pageviews",
+            pivots_dimensions="ga:pagePath",
+            dimensions="ga:year",
+            start_date=start_date,
+            end_date=end_date,
+            format_type="pivot",
+        )
         pageview.columns = [page[0] for page in pageview.columns]
         pageview = pageview.head(1).T
         pageview.reset_index(inplace=True)
-        pageview.columns = ['Pages', 'Pageview']
+        pageview.columns = ["Pages", "Pageview"]
         return pageview
 
-    def get_country(self, view_id: str, metrics: str="ga:sessions",
-                    start_date: str=None, end_date: str=None):
+    def get_country(
+        self,
+        view_id: str,
+        metrics: str = "ga:sessions",
+        start_date: str = None,
+        end_date: str = None,
+    ):
         """
         Get sessions per country.
         """
-        country = self.get_data(view_id, metrics=metrics,
-                                         pivots_dimensions="ga:country",
-                                         dimensions="ga:year", start_date=start_date,
-                                         end_date=end_date, format_type="pivot")
+        country = self.get_data(
+            view_id,
+            metrics=metrics,
+            pivots_dimensions="ga:country",
+            dimensions="ga:year",
+            start_date=start_date,
+            end_date=end_date,
+            format_type="pivot",
+        )
         country.columns = [ga_naming_to_title(c[0]) for c in country.columns]
         country = country.T
         country.reset_index(inplace=True)
@@ -176,19 +236,30 @@ class Views:
         """
         Format summary table.
         """
-        row_index_names = response['reports'][0]['columnHeader']['dimensions']
-        row_index = [element['dimensions'] for element in response['reports'][0]['data']['rows']]
-        row_index_named = pd.MultiIndex.from_arrays(np.transpose(np.array(row_index)),
-                                                    names = np.array(row_index_names))
+        row_index_names = response["reports"][0]["columnHeader"]["dimensions"]
+        row_index = [
+            element["dimensions"] for element in response["reports"][0]["data"]["rows"]
+        ]
+        row_index_named = pd.MultiIndex.from_arrays(
+            np.transpose(np.array(row_index)), names=np.array(row_index_names)
+        )
         # extract column names
-        summary_column_names = [item['name'] for item in response['reports'][0]
-                                ['columnHeader']['metricHeader']['metricHeaderEntries']]
+        summary_column_names = [
+            item["name"]
+            for item in response["reports"][0]["columnHeader"]["metricHeader"][
+                "metricHeaderEntries"
+            ]
+        ]
         # extract table values
-        summary_values = [element['metrics'][0]['values']
-                          for element in response['reports'][0]['data']['rows']]
-        return pd.DataFrame(data = np.array(summary_values),
-                        index = row_index_named,
-                        columns = summary_column_names).astype('float')
+        summary_values = [
+            element["metrics"][0]["values"]
+            for element in response["reports"][0]["data"]["rows"]
+        ]
+        return pd.DataFrame(
+            data=np.array(summary_values),
+            index=row_index_named,
+            columns=summary_column_names,
+        ).astype("float")
 
     @staticmethod
     def format_pivot(response):
@@ -196,23 +267,40 @@ class Views:
         Creates the final dataframe.
         """
         # extract table values
-        pivot_values = [item['metrics'][0]['pivotValueRegions'][0]['values']
-                        for item in response['reports'][0]['data']['rows']]
+        pivot_values = [
+            item["metrics"][0]["pivotValueRegions"][0]["values"]
+            for item in response["reports"][0]["data"]["rows"]
+        ]
         # create column index
-        top_header = [item['dimensionValues'] for item in response['reports'][0]
-                    ['columnHeader']['metricHeader']['pivotHeaders'][0]['pivotHeaderEntries']]
-        column_metrics = [item['metric']['name'] for item in response['reports'][0]
-                        ['columnHeader']['metricHeader']['pivotHeaders'][0]['pivotHeaderEntries']]
-        array = np.concatenate((np.array(top_header),
-                                np.array(column_metrics).reshape((len(column_metrics),1))),
-                            axis = 1)
+        top_header = [
+            item["dimensionValues"]
+            for item in response["reports"][0]["columnHeader"]["metricHeader"][
+                "pivotHeaders"
+            ][0]["pivotHeaderEntries"]
+        ]
+        column_metrics = [
+            item["metric"]["name"]
+            for item in response["reports"][0]["columnHeader"]["metricHeader"][
+                "pivotHeaders"
+            ][0]["pivotHeaderEntries"]
+        ]
+        array = np.concatenate(
+            (
+                np.array(top_header),
+                np.array(column_metrics).reshape((len(column_metrics), 1)),
+            ),
+            axis=1,
+        )
         column_index = pd.MultiIndex.from_arrays(np.transpose(array))
         # create row index
-        row_index_names = response['reports'][0]['columnHeader']['dimensions']
-        row_index = [ element['dimensions'] for element in response['reports'][0]['data']['rows']]
-        row_index_named = pd.MultiIndex.from_arrays(np.transpose(np.array(row_index)),
-                                                    names = np.array(row_index_names))
+        row_index_names = response["reports"][0]["columnHeader"]["dimensions"]
+        row_index = [
+            element["dimensions"] for element in response["reports"][0]["data"]["rows"]
+        ]
+        row_index_named = pd.MultiIndex.from_arrays(
+            np.transpose(np.array(row_index)), names=np.array(row_index_names)
+        )
         # combine into a dataframe
-        return pd.DataFrame(data = np.array(pivot_values),
-                        index = row_index_named,
-                        columns = column_index).astype('float')
+        return pd.DataFrame(
+            data=np.array(pivot_values), index=row_index_named, columns=column_index
+        ).astype("float")
