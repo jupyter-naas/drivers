@@ -1,3 +1,9 @@
+## 0.81.1 (2021-12-23)
+
+### Fix
+
+- add google analytics to init
+
 ## 0.81.0 (2021-12-23)
 
 ### Feat
