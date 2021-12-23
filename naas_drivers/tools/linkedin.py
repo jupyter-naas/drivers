@@ -191,6 +191,12 @@ class Profile(LinkedIn):
             for rows in lk_twiters:
                 lk_twiter = rows["name"]
                 break
+        lk_urls = ""
+        lk_websites = data.get("websites")
+        if lk_websites is not None:
+            for rows in lk_websites:
+                lk_url = rows["url"]
+                lk_urls = f"{lk_urls}{lk_url}, "
         result = {
             "PROFILE_URN": data.get("entityUrn", "").replace(
                 "urn:li:fs_contactinfo:", ""
@@ -202,7 +208,7 @@ class Profile(LinkedIn):
             "ADDRESS": data.get("address"),
             "TWITER": lk_twiter,
             "PHONENUMBER": lk_phone,
-            "WEBSITES": data.get("websites"),
+            "WEBSITES": lk_urls,
             "INTERESTS": data.get("interests"),
         }
         time.sleep(TIME_SLEEP)
@@ -253,8 +259,11 @@ class Network(LinkedIn):
         self.headers = headers
 
     def get_followers(self, start=0, count=100, limit=1000):
+        limit_init = limit
         df_followers = pd.DataFrame()
         while True:
+            if limit != -1 and limit < count:
+                count = limit
             req_url = f"{LINKEDIN_API}/network/getFollowers?start={start}&count={count}&limit={limit}"
             headers = {"Content-Type": "application/json"}
             res = requests.post(req_url, json=self.cookies, headers=headers)
@@ -264,17 +273,26 @@ class Network(LinkedIn):
                 res_json = {}
             else:
                 res_json = res.json()
+            if len(res_json) == 0:
+                break
             df = pd.DataFrame(res_json)
             df_followers = pd.concat([df_followers, df], axis=0)
-            start += limit
-            if len(df) == 0:
-                break
+            start += count
+            if limit != -1:
+                limit -= count
             time.sleep(TIME_SLEEP)
-        return df_followers.reset_index(drop=True)
+        df_followers = df_followers.drop_duplicates("PROFILE_URN").reset_index(
+            drop=True
+        )
+        if limit != -1:
+            df_followers = df_followers[:limit_init]
+        return df_followers
 
     def get_connections(self, start=0, count=100, limit=1000):
         df_connections = pd.DataFrame()
         while True:
+            if limit != -1 and limit < count:
+                count = limit
             req_url = f"{LINKEDIN_API}/network/getConnections?start={start}&count={count}&limit={limit}"
             headers = {"Content-Type": "application/json"}
             res = requests.post(req_url, json=self.cookies, headers=headers)
@@ -284,13 +302,18 @@ class Network(LinkedIn):
                 res_json = {}
             else:
                 res_json = res.json()
+            if len(res_json) == 0:
+                break
             df = pd.DataFrame(res_json)
             df_connections = pd.concat([df_connections, df], axis=0)
-            start += limit
-            if len(df) == 0:
-                break
+            start += count
+            if limit != -1:
+                limit -= count
             time.sleep(TIME_SLEEP)
-        return df_connections.reset_index(drop=True)
+        df_connections = df_connections.sort_values(
+            by="CREATED_AT", ascending=False
+        ).astype(str)
+        return df_connections.drop_duplicates().reset_index(drop=True)
 
 
 class Invitation(LinkedIn):
