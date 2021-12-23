@@ -9,6 +9,7 @@ from apiclient.discovery import build
 
 from naas_drivers.driver import InDriver, OutDriver
 
+
 # Helper function
 def ga_naming_to_title(ga_nanimg: str):
     name = ga_nanimg.split(":")[-1]
