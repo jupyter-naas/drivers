@@ -1,3 +1,10 @@
+## 0.81.2 (2021-12-23)
+
+### Fix
+
+- git pull
+- apply limit to followers and connections
+
 ## 0.81.1 (2021-12-23)
 
 ### Fix
