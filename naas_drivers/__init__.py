@@ -43,7 +43,7 @@ from naas_drivers.tools.googleanalytics import GoogleAnalytics
 import requests
 import os
 
-__version__ = "0.81.0"
+__version__ = "0.81.1"
 
 __github_repo = "jupyter-naas/drivers"
 
