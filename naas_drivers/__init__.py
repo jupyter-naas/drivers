@@ -38,6 +38,7 @@ from naas_drivers.tools.naas_credits import NaasCredits
 from naas_drivers.tools.budgetinsight import BudgetInsight
 from naas_drivers.tools.taggun import Taggun
 from naas_drivers.tools.youtube import Youtube
+from naas_drivers.tools.googleanalytics import GoogleAnalytics
 
 import requests
 import os
@@ -92,6 +93,7 @@ naascredits = NaasCredits()
 budgetinsight = BudgetInsight()
 taggun = Taggun()
 youtube = Youtube()
+googleanalytics = GoogleAnalytics()
 
 __doc_url = "https://naas.gitbook.io/drivers/"
 
