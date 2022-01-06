@@ -1,45 +1,4 @@
-from naas_drivers.tools.awesomenotebook import AwesomeNotebooks
-from naas_drivers.tools.yahoofinance import Yahoofinance
-from naas_drivers.tools.cityfalcon import Cityfalcon
-from naas_drivers.tools.geolocator import Geolocator
-from naas_drivers.tools.newsapi import Newsapi
-from naas_drivers.tools.prediction import Prediction
-from naas_drivers.tools.sentiment import Sentiment
-from naas_drivers.tools.optimise import Optimise
-from naas_drivers.tools.pdf import Pdf
-from naas_drivers.tools.plotly import Plotly
-from naas_drivers.tools.emailbuilder import EmailBuilder
-from naas_drivers.tools.qonto import Qonto
-from naas_drivers.tools.slack import Slack
-from naas_drivers.tools.teams import Teams
-from naas_drivers.tools.bubble import Bubble
-from naas_drivers.tools.healthcheck import Healthcheck
-from naas_drivers.tools.ifttt import Ifttt
-from naas_drivers.tools.integromat import Integromat
-from naas_drivers.tools.zapier import Zapier
-from naas_drivers.tools.email import Email
-from naas_drivers.tools.bobapp import Bobapp
-from naas_drivers.tools.airtable import Airtable
-from naas_drivers.tools.jupyter import Jupyter
-from naas_drivers.tools.ftp import Ftp
-from naas_drivers.tools.git import Git
-from naas_drivers.tools.gsheet import Gsheet
-from naas_drivers.tools.mongo import Mongo
-from naas_drivers.tools.toucan import Toucan
-from naas_drivers.tools.linkedin import LinkedIn
-from naas_drivers.tools.notion import Notion
-from naas_drivers.tools.hubspot import Hubspot
-from naas_drivers.tools.thinkific import Thinkific
-from naas_drivers.tools.markdown import Markdown
-from naas_drivers.tools.streamlit import Streamlit
-#from naas_drivers.tools.huggingface import Huggingface
-from naas_drivers.tools.naas_auth import NaasAuth
-from naas_drivers.tools.naas_credits import NaasCredits
-from naas_drivers.tools.budgetinsight import BudgetInsight
-from naas_drivers.tools.taggun import Taggun
-from naas_drivers.tools.youtube import Youtube
-from naas_drivers.tools.googleanalytics import GoogleAnalytics
-
+import sys
 import requests
 import os
 
@@ -47,70 +6,119 @@ __version__ = "0.81.2"
 
 __github_repo = "jupyter-naas/drivers"
 
+__doc_url = "https://naas.gitbook.io/drivers/"
+
 if os.environ.get("NAAS_DRIVER_LIGHT_INIT"):
     exit()
 
-# All drivers
-optimise = Optimise()
-cityfalcon = Cityfalcon()
-geolocator = Geolocator()
-newsapi = Newsapi()
-prediction = Prediction()
-sentiment = Sentiment()
-yahoofinance = Yahoofinance()
-pdf = Pdf()
-plotly = Plotly()
-emailbuilder = EmailBuilder()
-emailBuilder = EmailBuilder(True)
-templates = AwesomeNotebooks()
-html = EmailBuilder(True)
-markdown = Markdown()
-teams = Teams()
-slack = Slack()
-qonto = Qonto()
-#huggingface = Huggingface()
-naasauth = NaasAuth()
-bubble = Bubble()
-email = Email()
-healthcheck = Healthcheck()
-ifttt = Ifttt()
-integromat = Integromat()
-zapier = Zapier()
-streamlit = Streamlit()
-bobapp = Bobapp()
-airtable = Airtable()
-jupyter = Jupyter()
-ftp = Ftp()
-git = Git()
-gsheet = Gsheet()
-notion = Notion()
-mongo = Mongo()
-toucan = Toucan()
-linkedin = LinkedIn()
-hubspot = Hubspot()
-thinkific = Thinkific()
-naascredits = NaasCredits()
-budgetinsight = BudgetInsight()
-taggun = Taggun()
-youtube = Youtube()
-googleanalytics = GoogleAnalytics()
 
-__doc_url = "https://naas.gitbook.io/drivers/"
+class Drivers:
+    def __init__(self, props):
+        for prop in props:
+            prop_name, module_name, module_instance, params = prop
+            setattr(
+                self.__class__,
+                prop_name,
+                property(
+                    self.base_prop(prop_name, module_name, module_instance, params)
+                ),
+            )
 
+    def base_prop(self, prop_name, module_name, module_instance, params):
+        def base(self):
+            private_prop_name = f"__{prop_name}"
+            try:
+                getattr(self, private_prop_name)
+            except:  # noqa: E722
+                setattr(self, private_prop_name, None)
+            if getattr(self, private_prop_name) is None:
+                imported = __import__(module_name)
+                setattr(
+                    self,
+                    private_prop_name,
+                    getattr(imported, module_instance)(**params),
+                )
+            return getattr(self, private_prop_name)
 
-def doc():
-    return __doc_url
+        return base
+
+    def doc(self):
+        return __doc_url
+
+    def version(self):
+        print(__version__)
+
+    def get_last_version(self):
+        url = f"https://api.github.com/repos/{__github_repo}/tags"
+        response = requests.get(
+            url, headers={"Accept": "application/vnd.github.v3+json"}
+        )
+        return response.json()[0]["name"]
+
+    def up_to_date(self):
+        return self.get_last_version() == self.version()
 
 
-def version():
-    print(__version__)
+drivers = Drivers(
+    [
+        ("optimise", "naas_drivers.tools.optimise", "Optimise", {}),
+        ("cityfalcon", "naas_drivers.tools.cityfalcon", "Cityfalcon", {}),
+        ("geolocator", "naas_drivers.tools.geolocator", "Geolocator", {}),
+        ("newsapi", "naas_drivers.tools.newsapi", "Newsapi", {}),
+        ("prediction", "naas_drivers.tools.prediction", "Prediction", {}),
+        ("sentiment", "naas_drivers.tools.sentiment", "Sentiment", {}),
+        ("yahoofinance", "naas_drivers.tools.yahoofinance", "Yahoofinance", {}),
+        ("pdf", "naas_drivers.tools.pdf", "Pdf", {}),
+        ("plotly", "naas_drivers.tools.plotly", "Plotly", {}),
+        ("emailbuilder", "naas_drivers.tools.emailbuilder", "EmailBuilder", {}),
+        (
+            "emailBuilder",
+            "naas_drivers.tools.emailbuilder",
+            "EmailBuilder(True)",
+            {"deprecated": True},
+        ),
+        ("templates", "naas_drivers.tools.awesomenotebook", "AwesomeNotebooks", {}),
+        (
+            "html",
+            "naas_drivers.tools.emailbuilder",
+            "EmailBuilder(True)",
+            {"deprecated": True},
+        ),
+        ("markdown", "naas_drivers.tools.markdown", "Markdown", {}),
+        ("teams", "naas_drivers.tools.teams", "Teams", {}),
+        ("slack", "naas_drivers.tools.slack", "Slack", {}),
+        ("qonto", "naas_drivers.tools.qonto", "Qonto", {}),
+        ("naasauth", "naas_drivers.tools.naas_auth", "NaasAuth", {}),
+        ("bubble", "naas_drivers.tools.bubble", "Bubble", {}),
+        ("email", "naas_drivers.tools.email", "Email", {}),
+        ("healthcheck", "naas_drivers.tools.healthcheck", "Healthcheck", {}),
+        ("ifttt", "naas_drivers.tools.ifttt", "Ifttt", {}),
+        ("integromat", "naas_drivers.tools.integromat", "Integromat", {}),
+        ("zapier", "naas_drivers.tools.zapier", "Zapier", {}),
+        ("streamlit", "naas_drivers.tools.streamlit", "Streamlit", {}),
+        ("bobapp", "naas_drivers.tools.bobapp", "Bobapp", {}),
+        ("airtable", "naas_drivers.tools.airtable", "Airtable", {}),
+        ("jupyter", "naas_drivers.tools.jupyter", "Jupyter", {}),
+        ("ftp", "naas_drivers.tools.ftp", "Ftp", {}),
+        ("git", "naas_drivers.tools.git", "Git", {}),
+        ("gsheet", "naas_drivers.tools.gsheet", "Gsheet", {}),
+        ("notion", "naas_drivers.tools.notion", "Notion", {}),
+        ("mongo", "naas_drivers.tools.mongo", "Mongo", {}),
+        ("toucan", "naas_drivers.tools.toucan", "Toucan", {}),
+        ("linkedin", "naas_drivers.tools.linkedin", "LinkedIn", {}),
+        ("hubspot", "naas_drivers.tools.hubspot", "Hubspot", {}),
+        ("thinkific", "naas_drivers.tools.thinkific", "Thinkific", {}),
+        ("naascredits", "naas_drivers.tools.naas_credits", "NaasCredits", {}),
+        ("budgetinsight", "naas_drivers.tools.budgetinsight", "BudgetInsight", {}),
+        ("taggun", "naas_drivers.tools.taggun", "Taggun", {}),
+        ("youtube", "naas_drivers.tools.youtube", "Youtube", {}),
+        (
+            "googleanalytics",
+            "naas_drivers.tools.googleanalytics",
+            "GoogleAnalytics",
+            {},
+        ),
+    ]
+)
 
-
-def get_last_version():
-    url = f"https://api.github.com/repos/{__github_repo}/tags"
-    response = requests.get(url, headers={"Accept": "application/vnd.github.v3+json"})
-    return response.json()[0]["name"]
-
-
-def up_to_date():
-    return get_last_version() == version()
+sys.modules[__name__] = drivers
