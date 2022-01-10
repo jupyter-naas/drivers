@@ -1,3 +1,10 @@
+## 0.82.1 (2022-01-10)
+
+### Fix
+
+- **Notion**: Make database.query send back the whole database
+- **Notion**: Make database.query send back the whole database
+
 ## 0.82.0 (2022-01-10)
 
 ### Feat
