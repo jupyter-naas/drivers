@@ -2,7 +2,14 @@ from naas_drivers.driver import InDriver
 import requests
 import urllib.parse
 import traceback
-from IPython.core.display import display, Markdown
+
+from naas_drivers.driver import dependencies
+@dependencies(extra_requires = 'ipython')
+def dep():
+    global display
+    global Markdown
+    
+    from IPython.core.display import display, Markdown
 
 
 class AwesomeNotebooks(InDriver):

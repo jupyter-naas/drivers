@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 basic_text = "Not defined, it should to allow user to connect"
@@ -56,3 +57,14 @@ class OutDriver(ConnectDriver):
         self.check_connect()
         self.print_error(basic_error)
         return basic_error
+
+def dependencies(*args, **kwargs):
+    def wrapper(dep_load):
+        try:
+            dep_load()
+        except Exception as e:
+            cmd = f'pip install /home/ftp/drivers[{kwargs["extra_requires"]}]'
+            os.system(cmd)
+            dep_load()
+        
+    return wrapper

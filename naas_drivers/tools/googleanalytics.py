@@ -4,11 +4,17 @@ from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from google.oauth2 import service_account
-from apiclient.discovery import build
 
 from naas_drivers.driver import InDriver, OutDriver
 
+from naas_drivers.driver import dependencies
+@dependencies(extra_requires = 'google')
+def dep():
+    global service_account
+    global build
+
+    from google.oauth2 import service_account
+    from apiclient.discovery import build
 
 # Helper function
 def ga_naming_to_title(ga_nanimg: str):

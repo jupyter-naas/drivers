@@ -1,6 +1,10 @@
-import plotly.express as px
 import os
 import requests
+
+from naas_drivers.driver import dependencies
+@dependencies(extra_requires = 'plotly')
+def dep():
+    import plotly.express as px
 
 config = {"displayModeBar": False}
 

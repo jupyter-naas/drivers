@@ -1,7 +1,12 @@
 from naas_drivers.driver import InDriver, OutDriver
-from git import Repo
 import urllib.parse
 
+from naas_drivers.driver import dependencies
+@dependencies(extra_requires = 'git')
+def dep():
+    global Repo
+    
+    from git import Repo
 
 class Git(InDriver, OutDriver):
     def connect(self, config):

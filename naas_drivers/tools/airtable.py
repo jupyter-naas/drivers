@@ -1,6 +1,10 @@
 from naas_drivers.driver import InDriver, OutDriver
-from airtable import Airtable as at
 import pandas as pd
+
+from naas_drivers.driver import dependencies
+@dependencies(extra_requires = 'airtable')
+def dep():
+    from airtable import Airtable as at
 
 
 class Airtable(InDriver, OutDriver):

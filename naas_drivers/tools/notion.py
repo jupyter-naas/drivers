@@ -1,8 +1,6 @@
 from naas_drivers.driver import InDriver, OutDriver
-from notion_client import Client
 import dataclasses
 from dataclasses import dataclass, field
-from dacite import from_dict
 from typing import List, Optional, Union
 from numbers import Number
 from enum import Enum
@@ -12,6 +10,15 @@ from copy import deepcopy
 import pandas as pd
 import threading
 
+from naas_drivers.driver import dependencies
+@dependencies(extra_requires = 'notion')
+def dep():
+    global Client
+    global from_dict
+    
+    from notion_client import Client
+    from dacite import from_dict
+    
 VERSION = "2021-08-16"
 
 global notion_instance

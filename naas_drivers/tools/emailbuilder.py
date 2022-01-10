@@ -1,11 +1,20 @@
 from naas_drivers.driver import InDriver
-from htmlBuilder import tags, attributes
-import IPython.core.display
 import pandas as pd
 import requests
 import uuid
 import os
 import warnings
+
+from naas_drivers.driver import dependencies
+@dependencies(extra_requires = 'ipython,emailbuilder')
+def dep():
+    global tags
+    global attributes
+    
+    import IPython.core.display
+    import htmlBuilder
+    from htmlBuilder import tags, attributes
+    
 
 #  https://litmus.com/community/templates/31-accessible-product-announcement-email
 # https://github.com/rodriguezcommaj/accessible-emails

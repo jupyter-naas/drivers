@@ -1,7 +1,12 @@
 from naas_drivers.driver import InDriver
 import pandas as pd
-from geopy.extra.rate_limiter import RateLimiter
 
+from naas_drivers.driver import dependencies
+@dependencies(extra_requires = 'geolocator')
+def dep():
+    global RateLimiter
+    
+    from geopy.extra.rate_limiter import RateLimiter
 
 class Geolocator(InDriver):
     _key = None

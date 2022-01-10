@@ -2,6 +2,17 @@ import pandas as pd
 import numpy as np
 
 
+from naas_drivers.driver import dependencies
+@dependencies(extra_requires = 'prediction')
+def dep():
+    global pm
+    global SVR
+    global LinearRegression
+    
+    import pmdarima as pm
+    from sklearn.svm import SVR
+    from sklearn.linear_model import LinearRegression
+
 class Prediction:
     param_model_map = {"arima": "ARIMA", "linear": "LINEAR", "svr": "SVR"}
     # either all to predict using all the models else one of arima, svr or linear
@@ -72,7 +83,7 @@ class Prediction:
     def __createmodel(self, model_type, df):
 
         if model_type == "ARIMA":
-            import pmdarima as pm
+            #import pmdarima as pm
 
             model = pm.auto_arima(df[self.label], **self.model_params["arima"])
             predicted_values = model.predict(n_periods=self.data_points)
@@ -83,11 +94,11 @@ class Prediction:
             X = df[self.label].to_numpy().reshape(-1, 1)[: -self.data_points]
             y = prediction[: -self.data_points].ravel()
             if model_type == "SVR":
-                from sklearn.svm import SVR
+                #from sklearn.svm import SVR
 
                 model = SVR(**self.model_params["svr"])
             else:
-                from sklearn.linear_model import LinearRegression
+                #from sklearn.linear_model import LinearRegression
 
                 model = LinearRegression(**self.model_params["linear"])
             model.fit(X, y)
