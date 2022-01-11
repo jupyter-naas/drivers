@@ -544,9 +544,9 @@ class Post(LinkedIn):
                 for t in tag:
                     if not t.isalpha() and not t.isnumeric() and t != "#":
                         check_tag = False
-                    if check_tag == False:
+                    if check_tag is False:
                         break
-                if check_tag == False:
+                if check_tag is False:
                     tag = tag.rsplit(t)[0]
                 tags = f"{tags}{tag} "
             tags = tags.strip()
