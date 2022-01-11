@@ -550,7 +550,7 @@ class Post(LinkedIn):
                     tag = tag.rsplit(t)[0]
                 tags = f"{tags}{tag} "
             tags = tags.strip()
-            result[f"TAGS"] = tags
+            result["TAGS"] = tags
             for elem in data.get("updateMetadata", {}).get("actions", []):
                 if data.get("url") is not None:
                     result["URL"] = elem.get("url")
