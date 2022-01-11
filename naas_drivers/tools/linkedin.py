@@ -5,6 +5,7 @@ import time
 import urllib
 from datetime import datetime, timedelta
 import secrets
+import re
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -502,23 +503,26 @@ class Post(LinkedIn):
                 if t[-1:] == "h":
                     date_approx = (
                         datetime.now() - timedelta(hours=int(t[:-1]))
-                    ).strftime(DATE_FORMAT)
+                    ).strftime(DATETIME_FORMAT)
                 if t[-1:] == "d":
                     date_approx = (
                         datetime.now() - timedelta(days=int(t[:-1]))
-                    ).strftime(DATE_FORMAT)
+                    ).strftime(DATETIME_FORMAT)
                 if t[-1:] == "w":
                     date_approx = (
                         datetime.now() - timedelta(weeks=int(t[:-1]))
-                    ).strftime(DATE_FORMAT)
+                    ).strftime(DATETIME_FORMAT)
                 if t[-2:] == "mo":
                     date_approx = (
                         datetime.now() - timedelta(days=int(t[:-2]) * 30)
-                    ).strftime(DATE_FORMAT)
+                    ).strftime(DATETIME_FORMAT)
                 if t[-2:] == "yr":
                     date_approx = (
                         datetime.now() - timedelta(days=int(t[:-2]) * 360)
-                    ).strftime(DATE_FORMAT)
+                    ).strftime(DATETIME_FORMAT)
+            text = data.get("commentary", {}).get("text", {}).get("text", "")
+            tags_list = re.findall("#[^#| ]+[a-zA-Z0-9]", text)
+            tags_count = len(tags_list)
             result = {
                 "POST_URN": data.get("updateMetadata", {})
                 .get("urn")
@@ -528,26 +532,29 @@ class Post(LinkedIn):
                 .get("text", {})
                 .get("text", "")
                 .rsplit("\n")[0],
-                "TEXT": data.get("commentary", {})
-                .get("text", {})
-                .get("text", "")
-                .replace("\n", ""),
+                "TEXT": text,
                 "TIME_DELTA": t,
                 "DATE_APPROX": date_approx,
-                #                 "TAGS_COUNT": data.get("commentary", {})
-                #                 .get("text", {})
-                #                 .get("text")
-                #                 .count("#"),
+                "TAGS_COUNT": tags_count,
             }
-        #             for i in range(1, result.get("TAGS_COUNT", 1)):
-        #                 tag = result.get("TEXT", "").rsplit("#")[i]
-        #                 for x in [" ", "\n", ".", ","]:
-        #                     tag = tag.rsplit(x)[0]
-        #                 result[f"TAG_{i}"] = tag
-        #             for elem in data.get("updateMetadata", {}).get("actions", []):
-        #                 if data.get("url") is not None:
-        #                     result["URL"] = elem.get("url")
-        #                     break
+            tags = ""
+            for i in range(0, len(tags_list)):
+                tag = tags_list[i]
+                check_tag = True
+                for t in tag:
+                    if not t.isalpha() and not t.isnumeric() and t != "#":
+                        check_tag = False
+                    if check_tag is False:
+                        break
+                if check_tag is False:
+                    tag = tag.rsplit(t)[0]
+                tags = f"{tags}{tag} "
+            tags = tags.strip()
+            result["TAGS"] = tags
+            for elem in data.get("updateMetadata", {}).get("actions", []):
+                if data.get("url") is not None:
+                    result["URL"] = elem.get("url")
+                    break
         return result
 
     def __get_social_detail(self, data):
