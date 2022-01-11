@@ -1,3 +1,13 @@
+## 0.82.2 (2022-01-11)
+
+### Fix
+
+- add tags and date from post stats
+- comparison to False should be 'if cond is False:' or 'if not cond:'
+- remove f-string
+- remove comment on post stats
+- add tags and improve linkedin post stats
+
 ## 0.82.1 (2022-01-10)
 
 ### Fix
