@@ -333,7 +333,6 @@ class Profile(LinkedIn):
             keys = [k for k, v in until.items()]
         # Loop init
         start = 0
-        pagination_token = None
         df = pd.DataFrame()
         while True:
             if limit != -1 and start > limit - 1:
