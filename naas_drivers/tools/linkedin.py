@@ -381,7 +381,7 @@ class Profile(LinkedIn):
             "Europe/Paris"
         )
         df.PUBLISHED_DATE = df.PUBLISHED_DATE.astype(str)
-        return df
+        return df.reset_index(drop=True)
 
 
 class Network(LinkedIn):
