@@ -233,7 +233,7 @@ class Profile(LinkedIn):
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
 
-    def get_posts_stats(self, profile_url=None, profile_urn=None):
+    def get_posts_stats(self, profile_url, profile_urn=None):
         res_json = {}
         if profile_urn is None:
             profile_urn = LinkedIn.get_profile_urn(self, profile_url)
@@ -251,6 +251,127 @@ class Profile(LinkedIn):
         df = pd.DataFrame(res_json)
         time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
+
+    def get_posts_feed(
+        self, profile_url, profile_id=None, limit=10, until={}, sleep=True
+    ):
+        """
+        Return an dataframe object with 29 columns:
+        - ACTIVITY_ID       object
+        - PUBLISHED_DATE    object
+        - AUTHOR_NAME       object
+        - SUBDESCRIPTION    object
+        - TITLE             object
+        - TEXT              object
+        - CHARACTER_COUNT   int64
+        - TAGS              object
+        - TAGS_COUNT        int64
+        - EMOJIS            object
+        - EMOJIS_COUNT      int64
+        - LINKS             object
+        - LINKS_COUNT       int64
+        - PROFILE_MENTION   object
+        - COMPANY_MENTION   object
+        - CONTENT           object
+        - CONTENT_TITLE     object
+        - CONTENT_URL       object
+        - CONTENT_URN       object
+        - IMAGE_URL         object
+        - POLL_URN          object
+        - POLL_QUESTION     object
+        - POLL_RESULTS      object
+        - POST_URL          object
+        - VIEWS             int64
+        - COMMENTS          int64
+        - LIKES             int64
+        - SHARES            int64
+        - ENGAGEMENT_SCORE  float64
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile url from Linkedin.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+
+        profile_id: str (default None):
+            Linkedin unique profile id identifier
+            Example : "ACoAABCNSioBW3YZHc2lBHVG0E_TXYWitQkmwog"
+
+        limit: int (default 10):
+            Number of posts return by function. It will start with the most recent post.
+
+        until: dict (default {})
+            Dict to be set by end user to limit function:
+            - key must a columns of the dataframe
+            - value must exists in key columns
+            Example : "{"POST_URL": "https://www.linkedin.com/posts/naas-ai_opensource-data-activity-6890025972754710529-akfv"
+
+        sleep: boolean (default True):
+            Sleeping time between function will be randomly between 3 to 5 seconds.
+
+        """
+        # Get profile
+        if profile_id is None:
+            profile_id = LinkedIn.get_profile_urn(self, profile_url)
+            if profile_id is None:
+                return "Please enter a valid profile_url or profile_urn"
+        # Until init
+        until_check = False
+        keys = []
+        if isinstance(until, dict) and len(until) > 0:
+            keys = [k for k, v in until.items()]
+        # Loop init
+        start = 0
+        pagination_token = None
+        df = pd.DataFrame()
+        while True:
+            if limit != -1 and start > limit - 1:
+                break
+            if pagination_token is not None:
+                req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&start={start}&pagination_token={pagination_token}"
+            else:
+                req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&start={start}"
+            headers = {"Content-Type": "application/json"}
+            res = requests.post(req_url, json=self.cookies, headers=headers)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                return e
+            else:
+                res_json = res.json()
+            if len(res_json) == 0:
+                break
+            # Get response in dataframe
+            tmp_df = pd.DataFrame(res_json)
+
+            # Check until limit
+            for k in keys:
+                v = until.get(k)
+                if k in tmp_df.columns:
+                    values = tmp_df[k].astype(str).unique().tolist()
+                    if str(v) in values:
+                        until_check = True
+                        break
+            # Get pagination token + update start
+            pagination_token = tmp_df.loc[0, "PAGINATION_TOKEN"]
+            start += 1
+
+            # Concat dataframe
+            df = pd.concat([df, tmp_df], axis=0)
+
+            # Break if until condition is True
+            if until_check:
+                break
+            # Time sleep to avoid linkedin ban
+            if sleep:
+                time.sleep(TIME_SLEEP)
+        # Cleaning
+        df = df.drop("PAGINATION_TOKEN", axis=1)
+        df.PUBLISHED_DATE = pd.to_datetime(df.PUBLISHED_DATE).dt.tz_localize(
+            "Europe/Paris"
+        )
+        df.PUBLISHED_DATE = df.PUBLISHED_DATE.astype(str)
+        return df
 
 
 class Network(LinkedIn):
