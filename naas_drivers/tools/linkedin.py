@@ -253,38 +253,45 @@ class Profile(LinkedIn):
         return df.reset_index(drop=True)
 
     def get_posts_feed(
-        self, profile_url, profile_id=None, limit=10, until={}, sleep=True
+        self,
+        profile_url,
+        profile_id=None,
+        limit=10,
+        until={},
+        sleep=True,
+        pagination_token=None
     ):
         """
-        Return an dataframe object with 29 columns:
+        Return an dataframe object with 30 columns:
         - ACTIVITY_ID       object
-        - PUBLISHED_DATE    object
-        - AUTHOR_NAME       object
-        - SUBDESCRIPTION    object
-        - TITLE             object
-        - TEXT              object
-        - CHARACTER_COUNT   int64
-        - TAGS              object
-        - TAGS_COUNT        int64
-        - EMOJIS            object
-        - EMOJIS_COUNT      int64
-        - LINKS             object
-        - LINKS_COUNT       int64
-        - PROFILE_MENTION   object
-        - COMPANY_MENTION   object
-        - CONTENT           object
-        - CONTENT_TITLE     object
-        - CONTENT_URL       object
-        - CONTENT_URN       object
-        - IMAGE_URL         object
-        - POLL_URN          object
-        - POLL_QUESTION     object
+        - PAGINATION_TOKEN  object
+        - PUBLISHED_DATE    object 
+        - AUTHOR_NAME       object 
+        - SUBDESCRIPTION    object 
+        - TITLE             object 
+        - TEXT              object 
+        - CHARACTER_COUNT   int64  
+        - TAGS              object 
+        - TAGS_COUNT        int64  
+        - EMOJIS            object 
+        - EMOJIS_COUNT      int64  
+        - LINKS             object 
+        - LINKS_COUNT       int64  
+        - PROFILE_MENTION   object 
+        - COMPANY_MENTION   object 
+        - CONTENT           object 
+        - CONTENT_TITLE     object 
+        - CONTENT_URL       object 
+        - CONTENT_URN       object 
+        - IMAGE_URL         object 
+        - POLL_URN          object 
+        - POLL_QUESTION     object 
         - POLL_RESULTS      object
-        - POST_URL          object
-        - VIEWS             int64
-        - COMMENTS          int64
-        - LIKES             int64
-        - SHARES            int64
+        - POST_URL          object 
+        - VIEWS             int64  
+        - COMMENTS          int64  
+        - LIKES             int64  
+        - SHARES            int64  
         - ENGAGEMENT_SCORE  float64
 
         Parameters
@@ -308,6 +315,10 @@ class Profile(LinkedIn):
 
         sleep: boolean (default True):
             Sleeping time between function will be randomly between 3 to 5 seconds.
+
+        pagination_token: str (default None):
+            Token related to post used to start function from this post. 
+            If None, function starts from the last post.
 
         """
         # Get profile
@@ -366,7 +377,6 @@ class Profile(LinkedIn):
             if sleep:
                 time.sleep(TIME_SLEEP)
         # Cleaning
-        df = df.drop("PAGINATION_TOKEN", axis=1)
         df.PUBLISHED_DATE = pd.to_datetime(df.PUBLISHED_DATE).dt.tz_localize(
             "Europe/Paris"
         )
