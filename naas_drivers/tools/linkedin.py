@@ -233,29 +233,11 @@ class Profile(LinkedIn):
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
 
-    def get_posts_stats(self, profile_url, profile_urn=None):
-        res_json = {}
-        if profile_urn is None:
-            profile_urn = LinkedIn.get_profile_urn(self, profile_url)
-            if profile_urn is None:
-                return "Please enter a valid profile_url or profile_urn"
-        req_url = f"{LINKEDIN_API}/profile/getPostsStats?profile_urn={profile_urn}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        else:
-            res_json = res.json()
-        df = pd.DataFrame(res_json)
-        time.sleep(TIME_SLEEP)
-        return df.reset_index(drop=True)
-
     def get_posts_feed(
         self,
         profile_url,
         profile_id=None,
+        count=1,
         limit=10,
         until={},
         sleep=True,
@@ -303,10 +285,13 @@ class Profile(LinkedIn):
         profile_id: str (default None):
             Linkedin unique profile id identifier
             Example : "ACoAABCNSioBW3YZHc2lBHVG0E_TXYWitQkmwog"
+            
+        count: int (default 1, max 100):
+            Number of requests sent to LinkedIn API.
+            (!) If count > 1, published date will not be returned.
 
-        limit: int (default 10):
+        limit: int (default 10, unlimited=-1):
             Number of posts return by function. It will start with the most recent post.
-            Use -1 to get the entire posts feed.
 
         until: dict (default {})
             Dict to be set by end user to limit function:
@@ -332,16 +317,19 @@ class Profile(LinkedIn):
         keys = []
         if isinstance(until, dict) and len(until) > 0:
             keys = [k for k, v in until.items()]
+
         # Loop init
         start = 0
         df = pd.DataFrame()
         while True:
+            if count > limit:
+                limit = count
             if limit != -1 and start > limit - 1:
                 break
             if pagination_token is not None:
-                req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&start={start}&pagination_token={pagination_token}"
+                req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&count={count}&pagination_token={pagination_token}"
             else:
-                req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&start={start}"
+                req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&count={count}"
             headers = {"Content-Type": "application/json"}
             res = requests.post(req_url, json=self.cookies, headers=headers)
             try:
@@ -365,7 +353,7 @@ class Profile(LinkedIn):
                         break
             # Get pagination token + update start
             pagination_token = tmp_df.loc[0, "PAGINATION_TOKEN"]
-            start += 1
+            start += count
 
             # Concat dataframe
             df = pd.concat([df, tmp_df], axis=0)
