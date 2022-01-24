@@ -5,7 +5,6 @@ import time
 import urllib
 from datetime import datetime, timedelta
 import secrets
-import re
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
