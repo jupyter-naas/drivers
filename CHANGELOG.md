@@ -1,3 +1,18 @@
+## 0.83.0 (2022-01-24)
+
+### Feat
+
+- linkedin get posts feed
+- linkedin get posts feed with count > 1
+- linkedin get posts feed add reset index to dataframe
+- linkedin get posts feed
+
+### Fix
+
+- linkedin get posts feed remove pagination_token in code
+- linkedin get posts feed remove pagination token from code
+- linkedin posts feed add pagination token as parameter
+
 ## 0.82.2 (2022-01-11)
 
 ### Fix
