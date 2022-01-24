@@ -638,7 +638,8 @@ class Post(LinkedIn):
         ----------
         post_url: str:
             Post url from Linkedin.
-            Example : "https://www.linkedin.com/posts/j%C3%A9r%C3%A9my-ravenel-8a396910_thoughts-monday-work-activity-6891437034473426945-OOOg"
+            Example : "https://www.linkedin.com/posts/j%C3%A9r%C3%A9my-ravenel-8a396910_"
+                      "thoughts-monday-work-activity-6891437034473426945-OOOg"
 
         activity_id: str (default None):
             Linkedin unique post id identifier
