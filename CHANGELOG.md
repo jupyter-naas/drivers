@@ -1,3 +1,13 @@
+## 0.83.1 (2022-01-24)
+
+### Fix
+
+- get stats from posts (test with polls)
+- remove import package timedelta from datetime
+- remove import re
+- split docstring for lint
+- get stats from posts (test with polls)
+
 ## 0.83.0 (2022-01-24)
 
 ### Feat
