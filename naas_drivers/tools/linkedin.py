@@ -3,9 +3,8 @@ import pandas as pd
 import requests
 import time
 import urllib
-from datetime import datetime, timedelta
+from datetime import datetime
 import secrets
-import re
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -21,15 +20,16 @@ TIME_SLEEP = secrets.randbelow(3) + 2
 class LinkedIn(InDriver, OutDriver):
     deprecated = True
 
+    @staticmethod
+    def get_activity_id(url):
+        return url.split("activity-")[-1].split("-")[0]
+
     def print_deprecated(self, new_funct):
         if self.deprected:
             print(f"This function is deprecated, please use {new_funct}")
 
     def get_profile_id(self, url):
         return url.rsplit("/in/")[-1].rsplit("/")[0]
-
-    def get_activity_id(self, url):
-        return url.split("activity-")[-1].split("-")[0]
 
     def get_profile_urn(self, url):
         lk_id = self.get_profile_id(url)
@@ -241,39 +241,39 @@ class Profile(LinkedIn):
         limit=10,
         until={},
         sleep=True,
-        pagination_token=None
+        pagination_token=None,
     ):
         """
         Return an dataframe object with 30 columns:
         - ACTIVITY_ID       object
         - PAGINATION_TOKEN  object
-        - PUBLISHED_DATE    object 
-        - AUTHOR_NAME       object 
-        - SUBDESCRIPTION    object 
-        - TITLE             object 
-        - TEXT              object 
-        - CHARACTER_COUNT   int64  
-        - TAGS              object 
-        - TAGS_COUNT        int64  
-        - EMOJIS            object 
-        - EMOJIS_COUNT      int64  
-        - LINKS             object 
-        - LINKS_COUNT       int64  
-        - PROFILE_MENTION   object 
-        - COMPANY_MENTION   object 
-        - CONTENT           object 
-        - CONTENT_TITLE     object 
-        - CONTENT_URL       object 
-        - CONTENT_URN       object 
-        - IMAGE_URL         object 
-        - POLL_URN          object 
-        - POLL_QUESTION     object 
+        - PUBLISHED_DATE    object
+        - AUTHOR_NAME       object
+        - SUBDESCRIPTION    object
+        - TITLE             object
+        - TEXT              object
+        - CHARACTER_COUNT   int64
+        - TAGS              object
+        - TAGS_COUNT        int64
+        - EMOJIS            object
+        - EMOJIS_COUNT      int64
+        - LINKS             object
+        - LINKS_COUNT       int64
+        - PROFILE_MENTION   object
+        - COMPANY_MENTION   object
+        - CONTENT           object
+        - CONTENT_TITLE     object
+        - CONTENT_URL       object
+        - CONTENT_URN       object
+        - IMAGE_URL         object
+        - POLL_URN          object
+        - POLL_QUESTION     object
         - POLL_RESULTS      object
-        - POST_URL          object 
-        - VIEWS             int64  
-        - COMMENTS          int64  
-        - LIKES             int64  
-        - SHARES            int64  
+        - POST_URL          object
+        - VIEWS             int64
+        - COMMENTS          int64
+        - LIKES             int64
+        - SHARES            int64
         - ENGAGEMENT_SCORE  float64
 
         Parameters
@@ -285,7 +285,7 @@ class Profile(LinkedIn):
         profile_id: str (default None):
             Linkedin unique profile id identifier
             Example : "ACoAABCNSioBW3YZHc2lBHVG0E_TXYWitQkmwog"
-            
+
         count: int (default 1, max 100):
             Number of requests sent to LinkedIn API.
             (!) If count > 1, published date will not be returned.
@@ -303,7 +303,7 @@ class Profile(LinkedIn):
             Sleeping time between function will be randomly between 3 to 5 seconds.
 
         pagination_token: str (default None):
-            Token related to post used to start function from this post. 
+            Token related to post used to start function from this post.
             If None, function starts from the last post.
 
         """
@@ -317,7 +317,6 @@ class Profile(LinkedIn):
         keys = []
         if isinstance(until, dict) and len(until) > 0:
             keys = [k for k, v in until.items()]
-
         # Loop init
         start = 0
         df = pd.DataFrame()
@@ -602,147 +601,64 @@ class Post(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def __get_post_update(self, data):
-        result = None
-        if data.get(
-            "$type"
-        ) == "com.linkedin.voyager.feed.render.UpdateV2" and data.get("commentary"):
-            # Get post url
-            post_url = None
-            actions = data.get("updateMetadata", {}).get("actions", {})
-            for action in actions:
-                if action.get("$type") == "com.linkedin.voyager.feed.actions.Action":
-                    post_url = action.get("url")
-                    if post_url is not None:
-                        break
-            # Get time delta & month
-            time_delta = data.get("actor", {}).get("subDescription", {}).get("text", {})
-            if time_delta is not None:
-                t = time_delta.rsplit(" •")[0]
-                if t[-1:] == "h":
-                    date_approx = (
-                        datetime.now() - timedelta(hours=int(t[:-1]))
-                    ).strftime(DATETIME_FORMAT)
-                if t[-1:] == "d":
-                    date_approx = (
-                        datetime.now() - timedelta(days=int(t[:-1]))
-                    ).strftime(DATETIME_FORMAT)
-                if t[-1:] == "w":
-                    date_approx = (
-                        datetime.now() - timedelta(weeks=int(t[:-1]))
-                    ).strftime(DATETIME_FORMAT)
-                if t[-2:] == "mo":
-                    date_approx = (
-                        datetime.now() - timedelta(days=int(t[:-2]) * 30)
-                    ).strftime(DATETIME_FORMAT)
-                if t[-2:] == "yr":
-                    date_approx = (
-                        datetime.now() - timedelta(days=int(t[:-2]) * 360)
-                    ).strftime(DATETIME_FORMAT)
-            text = data.get("commentary", {}).get("text", {}).get("text", "")
-            tags_list = re.findall("#[^#| ]+[a-zA-Z0-9]", text)
-            tags_count = len(tags_list)
-            result = {
-                "POST_URN": data.get("updateMetadata", {})
-                .get("urn")
-                .replace("urn:li:activity:", ""),
-                "POST_URL": post_url,
-                "TITLE": data.get("commentary", {})
-                .get("text", {})
-                .get("text", "")
-                .rsplit("\n")[0],
-                "TEXT": text,
-                "TIME_DELTA": t,
-                "DATE_APPROX": date_approx,
-                "TAGS_COUNT": tags_count,
-            }
-            tags = ""
-            for i in range(0, len(tags_list)):
-                tag = tags_list[i]
-                check_tag = True
-                for t in tag:
-                    if not t.isalpha() and not t.isnumeric() and t != "#":
-                        check_tag = False
-                    if check_tag is False:
-                        break
-                if check_tag is False:
-                    tag = tag.rsplit(t)[0]
-                tags = f"{tags}{tag} "
-            tags = tags.strip()
-            result["TAGS"] = tags
-            for elem in data.get("updateMetadata", {}).get("actions", []):
-                if data.get("url") is not None:
-                    result["URL"] = elem.get("url")
-                    break
-        return result
+    def get_stats(self, post_url, activity_id=None):
+        """
+        Return an dataframe object with 28 columns:
+        - ACTIVITY_ID       object
+        - AUTHOR_NAME       object
+        - SUBDESCRIPTION    object
+        - TITLE             object
+        - TEXT              object
+        - CHARACTER_COUNT   int64
+        - TAGS              object
+        - TAGS_COUNT        int64
+        - EMOJIS            object
+        - EMOJIS_COUNT      int64
+        - LINKS             object
+        - LINKS_COUNT       int64
+        - PROFILE_MENTION   object
+        - COMPANY_MENTION   object
+        - CONTENT           object
+        - CONTENT_TITLE     object
+        - CONTENT_URL       object
+        - CONTENT_URN       object
+        - IMAGE_URL         object
+        - POLL_URN          object
+        - POLL_QUESTION     object
+        - POLL_RESULTS      object
+        - POST_URL          object
+        - VIEWS             int64
+        - COMMENTS          int64
+        - LIKES             int64
+        - SHARES            int64
+        - ENGAGEMENT_SCORE  float64
 
-    def __get_social_detail(self, data):
-        result = None
-        if data.get("$type") == "com.linkedin.voyager.feed.SocialDetail":
-            result = {
-                "POST_URN": data.get("urn").replace("urn:li:activity:", ""),
-                "LIKES": data.get("likes", {}).get("paging", {}).get("total", 0),
-                "DIRECT_COMMENTS": data.get("comments", {})
-                .get("paging", {})
-                .get("total", 0),
-            }
-            if "urn:li:ugcPost:" in result["POST_URN"]:
-                result = None
-        return result
+        Parameters
+        ----------
+        post_url: str:
+            Post url from Linkedin.
+            Example : "https://www.linkedin.com/posts/j%C3%A9r%C3%A9my-ravenel-8a396910_"
+                      "thoughts-monday-work-activity-6891437034473426945-OOOg"
 
-    def __get_social_activity_count(self, data, activity_id=None):
-        result = None
-        if data.get(
-            "$type"
-        ) == "com.linkedin.voyager.feed.shared.SocialActivityCounts" and (
-            activity_id is None
-            or activity_id == data.get("urn").replace("urn:li:activity:", "")
-        ):
-            result = {
-                "POST_URN": data.get("urn").replace("urn:li:activity:", ""),
-                "COMMENTS": data.get("numComments", 0),
-                "LIKES": data.get("numLikes", 0),
-                "VIEWS": data.get("numViews", 0),
-            }
-            if data.get("reactionTypeCounts", []):
-                for elem in data.get("reactionTypeCounts", []):
-                    result[f'LIKES_{elem.get("reactionType")}'] = elem.get("count", 0)
-        return result
+        activity_id: str (default None):
+            Linkedin unique post id identifier
+            Example : "6891437034473426945"
 
-    def get_stats(self, post_url=None, activity_id=None):
-        if post_url is not None:
-            activity_id = self.get_activity_id(post_url)
+        """
+        # Get profile
         if activity_id is None:
-            return "Please enter a valid post url"
-        post = requests.get(
-            f"https://www.linkedin.com/voyager/api/feed/updates/urn:li:activity:{activity_id}",
-            cookies=self.cookies,
-            headers=self.headers,
-        ).json()
-
-        included = post.get("included")
-        update = []
-        social = []
-        activity = []
-        for include in included:
-            u = self.__get_post_update(include)
-            if u is not None:
-                update.append(u)
-            s = self.__get_social_detail(include)
-            if s is not None:
-                social.append(s)
-            a = self.__get_social_activity_count(include, activity_id)
-            if a is not None:
-                activity.append(a)
-        # Set up dataframe
-        df_update = pd.DataFrame(update)
-        df_social = pd.DataFrame(social)
-        df_activity = pd.DataFrame(activity)
-
-        # Merge
-        df = pd.merge(df_update, df_social, on=["POST_URN"], how="left")
-        df = pd.merge(df, df_activity, on=["POST_URN", "LIKES"], how="left")
-        return df
+            activity_id = LinkedIn.get_activity_id(post_url)
+            if activity_id is None:
+                return "Please enter a valid post_url or activity_id"
+        req_url = f"{LINKEDIN_API}/post/getStats?activity_id={activity_id}"
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(req_url, json=self.cookies, headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return e
+        res_json = res.json()
+        return pd.DataFrame(res_json)
 
     def get_comments(self, post_url):
         req_url = f"{LINKEDIN_API}/post/getComments?post_link={post_url}"
