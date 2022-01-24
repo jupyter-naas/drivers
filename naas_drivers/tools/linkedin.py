@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 import time
 import urllib
-from datetime import datetime, timedelta
+from datetime import datetime
 import secrets
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
