@@ -306,6 +306,7 @@ class Profile(LinkedIn):
 
         limit: int (default 10):
             Number of posts return by function. It will start with the most recent post.
+            Use -1 to get the entire posts feed.
 
         until: dict (default {})
             Dict to be set by end user to limit function:
