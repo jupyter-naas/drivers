@@ -264,9 +264,9 @@ class Profile(LinkedIn):
         - CONTENT           object
         - CONTENT_TITLE     object
         - CONTENT_URL       object
-        - CONTENT_URN       object
+        - CONTENT_ID        object
         - IMAGE_URL         object
-        - POLL_URN          object
+        - POLL_ID           object
         - POLL_QUESTION     object
         - POLL_RESULTS      object
         - POST_URL          object
@@ -621,9 +621,9 @@ class Post(LinkedIn):
         - CONTENT           object
         - CONTENT_TITLE     object
         - CONTENT_URL       object
-        - CONTENT_URN       object
+        - CONTENT_ID        object
         - IMAGE_URL         object
-        - POLL_URN          object
+        - POLL_ID           object
         - POLL_QUESTION     object
         - POLL_RESULTS      object
         - POST_URL          object
@@ -657,6 +657,46 @@ class Post(LinkedIn):
             res.raise_for_status()
         except requests.HTTPError as e:
             return e
+        res_json = res.json()
+        return pd.DataFrame(res_json)
+    
+    def get_polls(self, post_url, activity_id=None):
+        """
+        Return an dataframe object with 8 columns:
+        - PROFILE_ID            object
+        - PUBLIC_ID             object
+        - FIRSTNAME             object
+        - FULLNAME              object
+        - OCCUPATION            object
+        - PROFILE_PICTURE       object 
+        - BACKGROUND_PICTURE    object
+        - POLL_RESULT           object 
+
+        Parameters
+        ----------
+        post_url: str:
+            Post url from Linkedin.
+            Example : "https://www.linkedin.com/posts/j%C3%A9r%C3%A9my-ravenel-8a396910_"
+                      "thoughts-monday-work-activity-6891437034473426945-OOOg"
+
+        activity_id: str (default None):
+            Linkedin unique post id identifier
+            Example : "6891437034473426945"
+
+        """
+        # Get profile
+        if activity_id is None:
+            activity_id = LinkedIn.get_activity_id(post_url)
+            if activity_id is None:
+                return "Please enter a valid post_url or activity_id"
+
+        req_url = f"{LINKEDIN_API}/post/getPolls?activity_id={activity_id}"
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(req_url, json=self.cookies, headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return(e)    
         res_json = res.json()
         return pd.DataFrame(res_json)
 
