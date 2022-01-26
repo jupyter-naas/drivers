@@ -64,7 +64,9 @@ def dependencies(*args, **kwargs):
         try:
             dep_load()
         except Exception:
-            cmd = f'pip install /home/ftp/drivers[{kwargs["extra_requires"]}]'
+            naas_drivers_path = "/".join(__file__.split("/")[:-2])
+            cmd = f'pip install {naas_drivers_path}[{kwargs["extra_requires"]}]'
+            print(cmd)
             os.system(cmd)
             dep_load()
 
