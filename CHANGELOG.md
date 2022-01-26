@@ -1,3 +1,14 @@
+## 0.84.0 (2022-01-26)
+
+### Feat
+
+- linkedin get polls result from post
+- linkedin get polls result from post
+
+### Fix
+
+- lint
+
 ## 0.83.2 (2022-01-26)
 
 ### Fix
