@@ -66,7 +66,7 @@ class Git(InDriver, OutDriver):
         username=None,
         password=None,
     ):
-        """ Clone the repo (dest_dir='gitSource', branch="master", repourl=None, username=None, password=None)"""
+        """Clone the repo (dest_dir='gitSource', branch="master", repourl=None, username=None, password=None)"""
         self.check_connect()
         if repourl[0:3] == "git":
             Repo.clone_from(repourl, dest_dir, branch=branch)
@@ -79,7 +79,7 @@ class Git(InDriver, OutDriver):
         print("Clone successful")
 
     def commit(self, from_dir, branch, message="Auto commit"):
-        """ Commit the files commit(from_dir,branch,message="Auto Commit Message")"""
+        """Commit the files commit(from_dir,branch,message="Auto Commit Message")"""
         self.check_connect()
         repo = Repo(from_dir)
         repo.git.execute(["git", "add", "--all"])
@@ -89,7 +89,7 @@ class Git(InDriver, OutDriver):
         return repo.remote()
 
     def push(self, from_dir, branch="master"):
-        """ Push to the specified repository push(self,from_dir,branch="master")"""
+        """Push to the specified repository push(self,from_dir,branch="master")"""
         self.check_connect()
         self.checkout(from_dir, branch)
         origin = self.commit(from_dir, branch)
@@ -97,7 +97,7 @@ class Git(InDriver, OutDriver):
         print("Push successful")
 
     def pull(self, from_dir, branch="master"):
-        """ Pull from the specified repository pull(from_dir,branch="master")"""
+        """Pull from the specified repository pull(from_dir,branch="master")"""
         self.check_connect()
         self.checkout(from_dir, branch)
         origin = self.commit(from_dir, branch)
@@ -105,7 +105,7 @@ class Git(InDriver, OutDriver):
         print("Pull successful!")
 
     def checkout(self, from_dir, branch="master"):
-        """ Checkout to a spcified branch (from_dir, branch="master") """
+        """Checkout to a spcified branch (from_dir, branch="master")"""
         self.check_connect()
         repo = Repo(from_dir)
         if repo.active_branch != branch:

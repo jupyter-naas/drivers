@@ -18,7 +18,7 @@ class Streamlit(BaseApp):
     Naas Streamlit app
     """
 
-    def add(self, path = "app.py", port = 9999, debug=True):
+    def add(self, path="app.py", port=9999, debug=True):
         self.path = path
         self.port = port
         self._start_server(port)

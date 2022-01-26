@@ -724,7 +724,7 @@ class EmailBuilder(InDriver):
             self.print_error(error_text)
         json["output"] = output
         req = requests.post(
-            url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render", # Sensitive
+            url=f"{os.environ.get('SCREENSHOT_API', 'http://naas-screenshot:9000')}/api/render",  # Sensitive
             json=json,
         )
         req.raise_for_status()
