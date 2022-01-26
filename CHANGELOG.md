@@ -1,3 +1,51 @@
+## 0.83.1 (2022-01-24)
+
+### Fix
+
+- get stats from posts (test with polls)
+- remove import package timedelta from datetime
+- remove import re
+- split docstring for lint
+- get stats from posts (test with polls)
+
+## 0.83.0 (2022-01-24)
+
+### Feat
+
+- linkedin get posts feed
+- linkedin get posts feed with count > 1
+- linkedin get posts feed add reset index to dataframe
+- linkedin get posts feed
+
+### Fix
+
+- linkedin get posts feed remove pagination_token in code
+- linkedin get posts feed remove pagination token from code
+- linkedin posts feed add pagination token as parameter
+
+## 0.82.2 (2022-01-11)
+
+### Fix
+
+- add tags and date from post stats
+- comparison to False should be 'if cond is False:' or 'if not cond:'
+- remove f-string
+- remove comment on post stats
+- add tags and improve linkedin post stats
+
+## 0.82.1 (2022-01-10)
+
+### Fix
+
+- **Notion**: Make database.query send back the whole database
+- **Notion**: Make database.query send back the whole database
+
+## 0.82.0 (2022-01-10)
+
+### Feat
+
+- Dynamic loading of drivers (#209)
+
 ## 0.81.2 (2021-12-23)
 
 ### Fix
