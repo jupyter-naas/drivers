@@ -24,7 +24,7 @@ class Ftpsbase(ftplib.FTP_TLS):
         self._sock = value
 
     def get_file(self, path, dest_path=None):
-        """Read and save data from file which is specified 'path' """
+        """Read and save data from file which is specified 'path'"""
         saved_path = None
         filename = os.path.basename(path)
         if filename != path:

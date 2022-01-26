@@ -8,7 +8,7 @@ def dep():
 
 
 class Markdown(InDriver):
-    """ Markdown generator lib"""
+    """Markdown generator lib"""
 
     def convert(self, data, output_type="html"):
         data_read = self.open_or_read(data)

@@ -4,7 +4,7 @@ import os
 
 
 class Pdf(InDriver):
-    """ PDF generator lib"""
+    """PDF generator lib"""
 
     api_url = None
     connected = True
@@ -13,13 +13,15 @@ class Pdf(InDriver):
         self.api_url = (
             api_url
             if api_url
-            else os.environ.get("SCREENSHOT_API", "http://naas-screenshot:9000") # Sensitive
+            else os.environ.get(
+                "SCREENSHOT_API", "http://naas-screenshot:9000"
+            )  # Sensitive
         )
         self.connected = True
         return self
 
     def get(self, url=None, html=None, filename="generated.pdf"):
-        """ generate pdf from html or url with optional filename"""
+        """generate pdf from html or url with optional filename"""
         self.check_connect()
         json = {
             "output": "pdf",
