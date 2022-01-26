@@ -3,18 +3,7 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setup(
-    name="naas-drivers",
-    version="0.81.2",
-    author="Martin Donadieu",
-    author_email="martindonadieu@gmail.com",
-    license="BSD",
-    description="Drivers made to easy connect to any services",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/jupyter-naas/drivers",
-    packages=find_packages(exclude=["tests"]),
-    extras_require={
+extras_requires = {
         "dev": [
             "pytest==6.2.3",
             "pytest-mock==3.6.0",
@@ -38,7 +27,7 @@ setup(
             "htmlbuilder==0.1.2",
         ],
         "ftp": [
-             "pysftp==0.2.9",
+            "pysftp==0.2.9",
         ],
         "geolocator": [
             "geopy==2.1.0",
@@ -100,7 +89,6 @@ setup(
             "keras==2.6.0"
         ],
         "extra": [
-            
             #"pyppeteer==0.2.5",
             #"pdfkit==0.6.1",
             #"notion==0.0.28",
@@ -133,6 +121,47 @@ setup(
             #"python-dateutil==2.8.1",
             #"pytz==2021.1",
         ]
+    }
+
+extras_requires_full = [env for env in extras_requires for env in extras_requires[env]]
+
+setup(
+    name="naas-drivers",
+    version="0.81.2",
+    author="Martin Donadieu",
+    author_email="martindonadieu@gmail.com",
+    license="BSD",
+    description="Drivers made to easy connect to any services",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/jupyter-naas/drivers",
+    packages=find_packages(exclude=["tests"]),
+    extras_require={
+        "dev": extras_requires["dev"],
+        "airtable": extras_requires["airtable"],
+        "email": extras_requires["email"],
+        "ipython": extras_requires["ipython"],
+        "emailbuilder": extras_requires["emailbuilder"],
+        "ftp": extras_requires["ftp"],
+        "geolocator": extras_requires["geolocator"],
+        "git": extras_requires["git"],
+        "google": extras_requires["google"],
+        "markdown": extras_requires["markdown"],
+        "mongo": extras_requires["mongo"],
+        "newsapi": extras_requires["newsapi"],
+        "notion": extras_requires["notion"],
+        "plotly": extras_requires["plotly"],
+        "prediction": extras_requires["prediction"],
+        "sentiment": extras_requires["sentiment"],
+        "slack": extras_requires["slack"],
+        "streamlit": extras_requires["streamlit"],
+        "teams": extras_requires["teams"],
+        "toucan": extras_requires["toucan"],
+        "youtube": extras_requires["youtube"],
+        "ml": extras_requires["ml"],
+        "extra": extras_requires["extra"],
+        "full": extras_requires_full,
+        "all": extras_requires_full
     },
     install_requires=[
         "mprop==0.16.0",
