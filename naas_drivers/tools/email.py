@@ -9,8 +9,12 @@ import pandas as pd
 import smtplib
 
 from naas_drivers.driver import dependencies
-@dependencies(extra_requires = 'email')
+
+
+@dependencies(extra_requires="email")
 def dep():
+    global MailBox, A, AND
+
     from imap_tools import MailBox, A, AND
 
 

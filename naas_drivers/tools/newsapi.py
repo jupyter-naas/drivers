@@ -3,11 +3,14 @@ import pandas as pd
 import os
 
 from naas_drivers.driver import dependencies
-@dependencies(extra_requires = 'newsapi')
+
+
+@dependencies(extra_requires="newsapi")
 def dep():
     global NewsApiClient
-    
+
     from newsapi.newsapi_client import NewsApiClient
+
 
 class Newsapi(InDriver):
     __key = None

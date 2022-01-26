@@ -4,17 +4,20 @@ import datetime
 
 
 from naas_drivers.driver import dependencies
-@dependencies(extra_requires = 'youtube,ml')
+
+
+@dependencies(extra_requires="youtube,ml")
 def dep():
     global YouTubeTranscriptApi
     global pipeline
     global tqdm
     global _
-    
+
     from youtube_transcript_api import YouTubeTranscriptApi
     from transformers import pipeline
     from tqdm import tqdm
     import pydash as _
+
 
 YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3"
 

@@ -4,11 +4,13 @@ import urllib.parse
 import traceback
 
 from naas_drivers.driver import dependencies
-@dependencies(extra_requires = 'ipython')
+
+
+@dependencies(extra_requires="ipython")
 def dep():
     global display
     global Markdown
-    
+
     from IPython.core.display import display, Markdown
 
 

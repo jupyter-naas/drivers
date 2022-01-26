@@ -2,8 +2,12 @@ from naas_drivers.driver import InDriver
 from IPython.core.display import display, HTML
 
 from naas_drivers.driver import dependencies
-@dependencies(extra_requires = 'markdown')
+
+
+@dependencies(extra_requires="markdown")
 def dep():
+    global markdown2
+
     import markdown2
 
 

@@ -2,9 +2,14 @@ import ftplib
 import os
 
 from naas_drivers.driver import dependencies
-@dependencies(extra_requires = 'ftp')
+
+
+@dependencies(extra_requires="ftp")
 def dep():
+    global pysftp
+
     import pysftp
+
 
 class Ftpbase:
     """FTP/SFTP Connector class for cashstory\nSample Credentials file :{

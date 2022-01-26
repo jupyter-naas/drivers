@@ -2,8 +2,11 @@ from naas_drivers.driver import InDriver, OutDriver
 import pandas as pd
 
 from naas_drivers.driver import dependencies
-@dependencies(extra_requires = 'airtable')
+
+
+@dependencies(extra_requires="airtable")
 def dep():
+    global at
     from airtable import Airtable as at
 
 

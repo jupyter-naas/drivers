@@ -2,13 +2,16 @@ from naas_drivers.driver import OutDriver
 import json
 
 from naas_drivers.driver import dependencies
-@dependencies(extra_requires = 'slack')
+
+
+@dependencies(extra_requires="slack")
 def dep():
     global WebClient
     global SlackApiError
-    
+
     from slack import WebClient
     from slack.errors import SlackApiError
+
 
 class Slack(OutDriver):
     client = None

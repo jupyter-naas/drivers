@@ -4,11 +4,14 @@ import sys
 import time
 
 from naas_drivers.driver import dependencies
-@dependencies(extra_requires = 'mongo')
+
+
+@dependencies(extra_requires="mongo")
 def dep():
     global MongoClient
-    
+
     from pymongo import MongoClient
+
 
 filter_system = {"name": {"$regex": r"^(?!system\.)"}}
 
