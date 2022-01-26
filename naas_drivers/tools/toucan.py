@@ -19,7 +19,7 @@ class Toucan(InDriver, OutDriver):
 
     # Private vars
     __url_screenshot_api = os.environ.get(
-        "TC_API_SCREENSHOT", "http://toucan-screenshot:3000/screenshot" # Sensitive
+        "TC_API_SCREENSHOT", "http://toucan-screenshot:3000/screenshot"  # Sensitive
     )
     __TOUCAN_EMBED_ENCRYPTION_KEY = os.environ.get("TOUCAN_EMBED_ENCRYPTION_KEY", None)
     __url_config = "config"

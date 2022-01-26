@@ -15,7 +15,7 @@ class Healthcheck(OutDriver):
         return self
 
     def send(self, mode=""):
-        """ send (mode) to healthcheck (healthkey)"""
+        """send (mode) to healthcheck (healthkey)"""
         self.check_connect()
         try:
             url = (
@@ -29,7 +29,7 @@ class Healthcheck(OutDriver):
             return f"Error ==> cannot get health server {self.healthUrl}{self.healthkey}, {date.today()}"
 
     def check_up(self, url, auth=None, verify=True):
-        """ check if url is reachable (url, healthkey, auth=None, verify=True)"""
+        """check if url is reachable (url, healthkey, auth=None, verify=True)"""
         self.check_connect()
         self.send("start")
         try:

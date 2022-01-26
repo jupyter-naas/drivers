@@ -5,14 +5,15 @@ import requests
 
 
 class Taggun(OutDriver):
-    '''
+    """
     Naas Driver for Taggun.io
 
     Taggun offers affordable Receipt/invoice OCR,
         Input: a pdf or image of a receipt
         Output: a dict containing parsed data from the image, and a corresponding
             confidence level for the extraction
-    '''
+    """
+
     _key = None
     _fileName = None
     _filePath = None
@@ -23,7 +24,7 @@ class Taggun(OutDriver):
     data = None
 
     def connect(self, key, mode="simple", incognito=False):
-        '''
+        """
         Initialize all the necessary elements to make an api request
 
         Args:
@@ -31,7 +32,7 @@ class Taggun(OutDriver):
             mode (string): Either simple or verbose. default simple
             incognite (bool): If true, taggun will not store a copy of the
                 uploaded file for reinforcement learning. default false
-        '''
+        """
         self._key = key
         self.connected = True
         self._url = f"https://api.taggun.io/api/receipt/v1/{mode}/file"
@@ -39,7 +40,7 @@ class Taggun(OutDriver):
         return self
 
     def hash_file(self, file):
-        '''
+        """
         Create a hash of the file to be sent. Taggun allows user-submitted data
         for reinforcement learning. This requires a unique identifier for the file.
         Instead of generating a UUID, which would need to be stored, use a hash
@@ -47,13 +48,13 @@ class Taggun(OutDriver):
 
         Returns:
             hash of the file
-        '''
+        """
         with open(file, "rb") as f:
             self._hash = hashlib.sha256(f.read()).hexdigest()
         return self._hash
 
     def send(self, file):
-        '''
+        """
         Dispatch the api request to Taggun and receive parsed data
 
         Args:
@@ -61,7 +62,7 @@ class Taggun(OutDriver):
 
         Returns:
             parsed data as a dict from Taggun
-        '''
+        """
         self._fileName = os.path.basename(file)
         self._filePath = file
         self.check_connect()

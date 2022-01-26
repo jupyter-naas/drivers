@@ -18,7 +18,7 @@ class Ftpbase:
         return self
 
     def get_file(self, path, dest_path=None):
-        """Read and return data from file which is specified 'path' """
+        """Read and return data from file which is specified 'path'"""
         saved_path = None
         filename = os.path.basename(path)
         if filename != path:
@@ -69,7 +69,7 @@ class Ftpbase:
             ftp = (
                 ftplib.FTP_TLS(credentials["url"])
                 if credentials["type"] == "explicit TLS"
-                else ftplib.FTP(credentials["url"]) # Sensitive
+                else ftplib.FTP(credentials["url"])  # Sensitive
             )
             ftp.connect(credentials["url"], credentials["port"])
             ftp.set_pasv(True) if credentials[

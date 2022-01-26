@@ -43,21 +43,23 @@ class Newsapi(InDriver):
     def get_sources(
         self, q, fields=["image", "title", "source", "link"], limit=20, **kargs
     ):
-        kargs['q'] = q
+        kargs["q"] = q
         self.check_connect()
         newsapi = NewsApiClient(api_key=self.__key)
         sources = newsapi.get_sources(**kargs)
         return self.__transformDate(sources.get("sources"), fields, limit)
 
-    def get_top(self, q, fields=["image", "title", "source", "link"], limit=20, **kargs):
-        kargs['q'] = q
+    def get_top(
+        self, q, fields=["image", "title", "source", "link"], limit=20, **kargs
+    ):
+        kargs["q"] = q
         self.check_connect()
         newsapi = NewsApiClient(api_key=self.__key)
         tops = newsapi.get_top_headlines(**kargs)
         return self.__transformDate(tops.get("articles"), fields, limit)
 
     def get(self, q, fields=["image", "title", "source", "link"], limit=20, **kargs):
-        kargs['q'] = q
+        kargs["q"] = q
         self.check_connect()
         newsapi = NewsApiClient(api_key=self.__key)
         all_news = newsapi.get_everything(**kargs)
