@@ -65,6 +65,8 @@ def dependencies(*args, **kwargs):
             dep_load()
         except Exception:
             naas_drivers_path = "/".join(__file__.split("/")[:-2])
+            if os.path.isfile(os.path.join(naas_drivers_path, "setup.py")) is False:
+                naas_drivers_path = "naas-drivers"
             cmd = f'pip install {naas_drivers_path}[{kwargs["extra_requires"]}]'
             print(cmd)
             os.system(cmd)
