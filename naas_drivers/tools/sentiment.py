@@ -1,8 +1,16 @@
 from naas_drivers.driver import InDriver
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
 from pandas import json_normalize
 from typing import Union
+
+from naas_drivers.driver import dependencies
+
+
+@dependencies(extra_requires="sentiment")
+def dep():
+    global SentimentIntensityAnalyzer
+
+    from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
 class Sentiment(InDriver):

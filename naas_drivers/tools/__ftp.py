@@ -1,6 +1,14 @@
 import ftplib
-import pysftp
 import os
+
+from naas_drivers.driver import dependencies
+
+
+@dependencies(extra_requires="ftp")
+def dep():
+    global pysftp
+
+    import pysftp
 
 
 class Ftpbase:

@@ -1,6 +1,14 @@
 import os
 import subprocess
-from pyngrok import ngrok
+
+from naas_drivers.driver import dependencies
+
+
+@dependencies(extra_requires="streamlit")
+def dep():
+    global ngrok
+
+    from pyngrok import ngrok
 
 
 class BaseApp:

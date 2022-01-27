@@ -5,9 +5,17 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from typing import Any, Dict, cast
-from imap_tools import MailBox, A, AND
 import pandas as pd
 import smtplib
+
+from naas_drivers.driver import dependencies
+
+
+@dependencies(extra_requires="email")
+def dep():
+    global MailBox, A, AND
+
+    from imap_tools import MailBox, A, AND
 
 
 class Email(OutDriver):
