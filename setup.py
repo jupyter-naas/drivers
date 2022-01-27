@@ -127,7 +127,7 @@ extras_requires_full = [env for env in extras_requires for env in extras_require
 
 setup(
     name="naas-drivers",
-    version="0.85.0b0",
+    version="0.85.0b1",
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
     license="BSD",
