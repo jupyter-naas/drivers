@@ -18,14 +18,14 @@ class Github():
         }
 
         # Init end point
-        self.repository = Repository(self.headers)
+        self.repositories = Repositories(self.headers)
 
         # Set connexion to active
         self.connected = True
         return self
 
 
-class Repository(Github):
+class Repositories(Github):
     def __init__(self, headers):
         Github.__init__(self)
         self.headers = headers
