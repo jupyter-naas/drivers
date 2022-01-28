@@ -337,3 +337,9 @@ def googleanalytics():
     from naas_drivers.tools.googleanalytics import GoogleAnalytics
 
     return GoogleAnalytics()
+
+@load_driver
+def github():
+    from naas_drivers.tools.github import Github
+
+    return Github()
