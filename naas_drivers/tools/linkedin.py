@@ -321,7 +321,7 @@ class Profile(LinkedIn):
         start = 0
         df = pd.DataFrame()
         while True:
-            if count > limit:
+            if limit != -1 and count > limit:
                 limit = count
             if limit != -1 and start > limit - 1:
                 break
