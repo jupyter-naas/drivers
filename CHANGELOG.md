@@ -1,3 +1,9 @@
+## 0.84.1 (2022-01-28)
+
+### Fix
+
+- linkedin get posts feed limit
+
 ## 0.84.0 (2022-01-26)
 
 ### Feat
