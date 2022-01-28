@@ -18,34 +18,26 @@ class Github():
         }
 
         # Init end point
-        self.endpoint = Repository(self.headers)
+        self.repository = Repository(self.headers)
 
         # Set connexion to active
         self.connected = True
         return self
 
 
-class Repository(Driver):
+class Repository(Github):
     def __init__(self, headers):
         Github.__init__(self)
         self.headers = headers
         
-    def get_commits(self, url):
+    def get_commits(self, url):			
         """
-        Return an dataframe object with 30 columns:
-        - ACTIVITY_ID       object
-        - PAGINATION_TOKEN  object
-        - PUBLISHED_DATE    object
-        - AUTHOR_NAME       object
-        - SUBDESCRIPTION    object
-        - TITLE             object
-        - TEXT              object
-        - CHARACTER_COUNT   int64
-        - TAGS              object
-        - TAGS_COUNT        int64
-        - EMOJIS            object
-        - EMOJIS_COUNT      int64
-        - LINKS             object
+        Return an dataframe object with 5 columns:
+        - AUTHOR_NAME      object
+        - AUTHOR_EMAIL     object
+        - COMMIT_DATE      object
+        - COMMIT_MESSAGE   object
+        - COMMIT_ID        object
 
         Parameters
         ----------
