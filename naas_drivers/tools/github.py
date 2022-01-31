@@ -31,19 +31,24 @@ class Repositories(Github):
 
     def get_commits(self, url):
         """
-        Return an dataframe object with 5 columns:
-        - AUTHOR_NAME      object
-        - AUTHOR_EMAIL     object
-        - COMMIT_DATE      object
-        - COMMIT_MESSAGE   object
-        - COMMIT_ID        object
+        Return an dataframe object with 11 columns:
+        - ID                   object
+        - MESSAGE              object
+        - AUTHOR_DATE          date
+        - AUTHOR_NAME          object
+        - AUTHOR_EMAIL         object
+        - COMMITTER_DATE       date
+        - COMMITTER_NAME       object
+        - COMMITTER_EMAIL      object
+        - COMMENTS_COUNT       int
+        - VERIFICATION_REASON  object
+        - VERIFICATION_STATUS  object
 
         Parameters
         ----------
         repository: str:
             Repository url from Github.
             Example : "https://github.com/jupyter-naas/awesome-notebooks"
-
         """
         # Get organisation and repository from url
         repository = Github.get_repository_url(url)
@@ -69,17 +74,26 @@ class Repositories(Github):
                 break
             for r in res_json:
                 commit = {
-                    "AUTHOR_NAME": _pd.get(r, "author.login"),
-                    "AUTHOR_EMAIL": _pd.get(r, "commit.author.email"),
-                    "COMMIT_DATE": _pd.get(r, "commit.author.date")
+                    "ID": _pd.get(r, "sha"),
+                    "MESSAGE": _pd.get(r, "commit.message"),
+                    "AUTHOR_DATE": _pd.get(r, "commit.author.date")
                     .replace("T", " ")
                     .replace("Z", ""),
-                    "COMMIT_MESSAGE": _pd.get(r, "commit.message"),
-                    "COMMIT_ID": _pd.get(r, "sha"),
+                    "AUTHOR_NAME": _pd.get(r, "commit.author.name"),
+                    "AUTHOR_EMAIL": _pd.get(r, "commit.author.email"),
+                    "COMMITTER_DATE": _pd.get(r, "commit.committer.date")
+                    .replace("T", " ")
+                    .replace("Z", ""),
+                    "COMMITTER_NAME": _pd.get(r, "commit.committer.name"),
+                    "COMMITTER_EMAIL": _pd.get(r, "commit.committer.email"),
+                    "COMMENTS_COUNT": _pd.get(r, "commit.comment_count"),
+                    "VERIFICATION_REASON": _pd.get(r, "commit.verification.reason"),
+                    "VERIFICATION_STATUS": _pd.get(r, "commit.verification.verified"),
                 }
                 commits.append(commit)
             page += 1
         # Return dataframe
         df = pd.DataFrame(commits)
-        df["COMMIT_DATE"] = pd.to_datetime(df["COMMIT_DATE"])
+        df["AUTHOR_DATE"] = pd.to_datetime(df["AUTHOR_DATE"])
+        df["COMMITTER_DATE"] = pd.to_datetime(df["COMMITTER_DATE"])
         return df
