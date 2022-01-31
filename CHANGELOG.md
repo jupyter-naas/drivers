@@ -1,3 +1,9 @@
+## 0.85.2 (2022-01-31)
+
+### Fix
+
+- (github) add new columns to get commits
+
 ## 0.85.1 (2022-01-29)
 
 ### Fix
