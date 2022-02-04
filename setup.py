@@ -48,7 +48,7 @@ setup(
         "inflection==0.5.1",
         "joblib==1.0.1",
         "more-itertools==8.7.0",
-        "numpy==1.19.5",
+        "numpy==1.22.2",
         "ipython==7.23.1",
         "pandas==1.2.4",
         "pandas-datareader==0.9.0",
