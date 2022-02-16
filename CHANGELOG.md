@@ -1,3 +1,11 @@
+## 0.86.1 (2022-02-16)
+
+### Fix
+
+- qonto driver
+- remove unused package
+- qonto driver
+
 ## 0.86.0 (2022-02-11)
 
 ### Feat
