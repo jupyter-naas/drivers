@@ -1,7 +1,6 @@
 import pandas as pd
 import requests
-import os
-from datetime import datetime, timedelta
+from datetime import datetime
 import plotly.graph_objects as go
 import urllib
 from naas_drivers.tools.emailbuilder import EmailBuilder
