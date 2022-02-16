@@ -1,51 +1,195 @@
 import pandas as pd
 import requests
-import os
-from datetime import datetime, timedelta
+from datetime import datetime
 import plotly.graph_objects as go
 import urllib
 from naas_drivers.tools.emailbuilder import EmailBuilder
+import pydash as _pd
 
 emailbuilder = EmailBuilder()
 
+QONTO_API_URL = "https://thirdparty.qonto.com/v2"
 DATE_FORMAT = "%Y-%m-%d"
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 NUMBER_FORMAT = "{:,.2f} €"
 
 QONTO_CARD = "https://lib.umso.co/lib_sluGpRGQOLtkyEpz/98a28jf4yswpuert.png"
 NAAS_WEBSITE = "https://www.naas.ai"
 
 
-class Organizations:
-    def __init__(self, user_id, api_key):
-        self.base_url = os.environ.get(
-            "QONTO_API_URL", "https://thirdparty.qonto.eu/v2"
-        )
-        self.req_headers = {"authorization": f"{user_id}:{api_key}"}
-        self.url = f"{self.base_url}/organizations"
-        self.user_id = user_id
+class Qonto:
+    
+    @staticmethod
+    def get_dates(df,
+                  date_column,
+                  date_from=None,
+                  date_to=None):
 
-    def get(self):
-        res = requests.get(url=f"{self.url}/{self.user_id}", headers=self.req_headers)
+        # Get all dates for range
+        filter_df = 0
+        dates = []
+        if date_to is None:
+            date_to = df[date_column].max()
+        else:
+            date_to = datetime.strptime(date_to, DATE_FORMAT)
+        if date_from is None:
+            date_from = df[date_column].min()
+        elif type(date_from) == int:
+            filter_df = date_from
+            date_from = df[date_column].min()
+        else:
+            date_from = datetime.strptime(date_from, DATE_FORMAT)
+        dates_range = pd.date_range(start=date_from, end=date_to)
+        for date in dates_range:
+            date = str(date.strftime(DATE_FORMAT))
+            dates.append(date)
+        return dates[filter_df:]
+    
+    @staticmethod
+    def filter_dates(df,
+                     date_column,
+                     date_from=None,
+                     date_to=None):
+        
+        # Create columns date temp to apply filter
+        df["DATE_TMP"] = pd.to_datetime(df[date_column]).dt.strftime(DATE_FORMAT)
+
+        # Get list of dates
+        dates = Qonto.get_dates(df,
+                                "DATE_TMP",
+                                date_from=date_from,
+                                date_to=date_to)
+
+        # Filter on new columns
+        df = df[df["DATE_TMP"].isin(dates)].reset_index(drop=True)
+        return df.drop("DATE_TMP", axis=1)
+    
+    def connect(self, user_id, api_token):
+        # Init thinkific attribute
+        self.user_id = user_id
+        self.api_token = api_token
+        
+        # Init headers
+        self.headers = {
+            'Content-Type': "application/json",
+            "Authorization": f"{self.user_id}:{self.api_token}"
+        }
+        
+        # Init end point
+        self.organizations = Organizations(self.user_id, self.headers)
+        self.positions = Organizations(self.user_id, self.headers)
+        self.transactions = Transactions(self.user_id, self.headers)
+        self.statements = Statements(self.user_id, self.headers)
+
+        # Set connexion to active
+        self.connected = True
+        return self
+
+        
+class Organizations(Qonto):
+    def __init__(self, user_id, headers):
+        Qonto.__init__(self)
+        self.user_id = user_id
+        self.headers = headers
+        
+    def get(self,
+            cols_to_drop=["SLUG",
+                          "BALANCE_CENTS",
+                          "AUTHORIZED_BALANCE_CENTS"]):
+        """
+        Return an dataframe object with 11 columns:
+        - IBAN                 
+        - BIC                  
+        - CURRENCY             
+        - BALANCE              
+        - AUTHORIZED_BALANCE   
+        - NAME                 
+        - UPDATED_AT           
+        - STATUS               
+        - ORGANIZATION_SLUG    
+        - LEGAL_NAME           
+        - EXTRACT_DATE         
+
+        Parameters
+        ----------
+        cols_to_drop: list (default None):
+            Columns to drop from your dataframe.
+        """
+        
+        req_url = f"{QONTO_API_URL}/organization"
+        res = requests.get(req_url,
+                           headers=self.headers)
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
             return e
         res_json = res.json()
-
-        items = res_json.get("organization", {}).get("bank_accounts")
-        df = pd.DataFrame.from_records(items)
-
-        # Formating CS
-        df["date"] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        df = df.drop(["slug", "balance_cents", "authorized_balance_cents"], axis=1)
+        
+        # Get bank accounts
+        slug = _pd.get(res_json, "organization.slug")
+        legal_name = _pd.get(res_json, "organization.legal_name")
+        accounts = _pd.get(res_json, "organization.bank_accounts")
+        df = pd.DataFrame.from_records(accounts)
+        df["organization_slug"] = slug
+        df["legal_name"] = legal_name
+        
+        # Cleaning naas
+        df["extract_date"] = datetime.now().strftime(DATETIME_FORMAT)
+        df = df.fillna("Not defined")
         df.columns = df.columns.str.upper()
+        
+        # Columns to drop
+        for cols in cols_to_drop:
+            df = df.drop(cols, axis=1)
         return df
 
 
-class Transactions(Organizations):
-    def get_all(self):
+class Transactions(Qonto):
+    def __init__(self, user_id, headers):
+        Qonto.__init__(self)
+        self.user_id = user_id
+        self.headers = headers
+        
+    def get(self,
+            date="EMITTED_AT",
+            date_from=None,
+            date_to=None):
+        """
+        Return an dataframe object with 22 columns:
+        - IBAN
+        - SETTLED_AT
+        - EMITTED_AT
+        - TRANSACTION_ID
+        - TRANSACTION_ORDER
+        - LABEL
+        - STATUS
+        - CATEGORY
+        - REFERENCE
+        - OPERATION_TYPE
+        - CARD_LAST_DIGITS
+        - SIDE
+        - AMOUNT
+        - CURRENCY
+        - VAT_AMOUNT
+        - VAT_RATE
+        - LOCAL_AMOUNT
+        - LOCAL_CURRENCY
+        - NOTE
+        - ATTACHMENT_IDS
+        - ATTACHMENT_LOST
+        - ATTACHMENT_REQUIRED
+
+        Parameters
+        ----------
+        date: str (default "EMITTED_AT"):
+            Date column to filter on.
+        date_from: date (default None):
+            Date from to get data, format "%Y-%m-%d".
+        date_to: date (default None):
+            Date to to get data, format "%Y-%m-%d".
+        """
         # Get organizations
-        df_organisations = self.get()
+        df_organisations = Organizations.get(self)
 
         # For each bank account, get all transactions
         df_transaction = pd.DataFrame()
@@ -58,11 +202,11 @@ class Transactions(Organizations):
             while has_more:
                 params = {
                     "current_page": current_page,
-                    "iban": iban,
+                    "iban": iban,            
                 }
                 res = requests.get(
-                    url=f"{self.base_url}/transactions?{urllib.parse.urlencode(params, safe='(),')}",
-                    headers=self.req_headers,
+                    url=f"{QONTO_API_URL}/transactions?{urllib.parse.urlencode(params, safe='(),')}",
+                    headers=self.headers,
                 )
                 try:
                     res.raise_for_status()
@@ -79,211 +223,143 @@ class Transactions(Organizations):
                     has_more = False
                 else:
                     current_page = int(next_page)
+                    
         # Formatting
+        df_transaction["transaction_order"] = df_transaction.apply(lambda row: int(row["transaction_id"].split("-")[-1]), axis=1)
+        df_transaction = df_transaction.sort_values(by=["iban", "transaction_order"]).reset_index(drop=True)
+        
+        # Select columns to keep
         to_keep = [
             "iban",
             "settled_at",
             "emitted_at",
             "transaction_id",
+            "transaction_order",
             "label",
+            "status",
+            "category",
             "reference",
             "operation_type",
+            "card_last_digits",
             "side",
             "amount",
             "currency",
+            "vat_amount",
+            "vat_rate",
+            "local_amount",
+            "local_currency",
+            "note",
+            "attachment_ids",
+            "attachment_lost",
+            "attachment_required"
         ]
-        df_transaction = (
-            df_transaction[to_keep].reset_index(drop=True).fillna("Not affected")
-        )
+        df_transaction = df_transaction[to_keep]
+        
+        # Sign amounts
         df_transaction.loc[
             df_transaction["side"] == "debit", "amount"
         ] = df_transaction["amount"] * (-1)
+        df_transaction.loc[
+            df_transaction["side"] == "debit", "local_amount"
+        ] = df_transaction["local_amount"] * (-1)
+        df_transaction.loc[
+            df_transaction["side"] == "debit", "vat_amount"
+        ] = df_transaction["vat_amount"] * (-1)
+        
+        # Format columns in upper case
+        df_transaction = df_transaction.fillna("Not defined")
         df_transaction.columns = df_transaction.columns.str.upper()
+        
+        # Filter dataframe
+        df_transaction = Qonto.filter_dates(df_transaction,
+                                            date,
+                                            date_from=date_from,
+                                            date_to=date_to)
         return df_transaction
 
 
 class Statements(Transactions):
-    def __get_dates(self, df, date_from=None, date_to=None):
-        dates = []
-        # Dates
-        if date_to is None:
-            date_to = df["DATE"].max()
-        if date_from is None:
-            date_from = df["DATE"].min()
-        dates_range = pd.date_range(start=date_from, end=date_to)
-        for date in dates_range:
-            date = str(date.strftime(DATE_FORMAT))
-            dates.append(date)
-        return dates
+    def __init__(self, user_id, headers):
+        Qonto.__init__(self)
+        self.user_id = user_id
+        self.headers = headers
+        
+    def get(self,
+            date="EMITTED_AT",
+            to_group=[
+                "IBAN",
+                "DATE",
+                "TRANSACTION_ID",
+                "TRANSACTION_ORDER",
+                "LABEL",
+                "REFERENCE",
+                "CATEGORY",
+                "OPERATION_TYPE",
+                "CURRENCY",
+            ],
+            date_from=None,
+            date_to=None):
+        """
+        Return an dataframe object with 11 columns:
+        - IBAN
+        - DATE
+        - TRANSACTION_ID
+        - TRANSACTION_ORDER
+        - LABEL
+        - REFERENCE
+        - CATEGORY
+        - OPERATION_TYPE
+        - CURRENCY
+        - AMOUNT
+        - POSITION
 
-    def __filter_dates(self, df, date_from=None, date_to=None):
-        df_filter = pd.DataFrame()
-        if "IBAN" in df.columns:
-            ibans = df["IBAN"].drop_duplicates().tolist()
-            for iban in ibans:
-                tmp_df = df[df.IBAN == iban]
-                dates = self.__get_dates(tmp_df, date_from, date_to)
-                tmp_df = tmp_df[tmp_df["DATE"].isin(dates)]
-                df_filter = pd.concat([df_filter, tmp_df], axis=0)
-        else:
-            dates = self.__get_dates(df, date_from, date_to)
-            df_filter = df[df["DATE"].isin(dates)]
-        return df_filter
-
-    def aggregated(self, date_from=None, date_to=None):
-        df = self.consolidated(date_from=date_from, date_to=date_to)
-        return df
-
-    def detailed(self, date_from=None, date_to=None):
-        to_group = [
-            "IBAN",
-            "TRANSACTION_ID",
-            "LABEL",
-            "REFERENCE",
-            "OPERATION_TYPE",
-            "AMOUNT",
-            "CURRENCY",
-        ]
-        df = self.consolidated(to_group, date_from, date_to)
-        return df
-
-    def consolidated(self, to_conso=[], date_from=None, date_to=None):
-        df = self.get_all()
-        df = df.rename(columns={"EMITTED_AT": "DATE"})
+        Parameters
+        ----------
+        date: str (default "EMITTED_AT"):
+            Date column to filter on.
+        date_from: date (default None):
+            Date from to get data, format "%Y-%m-%d".
+        date_to: date (default None):
+            Date to to get data, format "%Y-%m-%d".
+        """
+        
+        # Get transactions
+        df = Transactions.get(self,
+                              date)
+        
+        # Set date column
+        df = df.rename(columns={date: "DATE"})
         df["DATE"] = pd.to_datetime(df["DATE"]).dt.strftime(DATE_FORMAT)
 
-        # Aggregation
-        to_group = ["DATE"]
-        for x in to_conso:
-            to_group.append(x)
-        df = df.groupby(to_group, as_index=False).agg({"AMOUNT": "sum"})
-
-        # Calc positions
-        df = df.sort_values(by=["DATE"]).reset_index(drop=True)
-        df["POSITION"] = df.agg({"AMOUNT": "cumsum"})
-        return self.__filter_dates(df, date_from, date_to)
-
-    def summary(self, date_from=None, date_to=None):
-        # Get data
-        df_statement = self.consolidated(
-            to_conso=["OPERATION_TYPE"], date_from=date_from, date_to=date_to
-        )
-
-        # Create
-        if date_from is None:
-            date_from = df_statement.DATE.unique().min()
-        if date_to is None:
-            date_to = df_statement.DATE.unique().max()
-        first_text = (
-            f"Solde au {datetime.strptime(date_from, DATE_FORMAT).strftime('%d/%m/%Y')}"
-        )
-        current_text = (
-            f"Solde au {datetime.strptime(date_to, DATE_FORMAT).strftime('%d/%m/%Y')}"
-        )
-        # > Get first position
-        first_position = round(df_statement["POSITION"].tolist()[0], 2)
-        df_first = pd.DataFrame(
-            [{"OPERATION_TYPE": first_text, "ORDER": 0, "AMOUNT": first_position}]
-        )
-        # > Get transactions
-        df_transaction = df_statement.copy()
-        # Order
-        transaction_order = {
-            "income": 1,
-            "swift_income": 2,
-            "card": 3,
-            "transfer": 4,
-            "qonto_fee": 5,
-            "direct_debit": 6,
-            "cheque": 7,
-            "recall": 8,
-        }
-        df_transaction["ORDER"] = df_transaction["OPERATION_TYPE"].replace(
-            transaction_order
-        )
-        # Replace value
-        transaction_type = {
-            "income": " - Encaissements",
-            "swift_income": " - SWIFT",
-            "card": " - Flux carte bleue",
-            "transfer": " - Virements",
-            "qonto_fee": " - Frais bancaires",
-            "direct_debit": " - Prélèvements",
-            "cheque": " - Chèques",
-            "recall": " -  Rappel",
-        }
-        df_transaction["OPERATION_TYPE"] = df_transaction["OPERATION_TYPE"].replace(
-            transaction_type
-        )
-        # Groupby month
-        to_group = ["OPERATION_TYPE", "ORDER"]
-        to_agg = {"AMOUNT": "sum"}
-        df_transaction = df_transaction.groupby(to_group, as_index=False).agg(to_agg)
-
-        # > Get last position
-        last_position = round(df_statement["POSITION"].tolist()[-1], 2)
-        df_last = pd.DataFrame(
-            [{"OPERATION_TYPE": current_text, "ORDER": 99, "AMOUNT": last_position}]
-        )
-
-        # Create summary table
-        cash_summary = pd.concat([df_first, df_transaction, df_last], axis=0)
-        cash_summary = cash_summary.sort_values("ORDER").drop("ORDER", axis=1)
-        cash_summary["AMOUNT"] = (
-            cash_summary["AMOUNT"].map(NUMBER_FORMAT.format).str.replace(",", " ")
-        )  # .str.replace(".", ",")
-        cash_summary = cash_summary.rename(
-            columns={"OPERATION_TYPE": "Type", "AMOUNT": "Montant"}
-        )
-        return cash_summary
-
-    def transactions(self, date_from=None, date_to=None):
-        # Data
-        df = self.consolidated(
-            to_conso=["LABEL", "OPERATION_TYPE"], date_from=date_from, date_to=date_to
-        )
-
-        # Calc week ago
-        if type(date_from) is int and date_from < 0:
-            week_ago = (
-                datetime.strptime(date_to, DATE_FORMAT) + timedelta(days=date_from)
-            ).strftime(DATE_FORMAT)
-        # Filter data
-        df = df[(df["DATE"] > week_ago) & (df["DATE"] < date_to)]
-
         # Groupby
-        to_group = ["LABEL", "OPERATION_TYPE", "DATE"]
+        if "DATE" not in to_group:
+            to_group = ["DATE"] + to_group
+        if "IBAN" not in to_group:
+            to_group = ["IBAN"] + to_group
         df = df.groupby(to_group, as_index=False).agg({"AMOUNT": "sum"})
-        df["DATE"] = pd.to_datetime(df["DATE"]).dt.strftime("%d/%m/%Y")
-        # Replace value
-        transaction_type = {
-            "income": "Encaissement",
-            "swift_income": "SWIFT",
-            "card": "Carte bleue",
-            "transfer": "Virement",
-            "qonto_fee": "Frais bancaires",
-            "direct_debit": "Prélèvement",
-            "cheque": "Chèque",
-            "recall": "Rappel",
-        }
-        df["OPERATION_TYPE"] = df["OPERATION_TYPE"].replace(transaction_type)
-
-        # Rename columns
-        week_cols = {
-            "LABEL": "Description",
-            "OPERATION_TYPE": "Type",
-            "DATE": "Date",
-            "AMOUNT": "Montant",
-        }
-        df = df.rename(columns=week_cols)
-        df["Montant"] = (
-            df["Montant"].map("{:,.2f} €".format).str.replace(",", " ")
-        )  # .str.replace(".", ",")
-        df = df.sort_values("Date", ascending=False)
-        return df
+        
+        # Calc position
+        if "TRANSACTION_ORDER" in to_group:
+            df = df.sort_values(by=["IBAN", "TRANSACTION_ORDER"]).reset_index(drop=True)
+        else:
+            df = df.sort_values(by=["IBAN", "DATE"]).reset_index(drop=True)
+        df_statement = pd.DataFrame()
+        ibans = df["IBAN"].unique()
+        for iban in ibans:
+            tmp = df[df["IBAN"] == iban]
+            tmp["POSITION"] = tmp.agg({"AMOUNT": "cumsum"})
+            df_statement = pd.concat([df_statement, tmp])
+        
+        # Filter dataframe
+        df_statement = Qonto.filter_dates(df_statement,
+                                          date_column="DATE",
+                                          date_from=date_from,
+                                          date_to=date_to)
+        return df_statement
 
     def barline(
         self,
+        to_group=["IBAN", "DATE"],
         date_from=None,
         date_to=None,
         title=None,
@@ -295,16 +371,18 @@ class Statements(Transactions):
         cashout_color="#ea484f",
     ):
         # Data linechart
-        df = self.consolidated(date_from=date_from, date_to=date_to)
+        df = self.get(to_group=to_group,
+                      date_from=date_from,
+                      date_to=date_to)
         df_line = df.copy()
         df_line = df_line[["DATE", "POSITION"]]
         df_line["DATE"] = pd.to_datetime(df_line["DATE"])
 
         # Data bar
-        df_bar = self.consolidated(
-            to_conso=["TRANSACTION_ID", "LABEL", "OPERATION_TYPE"],
+        df_bar = self.get(
+            to_group=["TRANSACTION_ID", "LABEL", "OPERATION_TYPE"],
             date_from=date_from,
-            date_to=date_to,
+            date_to=date_to
         )
         df_bar.loc[df_bar.AMOUNT > 0, "FLOWS"] = "CASH_IN"
         df_bar.loc[df_bar.AMOUNT < 0, "FLOWS"] = "CASH_OUT"
@@ -355,10 +433,157 @@ class Statements(Transactions):
         )
 
         # Update chart display
-        fig.update_layout(plot_bgcolor="#ffffff", hovermode="x", title=title)
+        fig.update_layout(
+            plot_bgcolor="#ffffff",
+            hovermode="x",
+            title=title,
+            title_font=dict(family="Arial", size=18, color="black"),
+            width=1200,
+            height=800,
+            margin_pad=10,
+         )
         fig.update_yaxes(tickprefix="€", gridcolor="#eaeaea")
         fig.update_xaxes(dtick="M1")
         return fig
+        
+    def summary(self,
+                summary_type,
+                language="EN",
+                date_from=None,
+                date_to=None):
+        # Get data
+        df_statement = self.get(
+            to_group=[summary_type],
+            date_from=date_from,
+            date_to=date_to
+        )
+
+        # Create
+        if date_from is None:
+            date_from = df_statement.DATE.unique().min()
+        if date_to is None:
+            date_to = df_statement.DATE.unique().max()
+        
+        # > Get first position
+        first_position = round(df_statement["POSITION"].tolist()[0], 2)
+        first_text = (
+            f"{datetime.strptime(date_from, DATE_FORMAT).strftime('%d/%m/%Y')}"
+        )
+        df_first = pd.DataFrame(
+            [{summary_type: first_text, "ORDER": 0, "AMOUNT": first_position}]
+        )
+        # > Get last position
+        last_position = round(df_statement["POSITION"].tolist()[-1], 2)
+        current_text = (
+            f"{datetime.strptime(date_to, DATE_FORMAT).strftime('%d/%m/%Y')}"
+        )
+        df_last = pd.DataFrame(
+            [{summary_type: current_text, "ORDER": 99999, "AMOUNT": last_position}]
+        )
+        
+        # > Get transactions
+        df_transaction = df_statement.copy()
+        
+        # Order
+        if summary_type == "OPERATION_TYPE":
+            # Order
+            transaction_order = {
+                "income": 1,
+                "swift_income": 2,
+                "card": 3,
+                "transfer": 4,
+                "qonto_fee": 5,
+                "direct_debit": 6,
+                "cheque": 7,
+                "recall": 8,
+            }
+            df_transaction["ORDER"] = df_transaction[summary_type].replace(
+                transaction_order
+            )
+        else:
+            values = sorted(df_transaction[summary_type].unique())
+            transaction_order = {}
+            for i, v in enumerate(values):
+                transaction_order[v] = i
+            df_transaction["ORDER"] = df_transaction[summary_type].replace(
+                transaction_order
+            )
+        
+        # Label
+        if language == "FR":
+            # Replace value
+            transaction_type = {
+                "income": " - Encaissements",
+                "swift_income": " - SWIFT",
+                "card": " - Flux carte bleue",
+                "transfer": " - Virements",
+                "qonto_fee": " - Frais bancaires",
+                "direct_debit": " - Prélèvements",
+                "cheque": " - Chèques",
+                "recall": " -  Rappel",
+            }
+            df_transaction[summary_type] = df_transaction[summary_type].replace(
+                transaction_type
+            )
+            value_col = "Montant"
+        else:
+            df_transaction[summary_type] = " - " + df_transaction[summary_type].str.capitalize().str.replace("_", " ")
+            value_col = "Amount"
+            
+        # Groupby month
+        to_group = [summary_type, "ORDER"]
+        to_agg = {"AMOUNT": "sum"}
+        df_transaction = df_transaction.groupby(to_group, as_index=False).agg(to_agg)
+
+        # Create summary table
+        cash_summary = pd.concat([df_first, df_transaction, df_last], axis=0)
+        cash_summary = cash_summary.sort_values("ORDER").drop("ORDER", axis=1)
+        cash_summary["AMOUNT"] = (
+            cash_summary["AMOUNT"].map(NUMBER_FORMAT.format).str.replace(",", " ")
+        )
+        cash_summary = cash_summary.rename(
+            columns={summary_type: "Type", "AMOUNT": value_col}
+        )
+        return cash_summary
+
+    def transactions(self, date_from=None, date_to=None):
+        # Data
+        df = self.get(
+            to_group=["LABEL", "OPERATION_TYPE"],
+            date_from=date_from,
+            date_to=date_to
+        )
+
+        # Groupby
+        to_group = ["LABEL", "OPERATION_TYPE", "DATE"]
+        df = df.groupby(to_group, as_index=False).agg({"AMOUNT": "sum"})
+        df["DATE"] = pd.to_datetime(df["DATE"]).dt.strftime("%d/%m/%Y")
+        # Replace value
+        transaction_type = {
+            "income": "Encaissement",
+            "swift_income": "SWIFT",
+            "card": "Carte bleue",
+            "transfer": "Virement",
+            "qonto_fee": "Frais bancaires",
+            "direct_debit": "Prélèvement",
+            "cheque": "Chèque",
+            "recall": "Rappel",
+        }
+        df["OPERATION_TYPE"] = df["OPERATION_TYPE"].replace(transaction_type)
+
+        # Rename columns
+        week_cols = {
+            "LABEL": "Description",
+            "OPERATION_TYPE": "Type",
+            "DATE": "Date",
+            "AMOUNT": "Montant",
+        }
+        df = df.rename(columns=week_cols)
+        df["Montant"] = (
+            df["Montant"].map("{:,.2f} €".format).str.replace(",", " ")
+        )  # .str.replace(".", ",")
+        df = df.sort_values("Date", ascending=False)
+        return df
 
     def email(
         self,
@@ -462,22 +687,3 @@ class Statements(Transactions):
         # Generate email in html
         email_content = emailbuilder.generate(display="iframe", **content)
         return email_content
-
-
-class Qonto:
-    user_id = None
-    api_token = None
-
-    def connect(self, user_id, api_token):
-        # Init thinkific attribute
-        self.user_id = user_id
-        self.token = api_token
-
-        # Init end point
-        self.positions = Organizations(self.user_id, self.token)
-        self.flows = Transactions(self.user_id, self.token)
-        self.statement = Statements(self.user_id, self.token)
-
-        # Set connexion to active
-        self.connected = True
-        return self
