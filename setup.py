@@ -127,7 +127,11 @@ extras_requires_full = [env for env in extras_requires for env in extras_require
 
 setup(
     name="naas-drivers",
+<<<<<<< HEAD
     version="0.85.0b1",
+=======
+    version="0.86.1",
+>>>>>>> main
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
     license="BSD",
@@ -167,6 +171,7 @@ setup(
         "mprop==0.16.0",
         "pandas==1.2.4",
         "pandas-datareader==0.9.0",
+        "numpy==1.19.5"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

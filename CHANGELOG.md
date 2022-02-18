@@ -1,14 +1,51 @@
-## 0.85.0b1 (2022-01-27)
+## 0.86.1 (2022-02-16)
 
 ### Fix
 
-- **Automatic-dependencies-install**: Use naas-drivers instead of path if no setup.py
+- qonto driver
+- remove unused package
+- qonto driver
 
-## 0.85.0b0 (2022-01-27)
+## 0.86.0 (2022-02-11)
 
 ### Feat
 
-- Minimal install (#216)
+- get stargazers added
+- get stargazers added
+
+## 0.85.2 (2022-01-31)
+
+### Fix
+
+- (github) add new columns to get commits
+
+## 0.85.1 (2022-01-29)
+
+### Fix
+
+- bump ipython to 7.23.1
+- bump ipython to 7.23.1
+
+## 0.85.0 (2022-01-28)
+
+### Feat
+
+- init github driver, get commits from repository url
+- add new driver in init
+- update and lint
+- github get commits from repository
+- add template to repo
+- init get commtis from repository
+
+### Fix
+
+- lint
+
+## 0.84.1 (2022-01-28)
+
+### Fix
+
+- linkedin get posts feed limit
 
 ## 0.84.0 (2022-01-26)
 

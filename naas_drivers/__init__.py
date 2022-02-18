@@ -2,7 +2,7 @@ import requests
 import os
 from mprop import mproperty
 
-__version__ = "0.85.0b1"
+__version__ = "0.86.1"
 
 __github_repo = "jupyter-naas/drivers"
 
@@ -337,3 +337,9 @@ def googleanalytics():
     from naas_drivers.tools.googleanalytics import GoogleAnalytics
 
     return GoogleAnalytics()
+
+@load_driver
+def github():
+    from naas_drivers.tools.github import Github
+
+    return Github()
