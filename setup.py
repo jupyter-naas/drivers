@@ -130,7 +130,7 @@ setup(
 <<<<<<< HEAD
     version="0.85.0b1",
 =======
-    version="0.86.1",
+    version="0.87.0b0",
 >>>>>>> main
     author="Martin Donadieu",
     author_email="martindonadieu@gmail.com",
