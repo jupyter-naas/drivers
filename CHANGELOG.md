@@ -1,3 +1,10 @@
+## 0.86.2 (2022-02-21)
+
+### Fix
+
+- update dateformat to %Y-%m-%d
+- update dateformat to %Y-%m-%d
+
 ## 0.86.1 (2022-02-16)
 
 ### Fix
