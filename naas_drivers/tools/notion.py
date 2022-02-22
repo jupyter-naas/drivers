@@ -177,7 +177,10 @@ class Notion(InDriver, OutDriver):
                         "created_time",
                     ]
                     and getattr(prop, prop.type) is not None
-                    and not (prop.type == 'rich_text' and pydash.get(getattr(prop, prop.type), '[0].plain_text') == '')
+                    and not (
+                        prop.type == "rich_text"
+                        and pydash.get(getattr(prop, prop.type), "[0].plain_text") == ""
+                    )
                 ):
                     filtered_properties[p] = prop
             copied.properties = filtered_properties
