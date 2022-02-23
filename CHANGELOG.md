@@ -1,3 +1,11 @@
+## 0.86.3 (2022-02-23)
+
+### Fix
+
+- **notion**: Make sure we do not send rich_text containing empty plain_text
+- Applied black
+- **notion**: Make sure we do not send rich_text containing empty plain_text
+
 ## 0.86.2 (2022-02-21)
 
 ### Fix
