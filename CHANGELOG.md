@@ -1,3 +1,10 @@
+## 0.86.4 (2022-02-23)
+
+### Fix
+
+- **notion**: add space when rich text empty in page block
+- **notion**: add space when rich text empty in page block
+
 ## 0.86.3 (2022-02-23)
 
 ### Fix
