@@ -434,10 +434,16 @@ class RichText(__BaseDataClass):
 
     @classmethod
     def new(cls, text: str) -> "RichText":
+        # Notion does not accept empty text anymore, we added spaces to fix for now (2022-02-23)
+        if text == "":
+            return cls(type="text", plain_text=" ", text=Text.new(" "))
         return cls(type="text", plain_text=text, text=Text.new(text))
 
     @classmethod
     def new_text(cls, content):
+        # Notion does not accept empty text anymore, we added spaces to fix for now (2022-02-23)
+        if content == "":
+            return cls(plain_text=" ", text=Text(content=" "))
         return cls(plain_text=content, text=Text(content=content))
 
 
