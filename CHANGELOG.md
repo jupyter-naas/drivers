@@ -1,3 +1,10 @@
+## 0.87.0 (2022-02-28)
+
+### Feat
+
+- add bazimo connector
+- add bazimo connector
+
 ## 0.86.4 (2022-02-23)
 
 ### Fix
