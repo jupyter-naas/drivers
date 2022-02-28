@@ -338,8 +338,16 @@ def googleanalytics():
 
     return GoogleAnalytics()
 
+
 @load_driver
 def github():
     from naas_drivers.tools.github import Github
 
     return Github()
+
+
+@load_driver
+def bazimo():
+    from naas_drivers.tools.bazimo import Bazimo
+
+    return Bazimo()
