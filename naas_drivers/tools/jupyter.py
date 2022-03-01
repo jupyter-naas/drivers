@@ -202,13 +202,14 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r
 
-    def start_user(self, username):
+    def start_user(self, username, user_options={}):
         self.check_connect()
         r = requests.post(
             f"{self.api_url}/users/{username}/server",
             headers={
                 "Authorization": f"token {self.token}",
             },
+            body=user_options,
         )
         r.raise_for_status()
         return r
@@ -216,5 +217,7 @@ class Jupyter(InDriver, OutDriver):
     def restart_user(self, username):
         self.check_connect()
         if self.is_user_active(username):
+            user = self.get_user(username)
+            user_options = user.get("servers").get("").get("user_options")
             self.stop_user(username)
-            self.start_user(username)
+            self.start_user(username, user_options)
