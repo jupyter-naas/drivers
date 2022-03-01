@@ -1,3 +1,9 @@
+## 0.88.0 (2022-03-01)
+
+### Feat
+
+- **Jupyter**: Handle user_options on server restart (#233)
+
 ## 0.87.0 (2022-02-28)
 
 ### Feat
