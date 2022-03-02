@@ -93,7 +93,8 @@ setup(
         "dacite==1.6.0",
         "notion-client==0.7.1",
         "youtube_transcript_api==0.4.3",
-        "mprop==0.16.0"
+        "mprop==0.16.0",
+        "SharePlum==0.5.1"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
