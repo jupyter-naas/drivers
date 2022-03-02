@@ -351,3 +351,9 @@ def bazimo():
     from naas_drivers.tools.bazimo import Bazimo
 
     return Bazimo()
+
+@load_driver
+def sharepoint():
+    from naas_drivers.tools.sharepoint import Sharepoint
+
+    return Sharepoint()
