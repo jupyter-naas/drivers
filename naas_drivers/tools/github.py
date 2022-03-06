@@ -86,10 +86,18 @@ class Projects(Github):
         return projects_df
     
     def get_comments_from_issues(self, url):
+        """
+        Returns a list of comments to a particular issue
+        
+        Parameters
+        ----------
+        issue comments url: str
+        Example: https://github.com/jupyter-naas/awesome-notebooks/issues/359/comments
+        """
         issue_comments=[]
 
         if url.find("api.github.com")==-1:
-            url = "api.github.com".join(url.split("github.com"))
+            url = "api.github.com/repos".join(url.split("github.com"))
 
         comments = requests.get(url, headers=self.headers)
         try:
@@ -134,7 +142,7 @@ class Projects(Github):
         df_projects = self.get_active_projects_links(projects_url)
         df_issues = pd.DataFrame(columns=['issue_status', 'issue_state'])
 
-        ## Gets info from columns present in our roadmap for all active projects ##
+        ## Gets info from columns present in our roadmap for all active projects
         for _, project in df_projects.iterrows():
 
             columns = requests.get(project['project_columns_url'], headers=self.headers).json()
@@ -351,4 +359,212 @@ class Repositories(Github):
             if col.endswith("_at"):
                 df[col] = df[col].str.replace("T", " ").str.replace("Z", " ")
         df.columns = df.columns.str.upper()
+        return df
+    
+    def get_comments_from_issues(self, url):
+        """
+        Returns a list of comments to a particular issue
+        
+        Parameters
+        ----------
+        issue comments url: str
+        Example: https://github.com/jupyter-naas/awesome-notebooks/issues/359/comments
+        """
+        issue_comments=[]
+
+        if url.find("api.github.com")==-1:
+            url = "api.github.com".join(url.split("github.com"))
+
+        comments = requests.get(url, headers=self.headers)
+        try:
+            comments.raise_for_status()
+        except requests.HTTPError as e:
+            raise(e)
+        if len(comments.json())==0:
+            return 'No comments'
+        else:
+            for comment in comments.json():
+                issue_comments.append(comment['body'])
+        return issue_comments
+
+    def get_issues_from_repo(self, url):
+        """
+        Return an dataframe object with 15 columns:
+        - LINK_TO_THE_ISSUE      object
+        - ISSUE_NUMBER           int64
+        - ISSUE_TITLE            object
+        - ISSUE_STATE            object
+        - ISSUE_ID               int64
+        - ISSUE_LABELS           object
+        - ISSUE_ASSIGNEES        object
+        - COMMENTS_TILL_DATE     int64
+        - LAST_CREATED_DATE      object
+        - LAST_CREATED_TIME      object
+        - LAST_UPDATED_DATE      object
+        - LAST_UPDATED_TIME      object
+        - COMMENTS               object
+        - LINKED_PR_STATE        object
+        - PR_ACTIVITY            object
+
+        Parameters
+        ----------
+        repository: str:
+            Repository url from Github.
+            Example : "https://github.com/jupyter-naas/awesome-notebooks"
+        """
+        # Get organisation and repository from url
+        repository = Github.get_repository_url(url)
+        
+        df = pd.DataFrame()
+        page = 1
+        while True:
+            params = {
+                "per_page": "100",
+                "page": page,
+            }
+            url = f"https://api.github.com/repos/{repository}/issues?{urlencode(params, safe='(),')}"
+            res = requests.get(url, headers=self.headers)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                raise(e)
+            res_json = res.json()
+            if len(res_json) == 0:
+                break
+
+            for idx, issue in enumerate(res_json):
+                df.loc[idx, 'link_to_the_issue'], df.loc[idx, 'issue_number'] = issue['html_url'], issue['number']
+                df.loc[idx, 'issue_title'], df.loc[idx, 'issue_state'] = issue['title'], issue['state']
+                df.loc[idx, 'issue_id'] = issue['id']
+                labels= []
+                for label in issue['labels']:
+                    labels.append(label.get('name'))
+                if labels==[]:
+                    df.loc[idx, 'issue_labels'] = 'None'
+                else:
+                    df.loc[idx, 'issue_labels'] = ", ".join(labels)
+
+                assigned=[]
+                for assignee in issue['assignees']:
+                    assigned.append(assignee.get('login'))
+                if assigned==[]:
+                    df.loc[idx, 'issue_assignees'] = 'None'
+                else:
+                    df.loc[idx, 'issue_assignees'] = ", ".join(assigned)
+
+                df.loc[idx, 'comments_till_date'] = issue['comments']
+
+                df.loc[idx, 'last_created_date'] = issue.get('created_at').strip('Z').split('T')[0]
+                df.loc[idx, 'last_created_time'] = issue.get('created_at').strip('Z').split('T')[-1]
+                df.loc[idx, 'last_updated_date'] = issue.get('updated_at').strip('Z').split('T')[0]
+                df.loc[idx, 'last_updated_time'] = issue.get('updated_at').strip('Z').split('T')[-1]
+
+                df.loc[idx, 'comments'] = str(self.get_comments_from_issues(issue['comments_url']))
+
+                try:
+                    pr = requests.get(issue.get('pull_request')['url'], headers= self.headers).json()
+                    df.loc[idx, 'linked_pr_state'] = pr.get('state')
+
+                    date_format = "%Y-%m-%d"
+                    delta = datetime.now() - datetime.strptime(df.loc[idx, 'last_updated_date'], date_format)
+                    df.loc[idx, 'PR_activity'] = f'No activity since {delta.days} days'
+
+                except:
+                    df.loc[idx, 'linked_pr_state'] = 'None'
+                    df.loc[idx, 'PR_activity'] = 'None'
+            page+=1
+
+        df['issue_id'] = df.issue_id.astype('int')
+        df['comments_till_date'] = df.comments_till_date.astype('int')
+        df['issue_number'] = df.issue_number.astype('int')
+
+        return df
+    
+    def get_pulls_from_repo(self, url):
+        """
+        Return an dataframe object with 15 columns:
+        - ID                      int64
+        - ISSUE_URL               object
+        - PR_NUMBER               int64
+        - PR_STATE                object
+        - TITLE                   object
+        - FIRST_CREATED_DATE      object
+        - FIRST_CREATED_TIME      object
+        - LAST_UPDATED_DATE       object
+        - LAST_UPDATED_TIME       object
+        - COMMITS_URL             object
+        - REVIEW_COMMENTS_URL     object
+        - ISSUE_COMMENTS_URL      object
+        - ASSIGNEES               object
+        - REQUESTED_REVIEWERS     object
+        - PR_ACTIVITY             object
+
+        Parameters
+        ----------
+        repository: str:
+            Repository url from Github.
+            Example : "https://github.com/jupyter-naas/awesome-notebooks"
+        """
+        # Get organisation and repository from url
+        repository = Github.get_repository_url(url)
+        
+        df = pd.DataFrame()
+        page = 1
+        while True:
+            params = {
+                "per_page": "100",
+                "page": page,
+            }
+            url = f"https://api.github.com/repos/{repository}/pulls?{urlencode(params, safe='(),')}"
+            res = requests.get(url, headers=self.headers)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                raise(e)
+            res_json = res.json()
+            if len(res_json) == 0:
+                break
+
+            for idx, r in enumerate(res_json):
+                if r.get('state') == 'open':
+                    df.loc[idx, 'id'] = r.get('id')
+                    df.loc[idx, 'issue_url'] = r.get('issue_url')
+                    df.loc[idx, 'PR_number'] = r.get('number')
+                    df.loc[idx, 'PR_state'] = 'open'
+                    df.loc[idx, 'Title'] = r.get('title')
+
+                    df.loc[idx, 'first_created_date'] = r.get('created_at').strip('Z').split('T')[0]
+                    df.loc[idx, 'first_created_time'] = r.get('created_at').strip('Z').split('T')[-1]
+                    df.loc[idx, 'last_updated_date'] = r.get('updated_at').strip('Z').split('T')[0]
+                    df.loc[idx, 'last_updated_time'] = r.get('updated_at').strip('Z').split('T')[-1]
+
+                    df.loc[idx, 'commits_url'] = r.get('commits_url')
+                    df.loc[idx, 'review_comments_url'] = r.get('review_comments_url')
+                    df.loc[idx, 'issue_comments_url'] = r.get('comments_url')
+
+                    assignees_lst, reviewers_lst=[],[]
+                    for assignee in r.get('assignees'):
+                        assignees_lst.append(assignee.get('login'))
+                    for reviewer in r.get('requested_reviewers'):
+                        reviewers_lst.append(reviewer.get('login'))
+
+                    if assignees_lst==[]:
+                        df.loc[idx, 'assignees'] = 'None'
+                    elif assignees_lst:
+                        df.loc[idx, 'assignees'] = ", ".join(assignees_lst)
+
+                    if reviewers_lst==[]:
+                        df.loc[idx, 'requested_reviewers'] = 'None'
+                    elif reviewers_lst:
+                        df.loc[idx, 'requested_reviewers'] = ", ".join(reviewers_lst)
+
+                    date_format = "%Y-%m-%d"
+                    delta = datetime.now() - datetime.strptime(df.loc[idx, 'last_updated_date'], date_format)
+                    df.loc[idx, 'PR_activity'] = f'No activity since {delta.days} days'
+
+                df['PR_number'] = df.PR_number.astype('int')
+                df.id = df.id.astype('int')
+
+            page+=1
+
         return df
