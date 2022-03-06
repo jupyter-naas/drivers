@@ -19,11 +19,164 @@ class Github:
         # Init end point
         self.repos = Repositories(self.headers)
         self.projects = Projects(self.headers)
+        self.profiles = Profiles(self.headers)
 
         # Set connexion to active
         self.connected = True
         return self
 
+class Profiles(Github):
+    def __init__(self, headers):
+        Github.__init__(self)
+        self.headers = headers
+    
+    def get_user_profile(self, html_url, url=None):
+        """
+        Return a dataframe object with 20 columns:
+        - LOGIN               object
+        - ID                  int64
+        - NODE_ID             object
+        - GRAVATAR_ID         object
+        - TYPE                object
+        - SITE_ADMIN          bool
+        - NAME                object
+        - COMPANY             object
+        - BLOG                object
+        - LOCATION            object
+        - EMAIL               object
+        - HIREABLE            object
+        - BIO                 object
+        - TWITTER_USERNAME    object
+        - PUBLIC_REPOS        int64
+        - PUBLIC_GISTS        int64
+        - FOLLOWERS           int64
+        - FOLLOWING           int64
+        - CREATED_AT          object
+        - UPDATED_AT          object
+        
+        Parameters
+        ----------
+        html_url: str:
+            User profile url from Github.
+            Example : "https://github.com/SanjuEpic"
+        """
+        if url is None:
+            user = html_url.split("github.com/")[-1].split("/")[0]
+            url = f"https://api.github.com/users/{user}"
+        
+        res = requests.get(url, headers=self.headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            raise(e)
+        res_json = res.json()
+
+        # Dataframe
+        df = pd.DataFrame([res_json])
+        for col in df.columns:
+            if col.endswith("url"):
+                df = df.drop(col, axis=1)
+            if col.endswith("_at"):
+                df[col] = df[col].str.replace("T", " ").str.replace("Z", " ")
+        return df
+    
+
+    def get_profiles_from_teams(self, url):
+        """
+        Return an dataframe object with 14 columns:
+        - TEAM              object
+        - SLUG              object
+        - TEAM_DESCRIPTION  object
+        - MEMBER_PROFILE    object
+        - GITHUB            object
+        - NAME              object
+        - EMAIL             object
+        - LOCATION          object
+        - ORGANIZATION      object
+        - BIO               object
+        - LOGIN_NAME        object
+        - TWITTER           object
+        - CREATED_AT        object
+        - UPDATED_AT        object
+        
+        Parameters
+        ----------
+        url: str:
+            teams url from Github.
+            Example : "https://github.com/orgs/jupyter-naas/teams"
+        """
+        # Traverses through multiple teams and all member profiles within each team
+        org = url.split("https://github.com/orgs/")[-1].split("/")[0]
+        
+        member_profiles, teams, slugs, team_descriptions=[],[],[],[]
+        data = pd.DataFrame(columns=['TEAM', 'SLUG','TEAM_DESCRIPTION', 'member_profile','GITHUB'])
+        page = 1
+
+        while True:
+            params = {
+                "state": "open",
+                "per_page": "100",
+                "page": page,
+            }
+            url = f"https://api.github.com/orgs/{org}/teams?{urlencode(params, safe='(),')}"
+            res = requests.get(url, headers=self.headers)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                raise(e)
+            res_json = res.json()
+
+            if len(res_json) == 0:
+                break
+
+            members_details=[]
+            for team_info in res_json:
+                members_details.append((team_info['name'], team_info['slug'], team_info['description'], team_info['members_url'].strip("{/member}")))
+
+
+            for info in members_details:
+                page_number=1
+                while True:
+                    members_params ={
+                        "state": "open",
+                        "per_page": "100",
+                        "page": page_number,
+                    }
+
+                    url = f"{info[3]}?{urlencode(members_params, safe='(),')}"
+                    members = requests.get(url, headers=self.headers, params=members_params)
+
+                    try:
+                        members.raise_for_status()
+                    except requests.HTTPError as e:
+                        raise(e)
+                    members_json = members.json()
+
+                    if len(members_json) == 0:
+                        break
+
+                    for member in members_json:
+                        member_profiles.append(member['url'])
+                        teams.append(info[0])
+                        slugs.append(info[1])
+                        team_descriptions.append(info[2])
+
+                    page_number+=1
+
+            page += 1
+
+        data['TEAM'], data['SLUG'], data['TEAM_DESCRIPTION'], data['member_profile'] = teams, slugs, team_descriptions, member_profiles     
+        data['GITHUB'] = org
+
+        for idx, profile in enumerate(data['member_profile']):
+            details = requests.get(profile, headers=self.headers, params= params).json()
+            data.loc[idx,'NAME'], data.loc[idx,'EMAIL'], data.loc[idx,'LOCATION'] = details['name'], details['email'], details['location']
+            data.loc[idx,'ORGANIZATION'], data.loc[idx,'BIO'], data.loc[idx,'LOGIN_NAME'] = details['company'], details['bio'], details['login']
+            data.loc[idx,'TWITTER'], data.loc[idx,'CREATED_AT'] = details['twitter_username'], details['created_at']  
+            data.loc[idx,'UPDATED_AT'] = details['updated_at']
+        
+        return data
+    
 class Projects(Github):
     def __init__(self, headers):
         Github.__init__(self)
@@ -32,7 +185,7 @@ class Projects(Github):
     def get_active_projects_links(self, url):
         """
         Return an dataframe object with 9 columns:
-        - PROJECT_NAME           object
+        - PROJECT_NAME            object
         - PROJECT_DESCRIPTION     object
         - PROJECT_ID              int64
         - PROJECT_CREATED_BY      object
