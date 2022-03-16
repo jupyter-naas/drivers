@@ -1,3 +1,10 @@
+## 0.89.1 (2022-03-16)
+
+### Fix
+
+- (prediction) change date_column var in code
+- (prediction) change date_column var in code
+
 ## 0.89.0 (2022-03-02)
 
 ### Feat
