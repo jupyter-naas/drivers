@@ -1,3 +1,9 @@
+## 0.89.2 (2022-03-17)
+
+### Fix
+
+- gsheet get empty sheet + add url or spreadsheet id in connect
+
 ## 0.89.1 (2022-03-16)
 
 ### Fix
