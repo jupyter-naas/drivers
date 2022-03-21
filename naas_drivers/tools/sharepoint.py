@@ -1,8 +1,14 @@
-from shareplum import Site
-from shareplum import Office365
-from shareplum.site import Version
 from os import path
 
+@dependencies(extra_requires="sharepoint")
+def dep():
+    global Site
+    global Office365
+    global Version
+
+    from shareplum import Site
+    from shareplum import Office365
+    from shareplum.site import Version
 
 class Sharepoint:
     def connect(self, endpoint: str, username: str, password: str, site: str):
