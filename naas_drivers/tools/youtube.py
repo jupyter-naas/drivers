@@ -6,7 +6,7 @@ import datetime
 from naas_drivers.driver import dependencies
 
 
-@dependencies(extra_requires="youtube,ml")
+@dependencies(extra_requires="youtube,ml,pydash")
 def dep():
     global YouTubeTranscriptApi
     global pipeline

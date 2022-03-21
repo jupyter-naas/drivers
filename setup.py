@@ -80,7 +80,9 @@ extras_requires = {
         ],
         "youtube": [
             "transformers==4.12.5",
-            "youtube_transcript_api==0.4.3",
+            "youtube_transcript_api==0.4.3"
+        ],
+        "pydash": [
             "pydash==5.1.0",
         ],
         "ml": [
