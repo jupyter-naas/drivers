@@ -41,12 +41,12 @@ class HSCRUD:
                         value = value.replace(" ", "").replace(".", "")
                 elif key == "closedate":
                     try:
-                        value = datetime.strptime(value, "%d/%m/%Y")
+                        value = datetime.strptime(value, "%Y-%m-%d")
                         value = str(int(value.timestamp())) + "000"
                     except ValueError:
                         print(
                             f"❌ Close date '{value}' is in wrong format.\n"
-                            "Please change it to %d/%m/%Y."
+                            "Please change it to %Y-%m-%d."
                         )
                 elif key == "amount":
                     if value == "nan":

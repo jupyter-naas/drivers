@@ -9,6 +9,7 @@ import logging
 from copy import deepcopy
 import pandas as pd
 import threading
+import pydash
 
 from naas_drivers.driver import dependencies
 
@@ -186,6 +187,10 @@ class Notion(InDriver, OutDriver):
                         "created_time",
                     ]
                     and getattr(prop, prop.type) is not None
+                    and not (
+                        prop.type == "rich_text"
+                        and pydash.get(getattr(prop, prop.type), "[0].plain_text") == ""
+                    )
                 ):
                     filtered_properties[p] = prop
             copied.properties = filtered_properties
@@ -439,10 +444,16 @@ class RichText(__BaseDataClass):
 
     @classmethod
     def new(cls, text: str) -> "RichText":
+        # Notion does not accept empty text anymore, we added spaces to fix for now (2022-02-23)
+        if text == "":
+            return cls(type="text", plain_text=" ", text=Text.new(" "))
         return cls(type="text", plain_text=text, text=Text.new(text))
 
     @classmethod
     def new_text(cls, content):
+        # Notion does not accept empty text anymore, we added spaces to fix for now (2022-02-23)
+        if content == "":
+            return cls(plain_text=" ", text=Text(content=" "))
         return cls(plain_text=content, text=Text(content=content))
 
 

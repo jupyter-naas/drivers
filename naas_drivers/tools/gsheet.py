@@ -21,7 +21,7 @@ class Gsheet(InDriver, OutDriver):
         spreadsheet_id: str,
         api_url: str = None,
     ):
-        self.spreadsheet_id = spreadsheet_id
+        self.spreadsheet_id = spreadsheet_id.split("spreadsheets/d/")[-1].split("/")[0]
         self.sheets_api = api_url if api_url else os.getenv("GSHEETS_API")
         self.connected = True
         return self
@@ -51,9 +51,15 @@ class Gsheet(InDriver, OutDriver):
             params={"perPage": items_per_page},
         )
         data = resp.json()
+        
+        # If cell empty then return empty dataframe
+        if data.get("status") == 500:
+            return pd.DataFrame()
+        # Manage error
         if data.get("error"):
-            self.print_error(data.get("error"))
-        df = pd.DataFrame(data=data["data"], columns=data["columns"])
+            return data.get("error")
+        df = pd.DataFrame(data=data["data"],
+                          columns=data["columns"])
         return df
 
     def send(self, data, sheet_name: str, append: bool = True) -> str:

@@ -1,22 +1,56 @@
-## 0.87.0b1 (2022-02-18)
+## 0.89.2 (2022-03-17)
 
 ### Fix
 
-- Remove missed HEAD <<<
+- gsheet get empty sheet + add url or spreadsheet id in connect
 
-## 0.87.0b0 (2022-02-18)
-
-## 0.85.0b1 (2022-01-27)
+## 0.89.1 (2022-03-16)
 
 ### Fix
 
-- **Automatic-dependencies-install**: Use naas-drivers instead of path if no setup.py
+- (prediction) change date_column var in code
+- (prediction) change date_column var in code
 
-## 0.85.0b0 (2022-01-27)
+## 0.89.0 (2022-03-02)
 
 ### Feat
 
-- Minimal install (#216)
+- Add Sharepoint driver (#234)
+
+## 0.88.0 (2022-03-01)
+
+### Feat
+
+- **Jupyter**: Handle user_options on server restart (#233)
+
+## 0.87.0 (2022-02-28)
+
+### Feat
+
+- add bazimo connector
+- add bazimo connector
+
+## 0.86.4 (2022-02-23)
+
+### Fix
+
+- **notion**: add space when rich text empty in page block
+- **notion**: add space when rich text empty in page block
+
+## 0.86.3 (2022-02-23)
+
+### Fix
+
+- **notion**: Make sure we do not send rich_text containing empty plain_text
+- Applied black
+- **notion**: Make sure we do not send rich_text containing empty plain_text
+
+## 0.86.2 (2022-02-21)
+
+### Fix
+
+- update dateformat to %Y-%m-%d
+- update dateformat to %Y-%m-%d
 
 ## 0.86.1 (2022-02-16)
 

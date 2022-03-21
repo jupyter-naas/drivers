@@ -203,10 +203,10 @@ class Prediction:
         # predicted_cols = None
         # group = None
         if "Company" in dataset.columns:
-            group = ["Date", "Company"]
+            group = [date_column, "Company"]
             predicted_cols, output_dfs = self.__multi_company()
         else:
-            group = ["Date"]
+            group = [date_column]
             predicted_cols, output_dfs = self.__modelling_prediction(dataset)
         res = pd.concat(output_dfs)
         res = res.reset_index(drop=True)
