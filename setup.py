@@ -151,7 +151,7 @@ setup(
         "pandas-datareader==0.9.0",
         "requests==2.25.1",
         "mprop==0.16.0",
-        "numpy==1.19.3" # Version needed by pmdarima
+        "numpy==1.22.3"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

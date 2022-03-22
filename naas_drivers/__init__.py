@@ -47,23 +47,26 @@ def load_driver(_func=None, *, extra_requires=""):
                     loaded = loader_fn()
                     __loaded_drivers[name] = loaded
                 except Exception as e:
-                    naas_drivers_path = "/".join(__file__.split("/")[:-2])
-                    if os.path.isfile(os.path.join(naas_drivers_path, "setup.py")) is False:
-                        naas_drivers_path = "naas-drivers"
-                    cmd = ["pip", "install", "--user", f'{naas_drivers_path}[{extra_requires}]']
-                    print(f'''
-    👉 Running this command automatically to install missing requirements. $> {(" ").join(cmd)}
+                    if extra_requires is not "":
+                        naas_drivers_path = "/".join(__file__.split("/")[:-2])
+                        if os.path.isfile(os.path.join(naas_drivers_path, "setup.py")) is False:
+                            naas_drivers_path = "naas-drivers"
+                        cmd = ["pip", "install", "--user", f'{naas_drivers_path}[{extra_requires}]']
+                        print(f'''
+        👉 Running this command automatically to install missing requirements. $> {(" ").join(cmd)}
 
-    ⚠️ You may need to restart your kernel / execution to be able to use the installed packages.
+        ⚠️ You may need to restart your kernel / execution to be able to use the installed packages.
 
-    💡 You can also run this command prior to execution next time to install these packages the way you want (venv, etc).
-        ''')
-                    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-                    stdout, stderr = process.communicate()
-                    print(stdout.decode("utf-8") )
-                    print(stderr.decode("utf-8") , file=sys.stderr)
-                    loaded = loader_fn()
-                    __loaded_drivers[name] = loaded
+        💡 You can also run this command prior to execution next time to install these packages the way you want (venv, etc).
+            ''')
+                        process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+                        stdout, stderr = process.communicate()
+                        print(stdout.decode("utf-8") )
+                        print(stderr.decode("utf-8") , file=sys.stderr)
+                        loaded = loader_fn()
+                        __loaded_drivers[name] = loaded
+                    else:
+                        raise e
             return __loaded_drivers[name]
 
         return wrapper
