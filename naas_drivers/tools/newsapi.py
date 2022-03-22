@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from newsapi.newsapi_client import NewsApiClient
 
+
 class Newsapi(InDriver):
     __key = None
 

@@ -3,6 +3,7 @@ from shareplum import Site
 from shareplum import Office365
 from shareplum.site import Version
 
+
 class Sharepoint:
     def connect(self, endpoint: str, username: str, password: str, site: str):
         self.endpoint = endpoint

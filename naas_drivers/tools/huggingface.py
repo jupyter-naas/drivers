@@ -63,7 +63,6 @@ if is_tf_available():
     )
 
 
-
 TASKS = {
     "feature-extraction": {
         "impl": FeatureExtractionPipeline,

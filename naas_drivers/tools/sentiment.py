@@ -4,6 +4,7 @@ from pandas import json_normalize
 from typing import Union
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
+
 class Sentiment(InDriver):
     def __sanitize_dataset(
         self, dataset: Union[pd.DataFrame, pd.Series], column_name: str

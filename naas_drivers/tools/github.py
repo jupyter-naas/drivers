@@ -3,6 +3,7 @@ import requests
 from urllib.parse import urlencode
 import pydash as _pd
 
+
 class Github:
     @staticmethod
     def get_repository_url(url):
@@ -96,7 +97,7 @@ class Repositories(Github):
         df["AUTHOR_DATE"] = pd.to_datetime(df["AUTHOR_DATE"])
         df["COMMITTER_DATE"] = pd.to_datetime(df["COMMITTER_DATE"])
         return df
-    
+
     def get_stargazers(self, url):
         """
         Return an dataframe object with 6 columns:
@@ -115,11 +116,11 @@ class Repositories(Github):
         """
         # Get organisation and repository from url
         repository = Github.get_repository_url(url)
-        
+
         # Custom headers
         headers = self.headers
-        headers['Accept'] = 'application/vnd.github.v3.star+json'
-        
+        headers["Accept"] = "application/vnd.github.v3.star+json"
+
         df = pd.DataFrame()
         page = 1
         while True:
@@ -132,7 +133,7 @@ class Repositories(Github):
             try:
                 res.raise_for_status()
             except requests.HTTPError as e:
-                raise(e)
+                raise (e)
             res_json = res.json()
 
             if len(res_json) == 0:
@@ -144,7 +145,7 @@ class Repositories(Github):
                 tmp["starred_at"] = starred_at
                 df = pd.concat([df, tmp], axis=0)
             page += 1
-    
+
         # Cleaning
         for col in df.columns:
             if col.endswith("_url") or col.endswith("_id"):

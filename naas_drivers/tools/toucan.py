@@ -14,6 +14,7 @@ from IPython.core.display import display, HTML
 import cson
 import jwt
 
+
 class Toucan(InDriver, OutDriver):
     """Toucan lib"""
 

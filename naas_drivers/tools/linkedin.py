@@ -659,7 +659,7 @@ class Post(LinkedIn):
             return e
         res_json = res.json()
         return pd.DataFrame(res_json)
-    
+
     def get_polls(self, post_url, activity_id=None):
         """
         Return an dataframe object with 8 columns:
@@ -668,9 +668,9 @@ class Post(LinkedIn):
         - FIRSTNAME             object
         - FULLNAME              object
         - OCCUPATION            object
-        - PROFILE_PICTURE       object 
+        - PROFILE_PICTURE       object
         - BACKGROUND_PICTURE    object
-        - POLL_RESULT           object 
+        - POLL_RESULT           object
 
         Parameters
         ----------
@@ -696,7 +696,7 @@ class Post(LinkedIn):
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)    
+            return e
         res_json = res.json()
         return pd.DataFrame(res_json)
 

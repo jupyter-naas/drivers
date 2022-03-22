@@ -1,6 +1,7 @@
 from naas_drivers.driver import OutDriver
 import pymsteams
 
+
 class Teams(OutDriver):
     client = None
 

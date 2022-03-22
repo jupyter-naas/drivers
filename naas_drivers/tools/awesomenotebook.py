@@ -2,7 +2,8 @@ from naas_drivers.driver import InDriver
 import requests
 import urllib.parse
 import traceback
-from IPython.core.display import display, Markdown    
+from IPython.core.display import display, Markdown
+
 
 class AwesomeNotebooks(InDriver):
 
