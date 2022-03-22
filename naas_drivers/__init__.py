@@ -34,7 +34,6 @@ def up_to_date():
     return get_last_version() == version()
 
 
-#def load_driver(loader_fn):
 def load_driver(_func=None, *, extra_requires=""):
     def fn_wrapper(loader_fn):
         @mproperty
