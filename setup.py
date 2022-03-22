@@ -19,7 +19,7 @@ setup(
             "pytest==6.2.3",
             "pytest-mock==3.6.0",
             "requests-mock==1.9.1",
-            "twine==3.4.1",
+            "twine==3.8.0",
             "flake8==3.9.1",
             "black==21.4b2",
             "commitizen==2.17.4",
