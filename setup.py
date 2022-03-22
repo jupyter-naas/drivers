@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-extras_requires = {
+extras_require = {
         "dev": [
             "pytest==6.2.3",
             "pytest-mock==3.6.0",
@@ -57,6 +57,9 @@ extras_requires = {
         "plotly": [
             "plotly==4.14.3",
         ],
+        "cython": [
+            "Cython==0.29.23"
+        ],
         "prediction": [
             "pmdarima==1.8.2",
             "scikit-learn==0.24.2",
@@ -79,20 +82,20 @@ extras_requires = {
             "pyjwt==2.1.0",
         ],
         "youtube": [
-            "transformers==4.12.5",
             "youtube_transcript_api==0.4.3"
         ],
         "pydash": [
             "pydash==5.1.0",
         ],
         "ml": [
-            "tensorflow==2.6.0",
+            "transformers==4.12.5",
+            "tensorflow==2.8.0",
             "torch==1.8.1",
             "keras==2.6.0"
         ],
         "sharepoint": [
             "SharePlum==0.5.1"
-        ]
+        ],
         "extra": [
             #"pyppeteer==0.2.5",
             #"pdfkit==0.6.1",
@@ -128,8 +131,8 @@ extras_requires = {
         ]
     }
 
-extras_requires['full'] = [env for env in extras_requires for env in extras_requires[env]]
-extra_requires['all'] = extras_requires['full']
+extras_require['full'] = [env for env in extras_require for env in extras_require[env]]
+extras_require['all'] = extras_require['full']
 
 setup(
     name="naas-drivers",
@@ -142,12 +145,13 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/jupyter-naas/drivers",
     packages=find_packages(exclude=["tests"]),
-    extras_require=extra_requires,
+    extras_require=extras_require,
     install_requires=[
         "pandas==1.2.4",
         "pandas-datareader==0.9.0",
         "requests==2.25.1",
-        "mprop==0.16.0"
+        "mprop==0.16.0",
+        "numpy==1.19.3" # Version needed by pmdarima
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

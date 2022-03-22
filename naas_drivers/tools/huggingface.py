@@ -1,5 +1,6 @@
 # flake8: noqa
 
+from naas_drivers.driver import InDriver
 from typing import Optional, Union, Dict, Any
 
 from transformers import (
@@ -9,7 +10,6 @@ from transformers import (
     AutoTokenizer,
 )
 
-from naas_drivers.driver import InDriver
 from transformers.pipelines.question_answering import QuestionAnsweringPipeline
 from transformers.pipelines.text2text_generation import (
     SummarizationPipeline,
@@ -61,6 +61,8 @@ if is_tf_available():
         TFAutoModel,
         TFAutoModelForTokenClassification,
     )
+
+
 
 TASKS = {
     "feature-extraction": {

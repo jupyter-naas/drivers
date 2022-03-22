@@ -1,19 +1,8 @@
 import pandas as pd
 import numpy as np
-
-
-from naas_drivers.driver import dependencies
-
-
-@dependencies(extra_requires="prediction")
-def dep():
-    global pm
-    global SVR
-    global LinearRegression
-
-    import pmdarima as pm
-    from sklearn.svm import SVR
-    from sklearn.linear_model import LinearRegression
+import pmdarima as pm
+from sklearn.svm import SVR
+from sklearn.linear_model import LinearRegression
 
 
 class Prediction:

@@ -1,13 +1,7 @@
 import pandas as pd
 import requests
-import pydash as _pd
 from urllib.parse import urlencode
-
-@dependencies(extra_requires="pydash")
-def dep():
-    global _pd
-
-    import pydash as _pd
+import pydash as _pd
 
 class Github:
     @staticmethod

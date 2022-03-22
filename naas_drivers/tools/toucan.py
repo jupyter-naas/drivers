@@ -10,21 +10,9 @@ import time
 import uuid
 import os
 import io
-
-from naas_drivers.driver import dependencies
-
-
-@dependencies(extra_requires="ipython,toucan")
-def dep():
-    global display
-    global HTML
-    global cson
-    global jwt
-
-    from IPython.core.display import display, HTML
-    import cson
-    import jwt
-
+from IPython.core.display import display, HTML
+import cson
+import jwt
 
 class Toucan(InDriver, OutDriver):
     """Toucan lib"""

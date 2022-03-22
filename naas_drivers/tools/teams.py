@@ -1,13 +1,5 @@
 from naas_drivers.driver import OutDriver
-
-from naas_drivers.driver import dependencies
-
-
-@dependencies(extra_requires="teams")
-def dep():
-    global pymsteams
-    import pymsteams
-
+import pymsteams
 
 class Teams(OutDriver):
     client = None

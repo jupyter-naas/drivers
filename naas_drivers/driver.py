@@ -1,5 +1,7 @@
 import os
+import sys
 import pandas as pd
+from subprocess import Popen, PIPE
 
 basic_text = "Not defined, it should to allow user to connect"
 key_text = "Connect key missing"
@@ -58,18 +60,3 @@ class OutDriver(ConnectDriver):
         self.print_error(basic_error)
         return basic_error
 
-
-def dependencies(*args, **kwargs):
-    def wrapper(dep_load):
-        try:
-            dep_load()
-        except Exception:
-            naas_drivers_path = "/".join(__file__.split("/")[:-2])
-            if os.path.isfile(os.path.join(naas_drivers_path, "setup.py")) is False:
-                naas_drivers_path = "naas-drivers"
-            cmd = f'pip install {naas_drivers_path}[{kwargs["extra_requires"]}]'
-            print(cmd)
-            os.system(cmd)
-            dep_load()
-
-    return wrapper
