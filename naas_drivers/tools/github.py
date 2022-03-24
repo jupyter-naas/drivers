@@ -295,7 +295,7 @@ class Projects(Github):
         df_projects = self.get_active_projects_links(projects_url)
         df_issues = pd.DataFrame(columns=['issue_status', 'issue_state'])
 
-        ## Gets info from columns present in our roadmap for all active projects
+        # Gets info from columns present in our roadmap for all active projects
         for _, project in df_projects.iterrows():
 
             columns = requests.get(project['project_columns_url'], headers=self.headers).json()
@@ -316,7 +316,7 @@ class Projects(Github):
                     if len(issues.json()) == 0:
                         break
                     for issue in issues.json():
-                        if issue.get('content_url')!=None:                        
+                        if issue.get('content_url') is not None:                        
                             issue_urls.append(issue.get('content_url'))
                             issue_status.append(column['name'])
                     page+=1
@@ -330,7 +330,7 @@ class Projects(Github):
                 except requests.HTTPError as e:
                     raise(e)
                 issue = issue.json()
-                ###### information to be extracted are below #####
+                # information to be extracted are below
                 df_issues.loc[idx, 'link_to_the_issue'], df_issues.loc[idx, 'issue_number'] = issue['html_url'], issue['number']
                 df_issues.loc[idx, 'issue_title'], df_issues.loc[idx, 'issue_state'] = issue['title'], issue['state']
 
@@ -364,17 +364,16 @@ class Projects(Github):
                 df_issues.loc[idx, 'comments'] = str(self.get_comments_from_issues(issue['comments_url']))
 
                 try:
-                    pr = requests.get(issue.get('pull_request')['url'], headers= headers).json()
+                    pr = requests.get(issue.get('pull_request')['url'], headers= self.headers).json()
                     df_issues.loc[idx, 'linked_pr_state'] = pr.get('state')
 
                     date_format = "%Y-%m-%d"
                     delta = datetime.now() - datetime.strptime(pr.get('updated_at').split('T')[0], date_format)
                     df_issues.loc[idx, 'PR_activity'] = f'No activity since {delta.days} days'
 
-                except:
+                except Exception:
                     df_issues.loc[idx, 'linked_pr_state'] = 'None'
                     df_issues.loc[idx, 'PR_activity'] = 'None'
-                ##################################################
 
             df_issues['project_id'] = [df_projects.project_id.values[0]]*df_issues.shape[0]
             df_issues['project_name'] = [df_projects.project_name.values[0]]*df_issues.shape[0]
@@ -622,7 +621,7 @@ class Repositories(Github):
                     delta = datetime.now() - datetime.strptime(df.loc[idx, 'last_updated_date'], date_format)
                     df.loc[idx, 'PR_activity'] = f'No activity since {delta.days} days'
 
-                except:
+                except Exception:
                     df.loc[idx, 'linked_pr_state'] = 'None'
                     df.loc[idx, 'PR_activity'] = 'None'
             page+=1
