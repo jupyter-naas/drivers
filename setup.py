@@ -21,7 +21,7 @@ setup(
             "requests-mock==1.9.1",
             "twine==3.4.1",
             "flake8==3.9.1",
-            "black==21.4b2",
+            "black==22.3.0",
             "commitizen==2.17.4",
             "pytest-cov==2.11.1",
         ]
