@@ -1,3 +1,17 @@
+## 0.90.0 (2022-03-31)
+
+### Feat
+
+- github projects driver added
+- github profiles driver added
+- github repo driver updated
+- github projects driver added
+
+### Fix
+
+- rename function + create new end points to regarding github url (teams and users)
+- driver code debug
+
 ## 0.89.3 (2022-03-31)
 
 ### Fix
