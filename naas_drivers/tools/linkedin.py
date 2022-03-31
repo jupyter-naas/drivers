@@ -6,7 +6,6 @@ import urllib
 from datetime import datetime
 import secrets
 import pydash as _pd
-from pprint import pprint
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
