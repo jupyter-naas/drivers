@@ -5,6 +5,7 @@ import time
 import urllib
 from datetime import datetime
 import secrets
+import pydash as _pd
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -104,8 +105,10 @@ class Profile(LinkedIn):
     def get_identity(self, url=None, urn=None):
         res_json = {}
         result = {}
-        lk_id = self.get_profile_id(url)
-        req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}"
+        lk_public_id = self.get_profile_id(url)
+        req_url = (
+            f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_public_id}"
+        )
         res = requests.get(req_url, cookies=self.cookies, headers=self.headers)
         try:
             res.raise_for_status()
@@ -115,9 +118,43 @@ class Profile(LinkedIn):
             res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
+        included = res_json.get("included", {})
+
+        # Init var
+        bg_pic_url = None
+        profile_pic_url = None
+
+        # Get data from included json
+        if len(included) > 0:
+            included = included[0]
+            #             pprint(included)
+            # Get background picture
+            if included.get("backgroundImage"):
+                background_url_end = None
+                background_root = None
+                background_artifacts = _pd.get(included, "backgroundImage.artifacts")
+                if len(background_artifacts) > 0:
+                    background_url_end = background_artifacts[
+                        len(background_artifacts) - 1
+                    ].get("fileIdentifyingUrlPathSegment")
+                background_root = _pd.get(included, "backgroundImage.rootUrl")
+                if background_url_end and background_root:
+                    bg_pic_url = f"{background_root}{background_url_end}"
+            # Get profile picture
+
+            if included.get("picture"):
+                profile_url_end = None
+                profile_root = None
+                profile_artifacts = _pd.get(included, "picture.artifacts")
+                if len(profile_artifacts) > 0:
+                    profile_url_end = profile_artifacts[len(profile_artifacts) - 1].get(
+                        "fileIdentifyingUrlPathSegment"
+                    )
+                profile_root = _pd.get(included, "picture.rootUrl")
+                if profile_root and profile_url_end:
+                    profile_pic_url = f"{profile_root}{profile_url_end}"
+        lk_id = data.get("entityUrn", "").replace("urn:li:fs_profile:", "")
         result = {
-            "PROFILE_URN": data.get("entityUrn", "").replace("urn:li:fs_profile:", ""),
-            "PROFILE_ID": lk_id,
             "FIRSTNAME": data.get("firstName"),
             "LASTNAME": data.get("lastName"),
             "SUMMARY": data.get("summary"),
@@ -128,6 +165,11 @@ class Profile(LinkedIn):
             "COUNTRY": data.get("geoCountryName"),
             "LOCATION": data.get("locationName"),
             "BIRTHDATE": self.get_birthdate(data.get("birthDateOn")),
+            "PROFILE_ID": lk_id,
+            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
+            "PUBLIC_ID": lk_public_id,
+            "BACKGROUND_PICTURE": bg_pic_url,
+            "PROFILE_PICTURE": profile_pic_url,
         }
         time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
@@ -173,6 +215,7 @@ class Profile(LinkedIn):
             res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
+
         # Specific
         connected_at = data.get("connectedAt")
         if connected_at is not None:
@@ -659,7 +702,7 @@ class Post(LinkedIn):
             return e
         res_json = res.json()
         return pd.DataFrame(res_json)
-    
+
     def get_polls(self, post_url, activity_id=None):
         """
         Return an dataframe object with 8 columns:
@@ -668,9 +711,9 @@ class Post(LinkedIn):
         - FIRSTNAME             object
         - FULLNAME              object
         - OCCUPATION            object
-        - PROFILE_PICTURE       object 
+        - PROFILE_PICTURE       object
         - BACKGROUND_PICTURE    object
-        - POLL_RESULT           object 
+        - POLL_RESULT           object
 
         Parameters
         ----------
@@ -689,14 +732,13 @@ class Post(LinkedIn):
             activity_id = LinkedIn.get_activity_id(post_url)
             if activity_id is None:
                 return "Please enter a valid post_url or activity_id"
-
         req_url = f"{LINKEDIN_API}/post/getPolls?activity_id={activity_id}"
         headers = {"Content-Type": "application/json"}
         res = requests.post(req_url, json=self.cookies, headers=headers)
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)    
+            return e
         res_json = res.json()
         return pd.DataFrame(res_json)
 
