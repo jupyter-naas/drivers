@@ -18,19 +18,20 @@ class Github:
 
         # Init end point
         self.repos = Repositories(self.headers)
+        self.users = Users(self.headers)
+        self.teams = Teams(self.headers)
         self.projects = Projects(self.headers)
-        self.profiles = Profiles(self.headers)
 
         # Set connexion to active
         self.connected = True
         return self
 
-class Profiles(Github):
+class Users(Github):
     def __init__(self, headers):
         Github.__init__(self)
         self.headers = headers
     
-    def get_user_profile(self, html_url, url=None):
+    def get_profile(self, html_url, url=None):
         """
         Return a dataframe object with 20 columns:
         - LOGIN               object
@@ -79,9 +80,13 @@ class Profiles(Github):
             if col.endswith("_at"):
                 df[col] = df[col].str.replace("T", " ").str.replace("Z", " ")
         return df
-    
 
-    def get_profiles_from_teams(self, url):
+class Teams(Github):
+    def __init__(self, headers):
+        Github.__init__(self)
+        self.headers = headers    
+
+    def get_profiles(self, url):
         """
         Return an dataframe object with 14 columns:
         - TEAM              object
@@ -174,7 +179,6 @@ class Profiles(Github):
             data.loc[idx,'ORGANIZATION'], data.loc[idx,'BIO'], data.loc[idx,'LOGIN_NAME'] = details['company'], details['bio'], details['login']
             data.loc[idx,'TWITTER'], data.loc[idx,'CREATED_AT'] = details['twitter_username'], details['created_at']  
             data.loc[idx,'UPDATED_AT'] = details['updated_at']
-        
         return data
     
 class Projects(Github):
@@ -182,7 +186,7 @@ class Projects(Github):
         Github.__init__(self)
         self.headers = headers
     
-    def get_active_projects_links(self, url):
+    def get(self, url):
         """
         Return an dataframe object with 9 columns:
         - PROJECT_NAME            object
@@ -225,12 +229,10 @@ class Projects(Github):
                 projects_df.loc[idx, 'project_description'] = project.get('body')
                 projects_df.loc[idx, 'project_id'] = project.get('number')
                 projects_df.loc[idx, 'project_created_by'] = project.get('creator')['login']
-
                 projects_df.loc[idx, 'project_created_date'] = project.get('created_at').strip('Z').split('T')[0]
                 projects_df.loc[idx, 'project_created_time'] = project.get('created_at').strip('Z').split('T')[-1]
                 projects_df.loc[idx, 'project_updated_date'] = project.get('updated_at').strip('Z').split('T')[0]
                 projects_df.loc[idx, 'project_updated_time'] = project.get('updated_at').strip('Z').split('T')[-1]
-
                 projects_df.loc[idx, 'project_columns_url'] = project.get('columns_url')
 
             page+=1
@@ -264,7 +266,7 @@ class Projects(Github):
                 issue_comments.append(comment['body'])
         return issue_comments
     
-    def get_issues_from_projects(self, projects_url):
+    def get_issues(self, projects_url):
         """
         Return an dataframe object with 18 columns:
         - ISSUE_STATUS          object
@@ -539,7 +541,7 @@ class Repositories(Github):
                 issue_comments.append(comment['body'])
         return issue_comments
 
-    def get_issues_from_repo(self, url):
+    def get_issues(self, url):
         """
         Return an dataframe object with 15 columns:
         - LINK_TO_THE_ISSUE      object
@@ -632,7 +634,7 @@ class Repositories(Github):
 
         return df
     
-    def get_pulls_from_repo(self, url):
+    def get_pulls(self, url):
         """
         Return an dataframe object with 15 columns:
         - ID                      int64
