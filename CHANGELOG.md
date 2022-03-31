@@ -1,3 +1,11 @@
+## 0.89.3 (2022-03-31)
+
+### Fix
+
+- add profile and bg pic to identity
+- remove pprint
+- add profile and bg pic to identity
+
 ## 0.89.2 (2022-03-17)
 
 ### Fix
