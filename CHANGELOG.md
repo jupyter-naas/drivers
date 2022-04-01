@@ -1,3 +1,13 @@
+## 0.91.2 (2022-04-01)
+
+### Fix
+
+- create branch linkedin invitation
+- sonar cloud
+- lint + improve code
+- lint black
+- create branch linkedin invitation
+
 ## 0.91.1 (2022-04-01)
 
 ### Fix
