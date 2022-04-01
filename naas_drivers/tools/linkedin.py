@@ -65,7 +65,7 @@ class LinkedIn(InDriver, OutDriver):
             occupation = occupation.strip().replace("\n", " ")
         return occupation
 
-    def connect(self, li_at: str, jessionid: str):
+    def connect(self, li_at: str = None, jessionid: str = None):
         # Init lk attribute
         self.li_at = li_at
         self.jessionid = jessionid
@@ -103,7 +103,7 @@ class Profile(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_identity(self, url=None, urn=None):
+    def get_identity(self, url=None):
         res_json = {}
         result = {}
         lk_public_id = self.get_profile_id(url)
@@ -115,8 +115,7 @@ class Profile(LinkedIn):
             res.raise_for_status()
         except requests.HTTPError as e:
             print(e)
-        else:
-            res_json = res.json()
+        res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
         included = res_json.get("included", {})
@@ -128,7 +127,7 @@ class Profile(LinkedIn):
         # Get data from included json
         if len(included) > 0:
             included = included[0]
-            #             pprint(included)
+
             # Get background picture
             if included.get("backgroundImage"):
                 background_url_end = None
@@ -141,8 +140,8 @@ class Profile(LinkedIn):
                 background_root = _pd.get(included, "backgroundImage.rootUrl")
                 if background_url_end and background_root:
                     bg_pic_url = f"{background_root}{background_url_end}"
+                    
             # Get profile picture
-
             if included.get("picture"):
                 profile_url_end = None
                 profile_root = None
@@ -175,7 +174,7 @@ class Profile(LinkedIn):
         time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
-    def get_network(self, url=None, urn=None):
+    def get_network(self, url=None):
         res_json = {}
         result = {}
         lk_id = self.get_profile_id(url)
@@ -185,8 +184,7 @@ class Profile(LinkedIn):
             res.raise_for_status()
         except requests.HTTPError as e:
             print(e)
-        else:
-            res_json = res.json()
+        res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
         result = {
@@ -202,7 +200,7 @@ class Profile(LinkedIn):
         time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
-    def get_contact(self, url=None, urn=None):
+    def get_contact(self, url=None):
         res_json = {}
         result = {}
         lk_id = self.get_profile_id(url)
@@ -212,8 +210,7 @@ class Profile(LinkedIn):
             res.raise_for_status()
         except requests.HTTPError as e:
             print(e)
-        else:
-            res_json = res.json()
+        res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
 
@@ -640,7 +637,8 @@ class Invitation(LinkedIn):
         if recipient_urn is None:
             return True
         if message:
-            message = ',"message":' '"' + message + '"'
+            message = ',"message":"' + message + '"'
+            message = ""
         data = (
             (
                 '{"trackingId":"yvzykVorToqcOuvtxjSFMg==","invitations":[],"excludeInvitations":[],'
