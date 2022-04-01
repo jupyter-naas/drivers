@@ -554,7 +554,7 @@ class Invitation(LinkedIn):
         is_generic: boolean (default False):
             Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
         """
-        req_url = (f"{LINKEDIN_API}/invitation/response?action={action}&invitation_id={invitation_id}&invitation_shared_secret={invitation_shared_secret}&is_generic={is_generic}")
+        req_url = f"{LINKEDIN_API}/invitation/response?action={action}&invitation_id={invitation_id}&invitation_shared_secret={invitation_shared_secret}&is_generic={is_generic}"
         headers = {"Content-Type": "application/json"}
         res = requests.post(req_url, json=self.cookies, headers=headers)
         try:
