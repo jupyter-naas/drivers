@@ -16,6 +16,7 @@ RELEASE_MESSAGE = (
 DATE_FORMAT = "%Y-%m-%d"
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 TIME_SLEEP = secrets.randbelow(3) + 2
+HEADERS = {"Content-Type": "application/json"}
 
 
 class LinkedIn(InDriver, OutDriver):
@@ -265,8 +266,7 @@ class Profile(LinkedIn):
             if profile_urn is None:
                 return "Please enter a valid profile_url or profile_urn"
         req_url = f"{LINKEDIN_API}/profile/getResume?profile_urn={profile_urn}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
@@ -372,8 +372,7 @@ class Profile(LinkedIn):
                 req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&count={count}&pagination_token={pagination_token}"
             else:
                 req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&count={count}"
-            headers = {"Content-Type": "application/json"}
-            res = requests.post(req_url, json=self.cookies, headers=headers)
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             try:
                 res.raise_for_status()
             except requests.HTTPError as e:
@@ -427,8 +426,7 @@ class Network(LinkedIn):
             if limit != -1 and limit < count:
                 count = limit
             req_url = f"{LINKEDIN_API}/network/getFollowers?start={start}&count={count}&limit={limit}"
-            headers = {"Content-Type": "application/json"}
-            res = requests.post(req_url, json=self.cookies, headers=headers)
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             try:
                 res.raise_for_status()
             except requests.HTTPError:
@@ -456,8 +454,7 @@ class Network(LinkedIn):
             if limit != -1 and limit < count:
                 count = limit
             req_url = f"{LINKEDIN_API}/network/getConnections?start={start}&count={count}&limit={limit}"
-            headers = {"Content-Type": "application/json"}
-            res = requests.post(req_url, json=self.cookies, headers=headers)
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             try:
                 res.raise_for_status()
             except requests.HTTPError:
@@ -519,8 +516,7 @@ class Invitation(LinkedIn):
             Number of posts return by function. It will start with the most recent post.
         """
         req_url = f"{LINKEDIN_API}/invitation/get?start={start}&count={count}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
@@ -554,9 +550,14 @@ class Invitation(LinkedIn):
         is_generic: boolean (default False):
             Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
         """
-        req_url = f"{LINKEDIN_API}/invitation/response?action={action}&invitation_id={invitation_id}&invitation_shared_secret={invitation_shared_secret}&is_generic={is_generic}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        params = {
+            "action": action,
+            "invitation_id": invitation_id,
+            "invitation_shared_secret": invitation_shared_secret,
+            "is_generic": is_generic
+        }
+        req_url = f"{LINKEDIN_API}/invitation/response?{urllib.parse.urlencode(params, safe='(),')}"
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
@@ -680,11 +681,10 @@ class Message(LinkedIn):
             "limit": limit_max if limit > limit_max or limit == -1 else limit,
             "count": count,
         }
-        headers = {"Content-Type": "application/json"}
         df_result = None
         while True:
             req_url = f"{LINKEDIN_API}/message/getConversations?{urllib.parse.urlencode(params, safe='(),')}"
-            res = requests.post(req_url, json=self.cookies, headers=headers)
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             if limit != -1:
                 limit -= limit_max
                 if limit < 0:
@@ -723,8 +723,7 @@ class Message(LinkedIn):
             req_url += f"&conversation_url={conversation_url}"
         if conversation_urn:
             req_url += f"&conversation_urn={conversation_urn}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError:
@@ -843,8 +842,7 @@ class Post(LinkedIn):
             if activity_id is None:
                 return "Please enter a valid post_url or activity_id"
         req_url = f"{LINKEDIN_API}/post/getStats?activity_id={activity_id}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
@@ -882,8 +880,7 @@ class Post(LinkedIn):
             if activity_id is None:
                 return "Please enter a valid post_url or activity_id"
         req_url = f"{LINKEDIN_API}/post/getPolls?activity_id={activity_id}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
@@ -893,8 +890,7 @@ class Post(LinkedIn):
 
     def get_comments(self, post_url):
         req_url = f"{LINKEDIN_API}/post/getComments?post_link={post_url}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError:
@@ -906,8 +902,7 @@ class Post(LinkedIn):
 
     def get_likes(self, post_url):
         req_url = f"{LINKEDIN_API}/post/getLikes?post_link={post_url}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError:
@@ -926,8 +921,7 @@ class Event(LinkedIn):
 
     def get_guests(self, url):
         req_url = f"{LINKEDIN_API}/event/getGuests?event_link={url}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError:
@@ -946,8 +940,7 @@ class Company(LinkedIn):
 
     def get_info(self, company_url):
         req_url = f"{LINKEDIN_API}/company/getInfo?company_url={company_url}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
