@@ -484,6 +484,155 @@ class Invitation(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
+    def get(self, start=0, count=100):
+        """
+        Return an dataframe object with 15 columns:
+        - PROFILE_ID
+        - PUBLIC_ID
+        - FIRSTNAME
+        - LASTNAME
+        - FULLNAME
+        - OCCUPATION
+        - PROFILE_PICTURE
+        - MESSAGE
+        - SENT_AT
+        - UNSEEN
+        - INVITATION_TYPE
+        - INVITATION_DESC
+        - INVITATION_STATUS
+        - INVITATION_ID
+        - SHARED_SECRET
+
+        Parameters
+        ----------
+        response: str (default 'accept')
+            "accept" or "ignore"
+
+        invitation_id: str (default None)
+            Argument given when get invitations
+
+        invitation_shared_secret: int (default 1, max 100):
+            Number of requests sent to LinkedIn API.
+            (!) If count > 1, published date will not be returned.
+
+        is_generic: int (default 10, unlimited=-1):
+            Number of posts return by function. It will start with the most recent post.
+        """
+        req_url = f"{LINKEDIN_API}/invitation/get?start={start}&count={count}"
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(req_url, json=self.cookies, headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return e
+        else:
+            res_json = res.json()
+        return pd.DataFrame(res_json)
+
+    def response(
+        self,
+        action="accept",
+        invitation_id=None,
+        invitation_shared_secret=None,
+        is_generic=False,
+    ):
+        """
+        Print result : "Accept" or "Ignore"
+        Return dataframe profile if invitation type = "Profile"
+
+        Parameters
+        ----------
+        action: str (default 'accept')
+            "accept" or "ignore"
+
+        invitation_id: str (default None)
+            Argument given in invitations.get : "INVITATION_ID"
+
+        invitation_shared_secret: str (default None)
+            Argument given in invitations.get : "SHARED_SECRET"
+
+        is_generic: boolean (default False):
+            Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
+        """
+        req_url = f"{LINKEDIN_API}/invitation/response?action={action}&invitation_id={invitation_id}&invitation_shared_secret={invitation_shared_secret}&is_generic={is_generic}"
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(req_url, json=self.cookies, headers=headers)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return e
+        else:
+            res_json = res.json()
+        if action == "accept":
+            print("🤝 Invitation accepted !")
+        elif action == "ignore":
+            print("❌ Invitation ignored !")
+        return pd.DataFrame(res_json)
+
+    def accept(
+        self, invitation_id=None, invitation_shared_secret=None, is_generic=False
+    ):
+        """
+        Print result : "Accept" or "Ignore"
+        Return dataframe profile if invitation type = "Profile"
+
+        Parameters
+        ----------
+        action: str (default 'accept')
+            "accept" or "ignore"
+
+        invitation_id: str (default None)
+            Argument given in invitations.get : "INVITATION_ID"
+
+        invitation_shared_secret: str (default None)
+            Argument given in invitations.get : "SHARED_SECRET"
+
+        is_generic: boolean (default False):
+            Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
+        """
+        action = "accept"
+        try:
+            df = self.response(
+                action, invitation_id, invitation_shared_secret, is_generic
+            )
+        except requests.HTTPError as e:
+            return e
+        else:
+            print("🤝 Invitation accepted !")
+        return df
+
+    def ignore(
+        self, invitation_id=None, invitation_shared_secret=None, is_generic=False
+    ):
+        """
+        Print result : "Accept" or "Ignore"
+        Return dataframe profile if invitation type = "Profile"
+
+        Parameters
+        ----------
+        action: str (default 'accept')
+            "accept" or "ignore"
+
+        invitation_id: str (default None)
+            Argument given in invitations.get : "INVITATION_ID"
+
+        invitation_shared_secret: str (default None)
+            Argument given in invitations.get : "SHARED_SECRET"
+
+        is_generic: boolean (default False):
+            Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
+        """
+        action = "ignore"
+        try:
+            df = self.response(
+                action, invitation_id, invitation_shared_secret, is_generic
+            )
+        except requests.HTTPError as e:
+            return e
+        else:
+            print("❌ Invitation ignored !")
+        return df
+
     def send(self, recipient_url=None, message="", recipient_urn=None):
         if recipient_url is not None:
             recipient_urn = self.get_profile_urn(recipient_url)
