@@ -294,7 +294,7 @@ class Projects(Github):
             Projects url from Github.
             Example : "https://github.com/orgs/jupyter-naas/projects"
         """
-        df_projects = self.get_active_projects_links(projects_url)
+        df_projects = self.get(projects_url)
         df_issues = pd.DataFrame(columns=['issue_status', 'issue_state'])
 
         # Gets info from columns present in our roadmap for all active projects
