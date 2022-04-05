@@ -478,7 +478,7 @@ class Invitation(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get(self, start=0, count=100):
+    def get_received(self, start=0, count=100):
         """
         Return an dataframe object with 15 columns:
         - PROFILE_ID
