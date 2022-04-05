@@ -571,14 +571,10 @@ class Invitation(LinkedIn):
         self, invitation_id=None, invitation_shared_secret=None, is_generic=False
     ):
         """
-        Print result : "Accept" or "Ignore"
         Return dataframe profile if invitation type = "Profile"
 
         Parameters
         ----------
-        action: str (default 'accept')
-            "accept" or "ignore"
-
         invitation_id: str (default None)
             Argument given in invitations.get : "INVITATION_ID"
 
@@ -595,22 +591,16 @@ class Invitation(LinkedIn):
             )
         except requests.HTTPError as e:
             return e
-        else:
-            print("🤝 Invitation accepted !")
         return df
 
     def ignore(
         self, invitation_id=None, invitation_shared_secret=None, is_generic=False
     ):
         """
-        Print result : "Accept" or "Ignore"
         Return dataframe profile if invitation type = "Profile"
 
         Parameters
         ----------
-        action: str (default 'accept')
-            "accept" or "ignore"
-
         invitation_id: str (default None)
             Argument given in invitations.get : "INVITATION_ID"
 
@@ -627,8 +617,6 @@ class Invitation(LinkedIn):
             )
         except requests.HTTPError as e:
             return e
-        else:
-            print("❌ Invitation ignored !")
         return df
 
     def send(self, recipient_url=None, message="", recipient_urn=None):
