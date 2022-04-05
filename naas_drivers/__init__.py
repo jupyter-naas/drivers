@@ -2,7 +2,7 @@ import requests
 import os
 from mprop import mproperty
 
-__version__ = "0.91.4"
+__version__ = "0.91.5"
 
 __github_repo = "jupyter-naas/drivers"
 

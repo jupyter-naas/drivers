@@ -1,3 +1,10 @@
+## 0.91.5 (2022-04-05)
+
+### Fix
+
+- rename function linkedin.invitation.get() to linkedin.invitation.get_received()
+- rename function linkedin.invitation.get() to linkedin.invitation.get_received()
+
 ## 0.91.4 (2022-04-05)
 
 ### Fix
