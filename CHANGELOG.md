@@ -1,3 +1,10 @@
+## 0.92.0 (2022-04-07)
+
+### Feat
+
+- get invitations sent
+- get invitations sent
+
 ## 0.91.5 (2022-04-05)
 
 ### Fix
