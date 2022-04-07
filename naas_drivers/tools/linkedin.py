@@ -140,7 +140,6 @@ class Profile(LinkedIn):
                 background_root = _pd.get(included, "backgroundImage.rootUrl")
                 if background_url_end and background_root:
                     bg_pic_url = f"{background_root}{background_url_end}"
-                    
             # Get profile picture
             if included.get("picture"):
                 profile_url_end = None
@@ -520,7 +519,7 @@ class Invitation(LinkedIn):
                 limit -= count
             time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
-    
+
     def get_sent(self, start=0, count=100, limit=-1):
         """
         Return an dataframe object with 14 columns:
@@ -532,7 +531,7 @@ class Invitation(LinkedIn):
         - FULLNAME
         - OCCUPATION
         - PROFILE_PICTURE
-        - MESSAGE 
+        - MESSAGE
         - SENT_AT
         - INVITATION_TYPE
         - INVITATION_DESC
@@ -589,7 +588,7 @@ class Invitation(LinkedIn):
             "action": action,
             "invitation_id": invitation_id,
             "invitation_shared_secret": invitation_shared_secret,
-            "is_generic": is_generic
+            "is_generic": is_generic,
         }
         req_url = f"{LINKEDIN_API}/invitation/response?{urllib.parse.urlencode(params, safe='(),')}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
