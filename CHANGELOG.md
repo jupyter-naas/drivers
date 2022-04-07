@@ -1,3 +1,9 @@
+## 0.93.0 (2022-04-07)
+
+### Feat
+
+- Update google analytics driver to add metrics and trends. (#257)
+
 ## 0.92.0 (2022-04-07)
 
 ### Feat
