@@ -480,6 +480,34 @@ class Invitation(LinkedIn):
 
     def get_received(self, start=0, count=100):
         """
+        Return an dataframe object with 14 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - FIRSTNAME
+        - LASTNAME
+        - FULLNAME
+        - OCCUPATION
+        - PROFILE_PICTURE
+        - MESSAGE 
+        - SENT_AT
+        - INVITATION_TYPE
+        - INVITATION_DESC
+        - INVITATION_STATUS
+        - INVITATION_ID
+        """
+        req_url = f"{LINKEDIN_API}/invitation/get?start={start}&count={count}"
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as e:
+            return e
+        else:
+            res_json = res.json()
+        return pd.DataFrame(res_json)
+    
+    def get_sent(self, start=0, count=100):
+        """
         Return an dataframe object with 15 columns:
         - PROFILE_ID
         - PUBLIC_ID
@@ -490,29 +518,12 @@ class Invitation(LinkedIn):
         - PROFILE_PICTURE
         - MESSAGE
         - SENT_AT
-        - UNSEEN
         - INVITATION_TYPE
         - INVITATION_DESC
         - INVITATION_STATUS
         - INVITATION_ID
-        - SHARED_SECRET
-
-        Parameters
-        ----------
-        response: str (default 'accept')
-            "accept" or "ignore"
-
-        invitation_id: str (default None)
-            Argument given when get invitations
-
-        invitation_shared_secret: int (default 1, max 100):
-            Number of requests sent to LinkedIn API.
-            (!) If count > 1, published date will not be returned.
-
-        is_generic: int (default 10, unlimited=-1):
-            Number of posts return by function. It will start with the most recent post.
         """
-        req_url = f"{LINKEDIN_API}/invitation/get?start={start}&count={count}"
+        req_url = f"{LINKEDIN_API}/invitation/getSent?start={start}&count={count}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
