@@ -480,7 +480,7 @@ class Invitation(LinkedIn):
 
     def get_received(self, start=0, count=100):
         """
-        Return an dataframe object with 14 columns:
+        Return an dataframe object with 16 columns:
         - PROFILE_ID
         - PROFILE_URL
         - PUBLIC_ID
@@ -489,12 +489,14 @@ class Invitation(LinkedIn):
         - FULLNAME
         - OCCUPATION
         - PROFILE_PICTURE
-        - MESSAGE 
+        - MESSAGE
+        - UNSEEN
         - SENT_AT
         - INVITATION_TYPE
         - INVITATION_DESC
         - INVITATION_STATUS
         - INVITATION_ID
+        - SHARED_SECRET
         """
         req_url = f"{LINKEDIN_API}/invitation/get?start={start}&count={count}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
@@ -508,15 +510,16 @@ class Invitation(LinkedIn):
     
     def get_sent(self, start=0, count=100):
         """
-        Return an dataframe object with 15 columns:
+        Return an dataframe object with 14 columns:
         - PROFILE_ID
+        - PROFILE_URL
         - PUBLIC_ID
         - FIRSTNAME
         - LASTNAME
         - FULLNAME
         - OCCUPATION
         - PROFILE_PICTURE
-        - MESSAGE
+        - MESSAGE 
         - SENT_AT
         - INVITATION_TYPE
         - INVITATION_DESC
