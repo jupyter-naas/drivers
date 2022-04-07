@@ -86,7 +86,7 @@ class GoogleAnalytics(InDriver, OutDriver):
 
             try:
                 getattr(self, computed_name)
-            except Exception as e:
+            except Exception as e:  # noqa: F841
                 self.available_metrics.append(computed_name)
                 setattr(self, computed_name, Metric())
 
