@@ -1,3 +1,13 @@
+## 0.93.1 (2022-04-07)
+
+### Fix
+
+- linkedin invitation sent
+- return instead of raise
+- raise error instead of print
+- change columns name in profile
+- change doc string
+
 ## 0.93.0 (2022-04-07)
 
 ### Feat
