@@ -114,7 +114,8 @@ class Profile(LinkedIn):
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            raise(e)
+            return res_json
         res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
@@ -183,7 +184,8 @@ class Profile(LinkedIn):
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            raise(e)
+            return res_json
         res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
@@ -210,7 +212,8 @@ class Profile(LinkedIn):
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            raise(e)
+            return res_json
         res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
