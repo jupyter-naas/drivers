@@ -188,10 +188,11 @@ class Profile(LinkedIn):
         # Parse json
         data = res_json.get("data", {})
         result = {
-            "PROFILE_URN": data.get("entityUrn", "").replace(
+            "PROFILE_ID": data.get("entityUrn", "").replace(
                 "urn:li:fs_profileNetworkInfo:", ""
             ),
-            "PROFILE_ID": lk_id,
+            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
+            "PUBLIC_ID": lk_id,
             "DISTANCE": data.get("distance", {}).get("value"),
             "FOLLOWING": data.get("following"),
             "FOLLOWABLE": data.get("followable"),
@@ -240,10 +241,11 @@ class Profile(LinkedIn):
                 lk_url = rows["url"]
                 lk_urls = f"{lk_urls}{lk_url}, "
         result = {
-            "PROFILE_URN": data.get("entityUrn", "").replace(
+            "PROFILE_ID": data.get("entityUrn", "").replace(
                 "urn:li:fs_contactinfo:", ""
             ),
-            "PROFILE_ID": lk_id,
+            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
+            "PUBLIC_ID": lk_id,
             "EMAIL": data.get("emailAddress"),
             "CONNECTED_AT": connected_at,
             "BIRTHDATE": self.get_birthdate(data.get("birthDateOn")),
