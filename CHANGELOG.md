@@ -1,3 +1,12 @@
+## 0.93.2 (2022-04-07)
+
+### Fix
+
+- raise error
+- lint
+- get more invitations
+- raise error
+
 ## 0.93.1 (2022-04-07)
 
 ### Fix
