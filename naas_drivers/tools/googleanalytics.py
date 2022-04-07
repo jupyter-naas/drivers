@@ -252,7 +252,6 @@ class Views:
         # Fetch Data
         try:
             response = self.parent.service.reports().batchGet(body=body).execute()
-            #print(response)
         except Exception as error:
             raise error()
         # JSON to Pandas DataFrame
