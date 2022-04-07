@@ -88,7 +88,7 @@ setup(
         "pytesseract==0.3.7",
         "wkhtmltopdf==0.2",
         "streamlit==0.82.0",
-        "transformers==4.12.5",
+        "transformers==4.18.0",
         "pyngrok==5.0.5",
         "dacite==1.6.0",
         "notion-client==0.7.1",
