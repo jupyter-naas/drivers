@@ -114,7 +114,7 @@ class Profile(LinkedIn):
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            print(e)
         res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
@@ -140,7 +140,6 @@ class Profile(LinkedIn):
                 background_root = _pd.get(included, "backgroundImage.rootUrl")
                 if background_url_end and background_root:
                     bg_pic_url = f"{background_root}{background_url_end}"
-                    
             # Get profile picture
             if included.get("picture"):
                 profile_url_end = None
@@ -183,7 +182,7 @@ class Profile(LinkedIn):
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            print(e)
         res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
@@ -210,7 +209,7 @@ class Profile(LinkedIn):
         try:
             res.raise_for_status()
         except requests.HTTPError as e:
-            return(e)
+            print(e)
         res_json = res.json()
         # Parse json
         data = res_json.get("data", {})
@@ -480,7 +479,7 @@ class Invitation(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_received(self, start=0, count=100):
+    def get_received(self, start=0, count=100, limit=-1):
         """
         Return an dataframe object with 16 columns:
         - PROFILE_ID
@@ -500,17 +499,28 @@ class Invitation(LinkedIn):
         - INVITATION_ID
         - SHARED_SECRET
         """
-        req_url = f"{LINKEDIN_API}/invitation/get?start={start}&count={count}"
-        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        else:
+        df = pd.DataFrame()
+        while True:
+            if limit != -1 and limit < count:
+                count = limit
+            req_url = f"{LINKEDIN_API}/invitation/get?start={start}&count={count}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                return e
             res_json = res.json()
-        return pd.DataFrame(res_json)
-    
-    def get_sent(self, start=0, count=100):
+            if len(res_json) == 0:
+                break
+            tmp_df = pd.DataFrame(res_json)
+            df = pd.concat([df, tmp_df], axis=0)
+            start += count
+            if limit != -1:
+                limit -= count
+            time.sleep(TIME_SLEEP)
+        return df.reset_index(drop=True)
+
+    def get_sent(self, start=0, count=100, limit=-1):
         """
         Return an dataframe object with 14 columns:
         - PROFILE_ID
@@ -521,22 +531,33 @@ class Invitation(LinkedIn):
         - FULLNAME
         - OCCUPATION
         - PROFILE_PICTURE
-        - MESSAGE 
+        - MESSAGE
         - SENT_AT
         - INVITATION_TYPE
         - INVITATION_DESC
         - INVITATION_STATUS
         - INVITATION_ID
         """
-        req_url = f"{LINKEDIN_API}/invitation/getSent?start={start}&count={count}"
-        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        else:
+        df = pd.DataFrame()
+        while True:
+            if limit != -1 and limit < count:
+                count = limit
+            req_url = f"{LINKEDIN_API}/invitation/getSent?start={start}&count={count}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                return e
             res_json = res.json()
-        return pd.DataFrame(res_json)
+            if len(res_json) == 0:
+                break
+            tmp_df = pd.DataFrame(res_json)
+            df = pd.concat([df, tmp_df], axis=0)
+            start += count
+            if limit != -1:
+                limit -= count
+            time.sleep(TIME_SLEEP)
+        return df.reset_index(drop=True)
 
     def response(
         self,
@@ -567,7 +588,7 @@ class Invitation(LinkedIn):
             "action": action,
             "invitation_id": invitation_id,
             "invitation_shared_secret": invitation_shared_secret,
-            "is_generic": is_generic
+            "is_generic": is_generic,
         }
         req_url = f"{LINKEDIN_API}/invitation/response?{urllib.parse.urlencode(params, safe='(),')}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
