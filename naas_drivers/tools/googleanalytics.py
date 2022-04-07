@@ -14,6 +14,7 @@ def ga_naming_to_title(ga_nanimg: str):
     splited_name = re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)", name)
     return " ".join([name.title() for name in splited_name])
 
+
 ga_metrics = [
     "ga:users",
     "ga:newUsers",
@@ -57,6 +58,7 @@ ga_metrics = [
     "ga:sessionsPerUser",
 ]
 
+
 class GoogleAnalytics(InDriver, OutDriver):
     """
     Google Analytics driver.
@@ -74,31 +76,35 @@ class GoogleAnalytics(InDriver, OutDriver):
         self.view_id = view_id
         self.service = build("analyticsreporting", "v4", credentials=credentials)
         return self
-    
+
     # This method is used to automatically generate methods based on metrics available in GA.
     def __generate_methods(self):
         for metric_id in ga_metrics:
 
             computed_name = metric_id
-            computed_name = re.sub(r'(?<!^)(?=[A-Z])', '_', computed_name).lower()[3:]
+            computed_name = re.sub(r"(?<!^)(?=[A-Z])", "_", computed_name).lower()[3:]
 
             try:
                 getattr(self, computed_name)
-            except:
+            except Exception as e:
                 self.available_metrics.append(computed_name)
                 setattr(self, computed_name, Metric())
 
             def custom_get_trend(metric_id):
-                return lambda dimensions, start_date=None, end_date=None: self.get_trend(metric_id, dimensions, start_date, end_date)
-            setattr(getattr(self, computed_name), 'get_trend', custom_get_trend(metric_id))
+                return (
+                    lambda dimensions, start_date=None, end_date=None: self.get_trend(
+                        metric_id, dimensions, start_date, end_date
+                    )
+                )
 
-    def get_trend(self, metrics,
-              dimensions,
-              start_date,
-              end_date):
+            setattr(
+                getattr(self, computed_name), "get_trend", custom_get_trend(metric_id)
+            )
+
+    def get_trend(self, metrics, dimensions, start_date, end_date):
         """
         Return an dataframe object with 6 columns:
-        - DATE         GA dimensions 
+        - DATE         GA dimensions
         - METRIC       GA metrics
         - VALUE        Metrics value
         - VALUE_COMP   Metrics last value comparison
@@ -123,11 +129,16 @@ class GoogleAnalytics(InDriver, OutDriver):
         """
 
         allowed_aliases = ["hourly", "daily", "weekly", "monthly"]
-        allowed_dimensions = ["ga:date,ga:hour", "ga:date", "ga:year,ga:week", "ga:year,ga:month"]
-        
+        allowed_dimensions = [
+            "ga:date,ga:hour",
+            "ga:date",
+            "ga:year,ga:week",
+            "ga:year,ga:month",
+        ]
+
         if dimensions in allowed_aliases:
             dimensions = allowed_dimensions[allowed_aliases.index(dimensions)]
-        
+
         if dimensions not in allowed_dimensions:
             raise Exception(f"'dimensions' should be one of {allowed_dimensions}")
 
@@ -139,24 +150,42 @@ class GoogleAnalytics(InDriver, OutDriver):
             start_date=start_date,
             end_date=end_date,
             format_type="summary",
-            pivots_dimensions="ga:country", #not used
+            pivots_dimensions="ga:country",  # not used
         )
 
         # Format trend dataset
         df["DATE_ISO"] = df.index
         df = df.reset_index(drop=True)
         if dimensions == "ga:date,ga:hour":
-            df['DATE_ISO'] = pd.to_datetime(df.apply(lambda row: f'{row.DATE_ISO[0]} {row.DATE_ISO[1]}:00', axis=1))
-            df["DATE"] = df['DATE_ISO'].dt.strftime("%Y-%m-%d %H:00:00")
+            df["DATE_ISO"] = pd.to_datetime(
+                df.apply(lambda row: f"{row.DATE_ISO[0]} {row.DATE_ISO[1]}:00", axis=1)
+            )
+            df["DATE"] = df["DATE_ISO"].dt.strftime("%Y-%m-%d %H:00:00")
         elif dimensions == "ga:date":
-            df["DATE_ISO"] = pd.to_datetime(df.apply(lambda row: row.DATE_ISO[0], axis=1))
-            df["DATE"] = df['DATE_ISO'].dt.strftime("%Y-%m-%d")
+            df["DATE_ISO"] = pd.to_datetime(
+                df.apply(lambda row: row.DATE_ISO[0], axis=1)
+            )
+            df["DATE"] = df["DATE_ISO"].dt.strftime("%Y-%m-%d")
         elif dimensions == "ga:year,ga:week":
-            df['DATE_ISO'] = pd.to_datetime(df.apply(lambda row: datetime.strptime(f'{row.DATE_ISO[0]}-W{row.DATE_ISO[1]}' + '-1', "%Y-W%W-%w"), axis=1))
-            df["DATE"] = df['DATE_ISO'].dt.strftime("%Y W%W")
+            df["DATE_ISO"] = pd.to_datetime(
+                df.apply(
+                    lambda row: datetime.strptime(
+                        f"{row.DATE_ISO[0]}-W{row.DATE_ISO[1]}" + "-1", "%Y-W%W-%w"
+                    ),
+                    axis=1,
+                )
+            )
+            df["DATE"] = df["DATE_ISO"].dt.strftime("%Y W%W")
         elif dimensions == "ga:year,ga:month":
-            df['DATE_ISO'] = pd.to_datetime(df.apply(lambda row: datetime.strptime(f'{row.DATE_ISO[0]}-M{row.DATE_ISO[1]}', "%Y-m%m"), axis=1))
-            df["DATE"] = df['DATE_ISO'].dt.strftime("%Y %b")
+            df["DATE_ISO"] = pd.to_datetime(
+                df.apply(
+                    lambda row: datetime.strptime(
+                        f"{row.DATE_ISO[0]}-M{row.DATE_ISO[1]}", "%Y-m%m"
+                    ),
+                    axis=1,
+                )
+            )
+            df["DATE"] = df["DATE_ISO"].dt.strftime("%Y %b")
         df["METRIC"] = metrics.replace("ga:", "")
         df["VALUE"] = df[metrics]
         df = df.drop(metrics, axis=1)
@@ -167,14 +196,16 @@ class GoogleAnalytics(InDriver, OutDriver):
             if idx == 0:
                 value_n1 = 0
             else:
-                value_n1 = df.loc[df.index[idx-1], "VALUE"]
+                value_n1 = df.loc[df.index[idx - 1], "VALUE"]
             df.loc[df.index[idx], "VALUE_COMP"] = value_n1
         df["VARV"] = df["VALUE"] - df["VALUE_COMP"]
         df["VARP"] = df["VARV"] / abs(df["VALUE_COMP"])
         return df
 
+
 class Metric:
     pass
+
 
 class Views:
     def __init__(self, parent) -> None:
@@ -188,7 +219,7 @@ class Views:
         metrics: str,
         pivots_dimensions: str,
         dimensions: str = "ga:yearMonth",
-        max_group_count: int = 1000
+        max_group_count: int = 1000,
     ) -> dict:
         """
         Create the body of the request to Google Analytics Reporting API V4.
@@ -207,8 +238,12 @@ class Views:
                 {
                     "viewId": view_id,
                     "dateRanges": {"startDate": start_date, "endDate": end_date},
-                    "metrics": [{"expression": metric} for metric in metrics.split(',')],
-                    "dimensions": [{"name": dimension} for dimension in dimensions.split(',')],
+                    "metrics": [
+                        {"expression": metric} for metric in metrics.split(",")
+                    ],
+                    "dimensions": [
+                        {"name": dimension} for dimension in dimensions.split(",")
+                    ],
                     "pivots": [
                         {
                             "dimensions": {"name": pivots_dimensions},
@@ -229,7 +264,7 @@ class Views:
         start_date: str = None,
         end_date: str = None,
         format_type: str = "summary",
-        max_group_count: int = 1000
+        max_group_count: int = 1000,
     ) -> pd.DataFrame:
         """
         Get data from Google Analytics Reporting API V4.
@@ -247,7 +282,13 @@ class Views:
         end_date = end_date if end_date else datetime.today().strftime("%Y-%m-%d")
         # Create body
         body = self._get_body(
-            view_id, start_date, end_date, metrics, pivots_dimensions, dimensions, max_group_count=max_group_count
+            view_id,
+            start_date,
+            end_date,
+            metrics,
+            pivots_dimensions,
+            dimensions,
+            max_group_count=max_group_count,
         )
         # Fetch Data
         try:
@@ -451,5 +492,3 @@ class Views:
         return pd.DataFrame(
             data=np.array(pivot_values), index=row_index_named, columns=column_index
         ).astype("float")
-
-    
