@@ -1,3 +1,10 @@
+## 0.93.3 (2022-04-08)
+
+### Fix
+
+- linkedin doc + invitation
+- linkedin doc + invitation
+
 ## 0.93.2 (2022-04-07)
 
 ### Fix
