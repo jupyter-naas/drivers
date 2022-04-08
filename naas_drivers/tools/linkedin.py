@@ -1,4 +1,3 @@
-from naas_drivers.driver import InDriver, OutDriver
 import pandas as pd
 import requests
 import time
@@ -19,7 +18,7 @@ TIME_SLEEP = secrets.randbelow(3) + 2
 HEADERS = {"Content-Type": "application/json"}
 
 
-class LinkedIn(InDriver, OutDriver):
+class LinkedIn:
     deprecated = True
 
     @staticmethod
@@ -103,20 +102,45 @@ class Profile(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_identity(self, url=None):
+    def get_identity(self, profile_url=None):
+        """
+        Return an dataframe object with 15 columns:
+        - FIRSTNAME
+        - LASTNAME
+        - SUMMARY
+        - OCCUPATION
+        - INDUSTRY_NAME
+        - ADDRESS
+        - REGION
+        - COUNTRY
+        - LOCATION
+        - BIRTHDATE
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - BACKGROUND_PICTURE
+        - PROFILE_PICTURE
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile URL from LinkedIn.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+        """
         res_json = {}
+        if profile_url is None:
+            print("❌ No profile URL. Please enter a profile URL from LinkedIn")
+            return res_json
         result = {}
-        lk_public_id = self.get_profile_id(url)
+        lk_public_id = self.get_profile_id(profile_url)
         req_url = (
             f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_public_id}"
         )
         res = requests.get(req_url, cookies=self.cookies, headers=self.headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            print(e)
-        res_json = res.json()
+        # Raise error
+        res.raise_for_status()
         # Parse json
+        res_json = res.json()
         data = res_json.get("data", {})
         included = res_json.get("included", {})
 
@@ -173,18 +197,35 @@ class Profile(LinkedIn):
         time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
-    def get_network(self, url=None):
+    def get_network(self, profile_url=None):
+        """
+        Return an dataframe object with 7 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - DISTANCE
+        - FOLLOWING
+        - FOLLOWABLE
+        - FOLLOWERS_COUNT
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile URL from LinkedIn.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+        """
         res_json = {}
+        if profile_url is None:
+            print("❌ No profile URL. Please enter a profile URL from LinkedIn")
+            return res_json
         result = {}
-        lk_id = self.get_profile_id(url)
+        lk_id = self.get_profile_id(profile_url)
         req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/networkinfo"
         res = requests.get(req_url, cookies=self.cookies, headers=self.headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            print(e)
-        res_json = res.json()
+        # Raise error
+        res.raise_for_status()
         # Parse json
+        res_json = res.json()
         data = res_json.get("data", {})
         result = {
             "PROFILE_ID": data.get("entityUrn", "").replace(
@@ -200,18 +241,38 @@ class Profile(LinkedIn):
         time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
-    def get_contact(self, url=None):
+    def get_contact(self, profile_url=None):
+        """
+        Return an dataframe object with 11 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - EMAIL
+        - CONNECTED_AT
+        - BIRTHDATE
+        - ADDRESS
+        - TWITER
+        - PHONENUMBER
+        - WEBSITES
+        - INTERESTS
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile URL from LinkedIn.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+        """
         res_json = {}
+        if profile_url is None:
+            print("❌ No profile URL. Please enter a profile URL from LinkedIn")
+            return res_json
         result = {}
-        lk_id = self.get_profile_id(url)
+        lk_id = self.get_profile_id(profile_url)
         req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/profileContactInfo"
         res = requests.get(req_url, cookies=self.cookies, headers=self.headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            print(e)
-        res_json = res.json()
+        res.raise_for_status()
         # Parse json
+        res_json = res.json()
         data = res_json.get("data", {})
 
         # Specific
@@ -258,19 +319,41 @@ class Profile(LinkedIn):
         return pd.DataFrame([result])
 
     def get_resume(self, profile_url=None, profile_urn=None):
+        """
+        Return an dataframe object with 12 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - FULL_NAME
+        - CATEGORY
+        - TITLE
+        - DATE_START
+        - DATE_END
+        - PLACE_ID
+        - PLACE
+        - FIELD
+        - LOCATION
+        - DESCRIPTION
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile URL from LinkedIn.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+        """
         res_json = {}
+        if profile_url is None:
+            print("❌ No profile URL. Please enter a profile URL from LinkedIn")
+            return res_json
         if profile_urn is None:
             profile_urn = LinkedIn.get_profile_urn(self, profile_url)
             if profile_urn is None:
                 return "Please enter a valid profile_url or profile_urn"
         req_url = f"{LINKEDIN_API}/profile/getResume?profile_urn={profile_urn}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        else:
-            res_json = res.json()
+        # Raise error
+        res.raise_for_status()
+        # Return dataframe
+        res_json = res.json()
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
 
@@ -373,8 +456,8 @@ class Profile(LinkedIn):
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             try:
                 res.raise_for_status()
-            except requests.HTTPError as e:
-                return e
+            except requests.HTTPError:
+                res_json = {}
             else:
                 res_json = res.json()
             if len(res_json) == 0:
@@ -507,9 +590,10 @@ class Invitation(LinkedIn):
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             try:
                 res.raise_for_status()
-            except requests.HTTPError as e:
-                return e
-            res_json = res.json()
+            except requests.HTTPError:
+                res_json = {}
+            else:
+                res_json = res.json()
             if len(res_json) == 0:
                 break
             tmp_df = pd.DataFrame(res_json)
@@ -546,9 +630,10 @@ class Invitation(LinkedIn):
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             try:
                 res.raise_for_status()
-            except requests.HTTPError as e:
-                return e
-            res_json = res.json()
+            except requests.HTTPError:
+                res_json = {}
+            else:
+                res_json = res.json()
             if len(res_json) == 0:
                 break
             tmp_df = pd.DataFrame(res_json)
@@ -592,12 +677,8 @@ class Invitation(LinkedIn):
         }
         req_url = f"{LINKEDIN_API}/invitation/response?{urllib.parse.urlencode(params, safe='(),')}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        else:
-            res_json = res.json()
+        res.raise_for_status()
+        res_json = res.json()
         if action == "accept":
             print("🤝 Invitation accepted !")
         elif action == "ignore":
@@ -621,14 +702,9 @@ class Invitation(LinkedIn):
         is_generic: boolean (default False):
             Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
         """
-        action = "accept"
-        try:
-            df = self.response(
-                action, invitation_id, invitation_shared_secret, is_generic
-            )
-        except requests.HTTPError as e:
-            return e
-        return df
+        return self.response(
+            "accept", invitation_id, invitation_shared_secret, is_generic
+        )
 
     def ignore(
         self, invitation_id=None, invitation_shared_secret=None, is_generic=False
@@ -647,14 +723,9 @@ class Invitation(LinkedIn):
         is_generic: boolean (default False):
             Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
         """
-        action = "ignore"
-        try:
-            df = self.response(
-                action, invitation_id, invitation_shared_secret, is_generic
-            )
-        except requests.HTTPError as e:
-            return e
-        return df
+        return self.response(
+            "ignore", invitation_id, invitation_shared_secret, is_generic
+        )
 
     def send(self, recipient_url=None, message="", recipient_urn=None):
         if recipient_url is not None:
@@ -866,12 +937,8 @@ class Post(LinkedIn):
                 return "Please enter a valid post_url or activity_id"
         req_url = f"{LINKEDIN_API}/post/getStats?activity_id={activity_id}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        res_json = res.json()
-        return pd.DataFrame(res_json)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
     def get_polls(self, post_url, activity_id=None):
         """
@@ -904,36 +971,20 @@ class Post(LinkedIn):
                 return "Please enter a valid post_url or activity_id"
         req_url = f"{LINKEDIN_API}/post/getPolls?activity_id={activity_id}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        res_json = res.json()
-        return pd.DataFrame(res_json)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
-    def get_comments(self, post_url):
-        req_url = f"{LINKEDIN_API}/post/getComments?post_link={post_url}"
+    def get_comments(self, url):
+        req_url = f"{LINKEDIN_API}/post/getComments?post_link={url}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError:
-            res_json = {}
-        else:
-            res_json = res.json()
-        df = pd.DataFrame(res_json)
-        return df.reset_index(drop=True)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
-    def get_likes(self, post_url):
-        req_url = f"{LINKEDIN_API}/post/getLikes?post_link={post_url}"
+    def get_likes(self, url):
+        req_url = f"{LINKEDIN_API}/post/getLikes?post_link={url}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError:
-            res_json = {}
-        else:
-            res_json = res.json()
-        df = pd.DataFrame(res_json)
-        return df.reset_index(drop=True)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
 
 class Event(LinkedIn):
@@ -942,17 +993,30 @@ class Event(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_guests(self, url):
-        req_url = f"{LINKEDIN_API}/event/getGuests?event_link={url}"
+    def get_guests(
+        self, event_url="https://www.linkedin.com/events/6762355783188525056/"
+    ):
+        """
+        Return an dataframe object with 7 columns:
+        - FULLNAME
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - OCCUPATION
+        - LOCATION
+        - DISTANCE
+
+        Parameters
+        ----------
+        event_url: str:
+            Event url from Linkedin.
+            Example : "https://www.linkedin.com/events/6762355783188525056/"
+
+        """
+        req_url = f"{LINKEDIN_API}/event/getGuests?event_link={event_url}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError:
-            res_json = {}
-        else:
-            res_json = res.json()
-        df = pd.DataFrame(res_json)
-        return df.reset_index(drop=True)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
 
 class Company(LinkedIn):
@@ -961,13 +1025,34 @@ class Company(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_info(self, company_url):
+    def get_info(self, company_url="https://www.linkedin.com/company/naas-ai/"):
+        """
+        Return an dataframe object with 16 columns:
+        - COMPANY_ID
+        - COMPANY_URL
+        - COMPANY_NAME
+        - UNIVERSAL_NAME
+        - LOGO_URL
+        - INDUSTRY_URN
+        - WEBSITE
+        - TAGLINE
+        - SPECIALITIES
+        - DESCRIPTION
+        - COUNTRY
+        - REGION
+        - CITY
+        - STAFF_COUNT
+        - STAFF_RANGE
+        - FOLLOWER_COUNT
+
+        Parameters
+        ----------
+        company_url: str:
+            Company url from Linkedin.
+            Example : "https://www.linkedin.com/company/naas-ai/"
+
+        """
         req_url = f"{LINKEDIN_API}/company/getInfo?company_url={company_url}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        else:
-            res_json = res.json()
-        return pd.DataFrame(res_json).reset_index(drop=True)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
