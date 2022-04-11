@@ -6,10 +6,10 @@ with open("README.md", "r") as fh:
 setup(
     name="naas-drivers",
     version="0.93.3",
-    author="Martin Donadieu",
-    author_email="martindonadieu@gmail.com",
+    author="Maxime Jublou",
+    author_email="maxime@naas.ai",
     license="BSD",
-    description="Drivers made to easy connect to any services",
+    description="Drivers made to easily connect to any services",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jupyter-naas/drivers",
