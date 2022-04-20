@@ -1,3 +1,10 @@
+## 0.94.0 (2022-04-20)
+
+### Feat
+
+- company get followers
+- company get followers
+
 ## 0.93.4 (2022-04-11)
 
 ### Fix
