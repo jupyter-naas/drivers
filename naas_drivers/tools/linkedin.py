@@ -1025,7 +1025,8 @@ class Company(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_info(self, company_url="https://www.linkedin.com/company/naas-ai/"):
+    def get_info(self,
+                 company_url="https://www.linkedin.com/company/naas-ai/"):
         """
         Return an dataframe object with 16 columns:
         - COMPANY_ID
@@ -1056,3 +1057,64 @@ class Company(LinkedIn):
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         res.raise_for_status()
         return pd.DataFrame(res.json()).reset_index(drop=True)
+    
+    def get_followers(self,
+                      company_url="https://www.linkedin.com/company/naas-ai/",
+                      start=0,
+                      count=1,
+                      limit=10,
+                      sleep=True):
+        """
+        Return an dataframe object with 9 columns:
+        - FIRSTNAME
+        - LASTNAME
+        - OCCUPATION
+        - PROFILE_PICTURE
+        - PROFILE_URL
+        - PROFILE_ID
+        - PUBLIC_ID
+        - FOLLOWED_AT 
+        - DISTANCE
+        
+        Parameters
+        ----------
+        company_url: str:
+            Company url from Linkedin.
+            Example : "https://www.linkedin.com/company/naas-ai/"
+            
+        start: int (default 0):
+            Number of requests sent to LinkedIn API.
+            (!) If count > 1, published date will not be returned.
+            
+        count: int (default 1, max 100):
+            Number of requests sent to LinkedIn API.
+            (!) If count > 1, followed at will not be returned.
+
+        limit: int (default 10, unlimited=-1):
+            Number of followers return by function. It will start with the most recent followers.
+
+        sleep: boolean (default True):
+            Sleeping time between function will be randomly between 3 to 5 seconds.
+
+        """
+        df = pd.DataFrame()
+        while True:
+            if limit != -1 and limit < count:
+                count = limit
+            req_url = f"{LINKEDIN_API}/company/getFollowers?company_url={company_url}&start={start}&count={count}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                return e
+            res_json = res.json()
+            if len(res_json) == 0:
+                break
+            tmp_df = pd.DataFrame(res_json)
+            df = pd.concat([df, tmp_df], axis=0)
+            start += count
+            if limit != -1:
+                limit -= count
+            if sleep:
+                time.sleep(TIME_SLEEP)
+        return df.reset_index(drop=True)
