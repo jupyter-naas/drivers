@@ -31,14 +31,14 @@ class Slack(OutDriver):
         response = self.client.files_upload(channel="#theta", file=path)
         return response["file"]["permalink"]
 
-    def send(self, channel, text, image=None):
+    def send(self, channel, text, blocks=None, image=None):
         self.check_connect()
         try:
             attachments = None
             if image:
                 attachments = self.__upload_or_link(image)
             response = self.client.chat_postMessage(
-                channel=channel, text=text, attachments=attachments
+                channel=channel, text=text, blocks=blocks, attachments=attachments
             )
             response.get("message").get("text") == text
             print("✉️ Message sent")
