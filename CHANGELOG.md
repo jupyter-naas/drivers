@@ -1,3 +1,10 @@
+## 0.95.0 (2022-04-28)
+
+### Feat
+
+- add blocks to slack
+- add blocks to slack
+
 ## 0.94.0 (2022-04-20)
 
 ### Feat
