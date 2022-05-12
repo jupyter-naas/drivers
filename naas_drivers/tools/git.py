@@ -1,6 +1,6 @@
 from naas_drivers.driver import InDriver, OutDriver
-from git import Repo
 import urllib.parse
+from git import Repo
 
 
 class Git(InDriver, OutDriver):

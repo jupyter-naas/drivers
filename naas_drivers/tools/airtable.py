@@ -1,6 +1,6 @@
 from naas_drivers.driver import InDriver, OutDriver
-from airtable import Airtable as at
 import pandas as pd
+from airtable import Airtable as at
 
 
 class Airtable(InDriver, OutDriver):

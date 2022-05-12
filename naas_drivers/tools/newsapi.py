@@ -1,7 +1,7 @@
 from naas_drivers.driver import InDriver
-from newsapi.newsapi_client import NewsApiClient
 import pandas as pd
 import os
+from newsapi.newsapi_client import NewsApiClient
 
 
 class Newsapi(InDriver):

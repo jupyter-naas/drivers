@@ -5,9 +5,9 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from typing import Any, Dict, cast
-from imap_tools import MailBox, A, AND
 import pandas as pd
 import smtplib
+from imap_tools import MailBox, A, AND
 
 
 class Email(OutDriver):

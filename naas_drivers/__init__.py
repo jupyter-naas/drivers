@@ -1,8 +1,10 @@
 import requests
 import os
 from mprop import mproperty
+from subprocess import Popen, PIPE
+import sys
 
-__version__ = "0.95.0"
+__version__ = "0.96.0b3"
 
 __github_repo = "jupyter-naas/drivers"
 
@@ -32,17 +34,56 @@ def up_to_date():
     return get_last_version() == version()
 
 
-def load_driver(loader_fn):
-    @mproperty
-    def wrapper(mod):
-        name = loader_fn.__name__
+def load_driver(_func=None, *, extra_requires=""):
+    def fn_wrapper(loader_fn):
+        @mproperty
+        def wrapper(mod):
 
-        if name not in __loaded_drivers:
-            loaded = loader_fn()
-            __loaded_drivers[name] = loaded
-        return __loaded_drivers[name]
+            name = loader_fn.__name__
 
-    return wrapper
+            if name not in __loaded_drivers:
+                try:
+                    loaded = loader_fn()
+                    __loaded_drivers[name] = loaded
+                except Exception as e:
+                    if extra_requires != "":
+                        naas_drivers_path = "/".join(__file__.split("/")[:-2])
+                        if (
+                            os.path.isfile(os.path.join(naas_drivers_path, "setup.py"))
+                            is False
+                        ):
+                            naas_drivers_path = "naas-drivers"
+                        cmd = [
+                            "pip",
+                            "install",
+                            "--user",
+                            f"{naas_drivers_path}[{extra_requires}]",
+                        ]
+                        print(
+                            f"""
+        👉 Running this command automatically to install missing requirements. $> {(" ").join(cmd)}
+
+        ⚠️ You may need to restart your kernel / execution to be able to use the installed packages.
+
+        💡 You can also run this command prior to execution next time to install these packages the way you want (venv, etc).
+            """
+                        )
+                        process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+                        stdout, stderr = process.communicate()
+                        print(stdout.decode("utf-8"))
+                        print(stderr.decode("utf-8"), file=sys.stderr)
+                        loaded = loader_fn()
+                        __loaded_drivers[name] = loaded
+                    else:
+                        raise e
+            return __loaded_drivers[name]
+
+        return wrapper
+
+    if _func is None:
+        return fn_wrapper
+    else:
+        return fn_wrapper(_func)
 
 
 @load_driver
@@ -59,28 +100,28 @@ def cityfalcon():
     return Cityfalcon()
 
 
-@load_driver
+@load_driver(extra_requires="geolocator")
 def geolocator():
     from naas_drivers.tools.geolocator import Geolocator
 
     return Geolocator()
 
 
-@load_driver
+@load_driver(extra_requires="newsapi")
 def newsapi():
     from naas_drivers.tools.newsapi import Newsapi
 
     return Newsapi()
 
 
-@load_driver
+@load_driver(extra_requires="cython,prediction")
 def prediction():
     from naas_drivers.tools.prediction import Prediction
 
     return Prediction()
 
 
-@load_driver
+@load_driver(extra_requires="sentiment")
 def sentiment():
     from naas_drivers.tools.sentiment import Sentiment
 
@@ -101,28 +142,28 @@ def pdf():
     return Pdf()
 
 
-@load_driver
+@load_driver(extra_requires="plotly")
 def plotly():
     from naas_drivers.tools.plotly import Plotly
 
     return Plotly()
 
 
-@load_driver
+@load_driver(extra_requires="ipython,emailbuilder")
 def emailbuilder():
     from naas_drivers.tools.emailbuilder import EmailBuilder
 
     return EmailBuilder()
 
 
-@load_driver
+@load_driver(extra_requires="ipython,emailbuilder")
 def emailBuilder():
     from naas_drivers.tools.emailbuilder import EmailBuilder
 
     return EmailBuilder(deprecated=True)
 
 
-@load_driver
+@load_driver(extra_requires="ipython")
 def templates():
     from naas_drivers.tools.awesomenotebook import AwesomeNotebooks
 
@@ -136,21 +177,21 @@ def html():
     return EmailBuilder(deprecated=True)
 
 
-@load_driver
+@load_driver(extra_requires="markdown")
 def markdown():
     from naas_drivers.tools.markdown import Markdown
 
     return Markdown()
 
 
-@load_driver
+@load_driver(extra_requires="teams")
 def teams():
     from naas_drivers.tools.teams import Teams
 
     return Teams()
 
 
-@load_driver
+@load_driver(extra_requires="slack")
 def slack():
     from naas_drivers.tools.slack import Slack
 
@@ -178,7 +219,7 @@ def bubble():
     return Bubble()
 
 
-@load_driver
+@load_driver(extra_requires="email")
 def email():
     from naas_drivers.tools.email import Email
 
@@ -213,7 +254,7 @@ def zapier():
     return Zapier()
 
 
-@load_driver
+@load_driver(extra_requires="streamlit")
 def streamlit():
     from naas_drivers.tools.streamlit import Streamlit
 
@@ -227,7 +268,7 @@ def bobapp():
     return Bobapp()
 
 
-@load_driver
+@load_driver(extra_requires="airtable")
 def airtable():
     from naas_drivers.tools.airtable import Airtable
 
@@ -241,14 +282,14 @@ def jupyter():
     return Jupyter()
 
 
-@load_driver
+@load_driver(extra_requires="ftp")
 def ftp():
     from naas_drivers.tools.ftp import Ftp
 
     return Ftp()
 
 
-@load_driver
+@load_driver(extra_requires="git")
 def git():
     from naas_drivers.tools.git import Git
 
@@ -262,21 +303,21 @@ def gsheet():
     return Gsheet()
 
 
-@load_driver
+@load_driver(extra_requires="notion")
 def notion():
     from naas_drivers.tools.notion import Notion
 
     return Notion()
 
 
-@load_driver
+@load_driver(extra_requires="mongo")
 def mongo():
     from naas_drivers.tools.mongo import Mongo
 
     return Mongo()
 
 
-@load_driver
+@load_driver(extra_requires="ipython,toucan")
 def toucan():
     from naas_drivers.tools.toucan import Toucan
 
@@ -325,21 +366,21 @@ def taggun():
     return Taggun()
 
 
-@load_driver
+@load_driver(extra_requires="youtube,ml,pydash")
 def youtube():
     from naas_drivers.tools.youtube import Youtube
 
     return Youtube()
 
 
-@load_driver
+@load_driver(extra_requires="google")
 def googleanalytics():
     from naas_drivers.tools.googleanalytics import GoogleAnalytics
 
     return GoogleAnalytics()
 
 
-@load_driver
+@load_driver(extra_requires="pydash")
 def github():
     from naas_drivers.tools.github import Github
 
@@ -352,8 +393,16 @@ def bazimo():
 
     return Bazimo()
 
-@load_driver
+
+@load_driver(extra_requires="sharepoint")
 def sharepoint():
     from naas_drivers.tools.sharepoint import Sharepoint
 
     return Sharepoint()
+
+
+@load_driver(extra_requires="ml")
+def huggingface():
+    from naas_drivers.tools.huggingface import Huggingface
+
+    return Huggingface()

@@ -51,15 +51,14 @@ class Gsheet(InDriver, OutDriver):
             params={"perPage": items_per_page},
         )
         data = resp.json()
-        
+
         # If cell empty then return empty dataframe
         if data.get("status") == 500:
             return pd.DataFrame()
         # Manage error
         if data.get("error"):
             return data.get("error")
-        df = pd.DataFrame(data=data["data"],
-                          columns=data["columns"])
+        df = pd.DataFrame(data=data["data"], columns=data["columns"])
         return df
 
     def send(self, data, sheet_name: str, append: bool = True) -> str:

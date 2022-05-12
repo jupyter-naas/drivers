@@ -1,3 +1,63 @@
+## 0.96.0b3 (2022-05-12)
+
+### Fix
+
+- Lint
+
+## 0.96.0b2 (2022-05-12)
+
+### Fix
+
+- lint
+
+## 0.96.0b1 (2022-05-12)
+
+### Fix
+
+- Lint
+- bum black
+
+## 0.96.0b0 (2022-05-12)
+
+## 0.90.0b1 (2022-03-22)
+
+### Fix
+
+- Remove unwanted comment
+
+## 0.90.0b0 (2022-03-22)
+
+### Fix
+
+- Do not run pip install if no extra requires is provided
+- Applied black
+- Add pydash dependency
+- Remove all uneeded default requires
+
+### Feat
+
+- Remove driver dependencies decorator to reduce complexity
+
+## 0.87.0b1 (2022-02-18)
+
+### Fix
+
+- Remove missed HEAD <<<
+
+## 0.87.0b0 (2022-02-18)
+
+## 0.85.0b1 (2022-01-27)
+
+### Fix
+
+- **Automatic-dependencies-install**: Use naas-drivers instead of path if no setup.py
+
+## 0.85.0b0 (2022-01-27)
+
+### Feat
+
+- Minimal install (#216)
+
 ## 0.95.0 (2022-04-28)
 
 ### Feat

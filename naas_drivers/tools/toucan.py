@@ -1,5 +1,5 @@
 from naas_drivers.driver import InDriver, OutDriver
-from IPython.core.display import display, HTML
+
 from typing import Any, Dict, List
 import pandas as pd
 import requests
@@ -8,10 +8,11 @@ import shutil
 import json
 import time
 import uuid
-import cson
-import jwt
 import os
 import io
+from IPython.core.display import display, HTML
+import cson
+import jwt
 
 
 class Toucan(InDriver, OutDriver):

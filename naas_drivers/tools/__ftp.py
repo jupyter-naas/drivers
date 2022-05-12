@@ -1,6 +1,6 @@
 import ftplib
-import pysftp
 import os
+import pysftp
 
 
 class Ftpbase:

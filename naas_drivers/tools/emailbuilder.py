@@ -1,11 +1,11 @@
 from naas_drivers.driver import InDriver
-from htmlBuilder import tags, attributes
-import IPython.core.display
 import pandas as pd
 import requests
 import uuid
 import os
 import warnings
+from IPython.core import display
+from htmlBuilder import tags, attributes
 
 #  https://litmus.com/community/templates/31-accessible-product-announcement-email
 # https://github.com/rodriguezcommaj/accessible-emails
@@ -680,7 +680,7 @@ class EmailBuilder(InDriver):
             console.log('injected')
             </script>
             """
-            IPython.core.display.display(IPython.core.display.HTML(shadow))
+            display.display(display.HTML(shadow))
         elif mode == "iframe":
             iframe = f"""
             <script>
@@ -698,9 +698,9 @@ class EmailBuilder(InDriver):
             doc_{uid}.close();
             </script>
             """
-            IPython.core.display.display(IPython.core.display.HTML(iframe))
+            display.display(display.HTML(iframe))
         elif mode == "embed":
-            IPython.core.display.display(IPython.core.display.HTML(content))
+            display.display(display.HTML(content))
 
     def __export(self, html, filename, css=""):
         result = html.replace("</head>", f'<style id="naas_css">{css}</style></head>')

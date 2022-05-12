@@ -1,6 +1,6 @@
-import plotly.express as px
 import os
 import requests
+import plotly.express as px
 
 config = {"displayModeBar": False}
 

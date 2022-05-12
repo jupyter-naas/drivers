@@ -1025,8 +1025,7 @@ class Company(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_info(self,
-                 company_url="https://www.linkedin.com/company/naas-ai/"):
+    def get_info(self, company_url="https://www.linkedin.com/company/naas-ai/"):
         """
         Return an dataframe object with 16 columns:
         - COMPANY_ID
@@ -1057,13 +1056,15 @@ class Company(LinkedIn):
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         res.raise_for_status()
         return pd.DataFrame(res.json()).reset_index(drop=True)
-    
-    def get_followers(self,
-                      company_url="https://www.linkedin.com/company/naas-ai/",
-                      start=0,
-                      count=1,
-                      limit=10,
-                      sleep=True):
+
+    def get_followers(
+        self,
+        company_url="https://www.linkedin.com/company/naas-ai/",
+        start=0,
+        count=1,
+        limit=10,
+        sleep=True,
+    ):
         """
         Return an dataframe object with 9 columns:
         - FIRSTNAME
@@ -1073,19 +1074,19 @@ class Company(LinkedIn):
         - PROFILE_URL
         - PROFILE_ID
         - PUBLIC_ID
-        - FOLLOWED_AT 
+        - FOLLOWED_AT
         - DISTANCE
-        
+
         Parameters
         ----------
         company_url: str:
             Company url from Linkedin.
             Example : "https://www.linkedin.com/company/naas-ai/"
-            
+
         start: int (default 0):
             Number of requests sent to LinkedIn API.
             (!) If count > 1, published date will not be returned.
-            
+
         count: int (default 1, max 100):
             Number of requests sent to LinkedIn API.
             (!) If count > 1, followed at will not be returned.

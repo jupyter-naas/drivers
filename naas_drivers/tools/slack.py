@@ -1,7 +1,7 @@
 from naas_drivers.driver import OutDriver
+import json
 from slack import WebClient
 from slack.errors import SlackApiError
-import json
 
 
 class Slack(OutDriver):

@@ -1,7 +1,7 @@
+from os import path
 from shareplum import Site
 from shareplum import Office365
 from shareplum.site import Version
-from os import path
 
 
 class Sharepoint:
