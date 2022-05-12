@@ -1,10 +1,10 @@
-from naas_drivers.driver import InDriver, OutDriver
 import pandas as pd
 import requests
 import time
 import urllib
 from datetime import datetime
 import secrets
+import pydash as _pd
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -15,9 +15,10 @@ RELEASE_MESSAGE = (
 DATE_FORMAT = "%Y-%m-%d"
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 TIME_SLEEP = secrets.randbelow(3) + 2
+HEADERS = {"Content-Type": "application/json"}
 
 
-class LinkedIn(InDriver, OutDriver):
+class LinkedIn:
     deprecated = True
 
     @staticmethod
@@ -63,7 +64,7 @@ class LinkedIn(InDriver, OutDriver):
             occupation = occupation.strip().replace("\n", " ")
         return occupation
 
-    def connect(self, li_at: str, jessionid: str):
+    def connect(self, li_at: str = None, jessionid: str = None):
         # Init lk attribute
         self.li_at = li_at
         self.jessionid = jessionid
@@ -101,23 +102,82 @@ class Profile(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_identity(self, url=None, urn=None):
+    def get_identity(self, profile_url=None):
+        """
+        Return an dataframe object with 15 columns:
+        - FIRSTNAME
+        - LASTNAME
+        - SUMMARY
+        - OCCUPATION
+        - INDUSTRY_NAME
+        - ADDRESS
+        - REGION
+        - COUNTRY
+        - LOCATION
+        - BIRTHDATE
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - BACKGROUND_PICTURE
+        - PROFILE_PICTURE
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile URL from LinkedIn.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+        """
         res_json = {}
+        if profile_url is None:
+            print("❌ No profile URL. Please enter a profile URL from LinkedIn")
+            return res_json
         result = {}
-        lk_id = self.get_profile_id(url)
-        req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}"
+        lk_public_id = self.get_profile_id(profile_url)
+        req_url = (
+            f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_public_id}"
+        )
         res = requests.get(req_url, cookies=self.cookies, headers=self.headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            print(e)
-        else:
-            res_json = res.json()
+        # Raise error
+        res.raise_for_status()
         # Parse json
+        res_json = res.json()
         data = res_json.get("data", {})
+        included = res_json.get("included", {})
+
+        # Init var
+        bg_pic_url = None
+        profile_pic_url = None
+
+        # Get data from included json
+        if len(included) > 0:
+            included = included[0]
+
+            # Get background picture
+            if included.get("backgroundImage"):
+                background_url_end = None
+                background_root = None
+                background_artifacts = _pd.get(included, "backgroundImage.artifacts")
+                if len(background_artifacts) > 0:
+                    background_url_end = background_artifacts[
+                        len(background_artifacts) - 1
+                    ].get("fileIdentifyingUrlPathSegment")
+                background_root = _pd.get(included, "backgroundImage.rootUrl")
+                if background_url_end and background_root:
+                    bg_pic_url = f"{background_root}{background_url_end}"
+            # Get profile picture
+            if included.get("picture"):
+                profile_url_end = None
+                profile_root = None
+                profile_artifacts = _pd.get(included, "picture.artifacts")
+                if len(profile_artifacts) > 0:
+                    profile_url_end = profile_artifacts[len(profile_artifacts) - 1].get(
+                        "fileIdentifyingUrlPathSegment"
+                    )
+                profile_root = _pd.get(included, "picture.rootUrl")
+                if profile_root and profile_url_end:
+                    profile_pic_url = f"{profile_root}{profile_url_end}"
+        lk_id = data.get("entityUrn", "").replace("urn:li:fs_profile:", "")
         result = {
-            "PROFILE_URN": data.get("entityUrn", "").replace("urn:li:fs_profile:", ""),
-            "PROFILE_ID": lk_id,
             "FIRSTNAME": data.get("firstName"),
             "LASTNAME": data.get("lastName"),
             "SUMMARY": data.get("summary"),
@@ -128,29 +188,51 @@ class Profile(LinkedIn):
             "COUNTRY": data.get("geoCountryName"),
             "LOCATION": data.get("locationName"),
             "BIRTHDATE": self.get_birthdate(data.get("birthDateOn")),
+            "PROFILE_ID": lk_id,
+            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
+            "PUBLIC_ID": lk_public_id,
+            "BACKGROUND_PICTURE": bg_pic_url,
+            "PROFILE_PICTURE": profile_pic_url,
         }
         time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
-    def get_network(self, url=None, urn=None):
+    def get_network(self, profile_url=None):
+        """
+        Return an dataframe object with 7 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - DISTANCE
+        - FOLLOWING
+        - FOLLOWABLE
+        - FOLLOWERS_COUNT
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile URL from LinkedIn.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+        """
         res_json = {}
+        if profile_url is None:
+            print("❌ No profile URL. Please enter a profile URL from LinkedIn")
+            return res_json
         result = {}
-        lk_id = self.get_profile_id(url)
+        lk_id = self.get_profile_id(profile_url)
         req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/networkinfo"
         res = requests.get(req_url, cookies=self.cookies, headers=self.headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            print(e)
-        else:
-            res_json = res.json()
+        # Raise error
+        res.raise_for_status()
         # Parse json
+        res_json = res.json()
         data = res_json.get("data", {})
         result = {
-            "PROFILE_URN": data.get("entityUrn", "").replace(
+            "PROFILE_ID": data.get("entityUrn", "").replace(
                 "urn:li:fs_profileNetworkInfo:", ""
             ),
-            "PROFILE_ID": lk_id,
+            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
+            "PUBLIC_ID": lk_id,
             "DISTANCE": data.get("distance", {}).get("value"),
             "FOLLOWING": data.get("following"),
             "FOLLOWABLE": data.get("followable"),
@@ -159,20 +241,40 @@ class Profile(LinkedIn):
         time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
-    def get_contact(self, url=None, urn=None):
+    def get_contact(self, profile_url=None):
+        """
+        Return an dataframe object with 11 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - EMAIL
+        - CONNECTED_AT
+        - BIRTHDATE
+        - ADDRESS
+        - TWITER
+        - PHONENUMBER
+        - WEBSITES
+        - INTERESTS
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile URL from LinkedIn.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+        """
         res_json = {}
+        if profile_url is None:
+            print("❌ No profile URL. Please enter a profile URL from LinkedIn")
+            return res_json
         result = {}
-        lk_id = self.get_profile_id(url)
+        lk_id = self.get_profile_id(profile_url)
         req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/profileContactInfo"
         res = requests.get(req_url, cookies=self.cookies, headers=self.headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            print(e)
-        else:
-            res_json = res.json()
+        res.raise_for_status()
         # Parse json
+        res_json = res.json()
         data = res_json.get("data", {})
+
         # Specific
         connected_at = data.get("connectedAt")
         if connected_at is not None:
@@ -199,10 +301,11 @@ class Profile(LinkedIn):
                 lk_url = rows["url"]
                 lk_urls = f"{lk_urls}{lk_url}, "
         result = {
-            "PROFILE_URN": data.get("entityUrn", "").replace(
+            "PROFILE_ID": data.get("entityUrn", "").replace(
                 "urn:li:fs_contactinfo:", ""
             ),
-            "PROFILE_ID": lk_id,
+            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
+            "PUBLIC_ID": lk_id,
             "EMAIL": data.get("emailAddress"),
             "CONNECTED_AT": connected_at,
             "BIRTHDATE": self.get_birthdate(data.get("birthDateOn")),
@@ -216,20 +319,41 @@ class Profile(LinkedIn):
         return pd.DataFrame([result])
 
     def get_resume(self, profile_url=None, profile_urn=None):
+        """
+        Return an dataframe object with 12 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - FULL_NAME
+        - CATEGORY
+        - TITLE
+        - DATE_START
+        - DATE_END
+        - PLACE_ID
+        - PLACE
+        - FIELD
+        - LOCATION
+        - DESCRIPTION
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile URL from LinkedIn.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+        """
         res_json = {}
+        if profile_url is None:
+            print("❌ No profile URL. Please enter a profile URL from LinkedIn")
+            return res_json
         if profile_urn is None:
             profile_urn = LinkedIn.get_profile_urn(self, profile_url)
             if profile_urn is None:
                 return "Please enter a valid profile_url or profile_urn"
         req_url = f"{LINKEDIN_API}/profile/getResume?profile_urn={profile_urn}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        else:
-            res_json = res.json()
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        # Raise error
+        res.raise_for_status()
+        # Return dataframe
+        res_json = res.json()
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
 
@@ -329,12 +453,11 @@ class Profile(LinkedIn):
                 req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&count={count}&pagination_token={pagination_token}"
             else:
                 req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&count={count}"
-            headers = {"Content-Type": "application/json"}
-            res = requests.post(req_url, json=self.cookies, headers=headers)
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             try:
                 res.raise_for_status()
-            except requests.HTTPError as e:
-                return e
+            except requests.HTTPError:
+                res_json = {}
             else:
                 res_json = res.json()
             if len(res_json) == 0:
@@ -384,8 +507,7 @@ class Network(LinkedIn):
             if limit != -1 and limit < count:
                 count = limit
             req_url = f"{LINKEDIN_API}/network/getFollowers?start={start}&count={count}&limit={limit}"
-            headers = {"Content-Type": "application/json"}
-            res = requests.post(req_url, json=self.cookies, headers=headers)
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             try:
                 res.raise_for_status()
             except requests.HTTPError:
@@ -413,8 +535,7 @@ class Network(LinkedIn):
             if limit != -1 and limit < count:
                 count = limit
             req_url = f"{LINKEDIN_API}/network/getConnections?start={start}&count={count}&limit={limit}"
-            headers = {"Content-Type": "application/json"}
-            res = requests.post(req_url, json=self.cookies, headers=headers)
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             try:
                 res.raise_for_status()
             except requests.HTTPError:
@@ -441,13 +562,179 @@ class Invitation(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
+    def get_received(self, start=0, count=100, limit=-1):
+        """
+        Return an dataframe object with 16 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - FIRSTNAME
+        - LASTNAME
+        - FULLNAME
+        - OCCUPATION
+        - PROFILE_PICTURE
+        - MESSAGE
+        - UNSEEN
+        - SENT_AT
+        - INVITATION_TYPE
+        - INVITATION_DESC
+        - INVITATION_STATUS
+        - INVITATION_ID
+        - SHARED_SECRET
+        """
+        df = pd.DataFrame()
+        while True:
+            if limit != -1 and limit < count:
+                count = limit
+            req_url = f"{LINKEDIN_API}/invitation/get?start={start}&count={count}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError:
+                res_json = {}
+            else:
+                res_json = res.json()
+            if len(res_json) == 0:
+                break
+            tmp_df = pd.DataFrame(res_json)
+            df = pd.concat([df, tmp_df], axis=0)
+            start += count
+            if limit != -1:
+                limit -= count
+            time.sleep(TIME_SLEEP)
+        return df.reset_index(drop=True)
+
+    def get_sent(self, start=0, count=100, limit=-1):
+        """
+        Return an dataframe object with 14 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - FIRSTNAME
+        - LASTNAME
+        - FULLNAME
+        - OCCUPATION
+        - PROFILE_PICTURE
+        - MESSAGE
+        - SENT_AT
+        - INVITATION_TYPE
+        - INVITATION_DESC
+        - INVITATION_STATUS
+        - INVITATION_ID
+        """
+        df = pd.DataFrame()
+        while True:
+            if limit != -1 and limit < count:
+                count = limit
+            req_url = f"{LINKEDIN_API}/invitation/getSent?start={start}&count={count}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError:
+                res_json = {}
+            else:
+                res_json = res.json()
+            if len(res_json) == 0:
+                break
+            tmp_df = pd.DataFrame(res_json)
+            df = pd.concat([df, tmp_df], axis=0)
+            start += count
+            if limit != -1:
+                limit -= count
+            time.sleep(TIME_SLEEP)
+        return df.reset_index(drop=True)
+
+    def response(
+        self,
+        action="accept",
+        invitation_id=None,
+        invitation_shared_secret=None,
+        is_generic=False,
+    ):
+        """
+        Print result : "Accept" or "Ignore"
+        Return dataframe profile if invitation type = "Profile"
+
+        Parameters
+        ----------
+        action: str (default 'accept')
+            "accept" or "ignore"
+
+        invitation_id: str (default None)
+            Argument given in invitations.get : "INVITATION_ID"
+
+        invitation_shared_secret: str (default None)
+            Argument given in invitations.get : "SHARED_SECRET"
+
+        is_generic: boolean (default False):
+            Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
+        """
+        params = {
+            "action": action,
+            "invitation_id": invitation_id,
+            "invitation_shared_secret": invitation_shared_secret,
+            "is_generic": is_generic,
+        }
+        req_url = f"{LINKEDIN_API}/invitation/response?{urllib.parse.urlencode(params, safe='(),')}"
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        res.raise_for_status()
+        res_json = res.json()
+        if action == "accept":
+            print("🤝 Invitation accepted !")
+        elif action == "ignore":
+            print("❌ Invitation ignored !")
+        return pd.DataFrame(res_json)
+
+    def accept(
+        self, invitation_id=None, invitation_shared_secret=None, is_generic=False
+    ):
+        """
+        Return dataframe profile if invitation type = "Profile"
+
+        Parameters
+        ----------
+        invitation_id: str (default None)
+            Argument given in invitations.get : "INVITATION_ID"
+
+        invitation_shared_secret: str (default None)
+            Argument given in invitations.get : "SHARED_SECRET"
+
+        is_generic: boolean (default False):
+            Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
+        """
+        return self.response(
+            "accept", invitation_id, invitation_shared_secret, is_generic
+        )
+
+    def ignore(
+        self, invitation_id=None, invitation_shared_secret=None, is_generic=False
+    ):
+        """
+        Return dataframe profile if invitation type = "Profile"
+
+        Parameters
+        ----------
+        invitation_id: str (default None)
+            Argument given in invitations.get : "INVITATION_ID"
+
+        invitation_shared_secret: str (default None)
+            Argument given in invitations.get : "SHARED_SECRET"
+
+        is_generic: boolean (default False):
+            Must be True for generic invitation, if "INVITATION_TYPE" != "Profile"
+        """
+        return self.response(
+            "ignore", invitation_id, invitation_shared_secret, is_generic
+        )
+
     def send(self, recipient_url=None, message="", recipient_urn=None):
         if recipient_url is not None:
             recipient_urn = self.get_profile_urn(recipient_url)
         if recipient_urn is None:
             return True
         if message:
-            message = ',"message":' '"' + message + '"'
+            message = ',"message":"' + message + '"'
+            message = ""
         data = (
             (
                 '{"trackingId":"yvzykVorToqcOuvtxjSFMg==","invitations":[],"excludeInvitations":[],'
@@ -488,11 +775,10 @@ class Message(LinkedIn):
             "limit": limit_max if limit > limit_max or limit == -1 else limit,
             "count": count,
         }
-        headers = {"Content-Type": "application/json"}
         df_result = None
         while True:
             req_url = f"{LINKEDIN_API}/message/getConversations?{urllib.parse.urlencode(params, safe='(),')}"
-            res = requests.post(req_url, json=self.cookies, headers=headers)
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             if limit != -1:
                 limit -= limit_max
                 if limit < 0:
@@ -531,8 +817,7 @@ class Message(LinkedIn):
             req_url += f"&conversation_url={conversation_url}"
         if conversation_urn:
             req_url += f"&conversation_urn={conversation_urn}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         try:
             res.raise_for_status()
         except requests.HTTPError:
@@ -651,14 +936,9 @@ class Post(LinkedIn):
             if activity_id is None:
                 return "Please enter a valid post_url or activity_id"
         req_url = f"{LINKEDIN_API}/post/getStats?activity_id={activity_id}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        res_json = res.json()
-        return pd.DataFrame(res_json)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
     def get_polls(self, post_url, activity_id=None):
         """
@@ -689,42 +969,22 @@ class Post(LinkedIn):
             activity_id = LinkedIn.get_activity_id(post_url)
             if activity_id is None:
                 return "Please enter a valid post_url or activity_id"
-
         req_url = f"{LINKEDIN_API}/post/getPolls?activity_id={activity_id}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        res_json = res.json()
-        return pd.DataFrame(res_json)
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
-    def get_comments(self, post_url):
-        req_url = f"{LINKEDIN_API}/post/getComments?post_link={post_url}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError:
-            res_json = {}
-        else:
-            res_json = res.json()
-        df = pd.DataFrame(res_json)
-        return df.reset_index(drop=True)
+    def get_comments(self, url):
+        req_url = f"{LINKEDIN_API}/post/getComments?post_link={url}"
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
-    def get_likes(self, post_url):
-        req_url = f"{LINKEDIN_API}/post/getLikes?post_link={post_url}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError:
-            res_json = {}
-        else:
-            res_json = res.json()
-        df = pd.DataFrame(res_json)
-        return df.reset_index(drop=True)
+    def get_likes(self, url):
+        req_url = f"{LINKEDIN_API}/post/getLikes?post_link={url}"
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
 
 class Event(LinkedIn):
@@ -733,18 +993,30 @@ class Event(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_guests(self, url):
-        req_url = f"{LINKEDIN_API}/event/getGuests?event_link={url}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError:
-            res_json = {}
-        else:
-            res_json = res.json()
-        df = pd.DataFrame(res_json)
-        return df.reset_index(drop=True)
+    def get_guests(
+        self, event_url="https://www.linkedin.com/events/6762355783188525056/"
+    ):
+        """
+        Return an dataframe object with 7 columns:
+        - FULLNAME
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - OCCUPATION
+        - LOCATION
+        - DISTANCE
+
+        Parameters
+        ----------
+        event_url: str:
+            Event url from Linkedin.
+            Example : "https://www.linkedin.com/events/6762355783188525056/"
+
+        """
+        req_url = f"{LINKEDIN_API}/event/getGuests?event_link={event_url}"
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
 
 
 class Company(LinkedIn):
@@ -753,14 +1025,96 @@ class Company(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_info(self, company_url):
+    def get_info(self,
+                 company_url="https://www.linkedin.com/company/naas-ai/"):
+        """
+        Return an dataframe object with 16 columns:
+        - COMPANY_ID
+        - COMPANY_URL
+        - COMPANY_NAME
+        - UNIVERSAL_NAME
+        - LOGO_URL
+        - INDUSTRY_URN
+        - WEBSITE
+        - TAGLINE
+        - SPECIALITIES
+        - DESCRIPTION
+        - COUNTRY
+        - REGION
+        - CITY
+        - STAFF_COUNT
+        - STAFF_RANGE
+        - FOLLOWER_COUNT
+
+        Parameters
+        ----------
+        company_url: str:
+            Company url from Linkedin.
+            Example : "https://www.linkedin.com/company/naas-ai/"
+
+        """
         req_url = f"{LINKEDIN_API}/company/getInfo?company_url={company_url}"
-        headers = {"Content-Type": "application/json"}
-        res = requests.post(req_url, json=self.cookies, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
-        else:
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        res.raise_for_status()
+        return pd.DataFrame(res.json()).reset_index(drop=True)
+    
+    def get_followers(self,
+                      company_url="https://www.linkedin.com/company/naas-ai/",
+                      start=0,
+                      count=1,
+                      limit=10,
+                      sleep=True):
+        """
+        Return an dataframe object with 9 columns:
+        - FIRSTNAME
+        - LASTNAME
+        - OCCUPATION
+        - PROFILE_PICTURE
+        - PROFILE_URL
+        - PROFILE_ID
+        - PUBLIC_ID
+        - FOLLOWED_AT 
+        - DISTANCE
+        
+        Parameters
+        ----------
+        company_url: str:
+            Company url from Linkedin.
+            Example : "https://www.linkedin.com/company/naas-ai/"
+            
+        start: int (default 0):
+            Number of requests sent to LinkedIn API.
+            (!) If count > 1, published date will not be returned.
+            
+        count: int (default 1, max 100):
+            Number of requests sent to LinkedIn API.
+            (!) If count > 1, followed at will not be returned.
+
+        limit: int (default 10, unlimited=-1):
+            Number of followers return by function. It will start with the most recent followers.
+
+        sleep: boolean (default True):
+            Sleeping time between function will be randomly between 3 to 5 seconds.
+
+        """
+        df = pd.DataFrame()
+        while True:
+            if limit != -1 and limit < count:
+                count = limit
+            req_url = f"{LINKEDIN_API}/company/getFollowers?company_url={company_url}&start={start}&count={count}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            try:
+                res.raise_for_status()
+            except requests.HTTPError as e:
+                return e
             res_json = res.json()
-        return pd.DataFrame(res_json).reset_index(drop=True)
+            if len(res_json) == 0:
+                break
+            tmp_df = pd.DataFrame(res_json)
+            df = pd.concat([df, tmp_df], axis=0)
+            start += count
+            if limit != -1:
+                limit -= count
+            if sleep:
+                time.sleep(TIME_SLEEP)
+        return df.reset_index(drop=True)

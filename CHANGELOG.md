@@ -1,41 +1,126 @@
-## 0.90.0b1 (2022-03-22)
-
-### Fix
-
-- Remove unwanted comment
-
-## 0.90.0b0 (2022-03-22)
-
-### Fix
-
-- Do not run pip install if no extra requires is provided
-- Applied black
-- Add pydash dependency
-- Remove all uneeded default requires
+## 0.95.0 (2022-04-28)
 
 ### Feat
 
-- Remove driver dependencies decorator to reduce complexity
+- add blocks to slack
+- add blocks to slack
 
-## 0.87.0b1 (2022-02-18)
-
-### Fix
-
-- Remove missed HEAD <<<
-
-## 0.87.0b0 (2022-02-18)
-
-## 0.85.0b1 (2022-01-27)
-
-### Fix
-
-- **Automatic-dependencies-install**: Use naas-drivers instead of path if no setup.py
-
-## 0.85.0b0 (2022-01-27)
+## 0.94.0 (2022-04-20)
 
 ### Feat
 
-- Minimal install (#216)
+- company get followers
+- company get followers
+
+## 0.93.4 (2022-04-11)
+
+### Fix
+
+- Change Author
+
+## 0.93.3 (2022-04-08)
+
+### Fix
+
+- linkedin doc + invitation
+- linkedin doc + invitation
+
+## 0.93.2 (2022-04-07)
+
+### Fix
+
+- raise error
+- lint
+- get more invitations
+- raise error
+
+## 0.93.1 (2022-04-07)
+
+### Fix
+
+- linkedin invitation sent
+- return instead of raise
+- raise error instead of print
+- change columns name in profile
+- change doc string
+
+## 0.93.0 (2022-04-07)
+
+### Feat
+
+- Update google analytics driver to add metrics and trends. (#257)
+
+## 0.92.0 (2022-04-07)
+
+### Feat
+
+- get invitations sent
+- get invitations sent
+
+## 0.91.5 (2022-04-05)
+
+### Fix
+
+- rename function linkedin.invitation.get() to linkedin.invitation.get_received()
+- rename function linkedin.invitation.get() to linkedin.invitation.get_received()
+
+## 0.91.4 (2022-04-05)
+
+### Fix
+
+- update accept and ignore invitation
+- update accept and ignore invitation
+
+## 0.91.3 (2022-04-03)
+
+### Fix
+
+- github get issues from projects
+- github get issues from projects
+
+## 0.91.2 (2022-04-01)
+
+### Fix
+
+- create branch linkedin invitation
+- sonar cloud
+- lint + improve code
+- lint black
+- create branch linkedin invitation
+
+## 0.91.1 (2022-04-01)
+
+### Fix
+
+- lint
+
+## 0.91.0 (2022-04-01)
+
+### Feat
+
+- get invitation and add response
+
+## 0.90.0 (2022-03-31)
+
+### Feat
+
+- github projects driver added
+- github profiles driver added
+- github repo driver updated
+- github projects driver added
+
+### Fix
+
+- rename function + create new end points to regarding github url (teams and users)
+- driver code debug
+
+## 0.89.3 (2022-03-31)
+
+### Fix
+
+- add profile and bg pic to identity
+- remove pprint
+- add profile and bg pic to identity
 
 ## 0.89.2 (2022-03-17)
 
