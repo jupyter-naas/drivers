@@ -11,6 +11,9 @@ class Ifttt(OutDriver):
     def send(self, event, data=None):
         self.check_connect()
         url = f"https://maker.ifttt.com/trigger/{event}/with/key/{self._key}"
-        r = requests.post(url=url, json=data,)
+        r = requests.post(
+            url=url,
+            json=data,
+        )
         r.raise_for_status()
         return r

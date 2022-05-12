@@ -10,7 +10,10 @@ class CRUD(ConnectDriver):
     raise_error = False
 
     def __init__(
-        self, base_url, endpoint, auth,
+        self,
+        base_url,
+        endpoint,
+        auth,
     ):
         self.base_public_url = base_url
         self.endpoint = endpoint

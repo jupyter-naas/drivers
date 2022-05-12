@@ -56,7 +56,7 @@ class Users(Github):
         - FOLLOWING           int64
         - CREATED_AT          object
         - UPDATED_AT          object
-        
+
         Parameters
         ----------
         html_url: str:
@@ -106,7 +106,7 @@ class Teams(Github):
         - TWITTER           object
         - CREATED_AT        object
         - UPDATED_AT        object
-        
+
         Parameters
         ----------
         url: str:
@@ -228,7 +228,7 @@ class Projects(Github):
         - PROJECT_UPDATED_DATE    object
         - PROJECT_UPDATED_TIME    object
         - PROJECT_COLUMNS_URL     object
-        
+
         Parameters
         ----------
         url: str:
@@ -280,7 +280,7 @@ class Projects(Github):
     def get_comments_from_issues(self, url):
         """
         Returns a list of comments to a particular issue
-        
+
         Parameters
         ----------
         issue comments url: str
@@ -324,7 +324,7 @@ class Projects(Github):
         - PR_ACTIVITY           object
         - PROJECT_ID            int64
         - PROJECT_NAME          object
-        
+
         Parameters
         ----------
         projects_url: str:
@@ -589,7 +589,7 @@ class Repositories(Github):
     def get_comments_from_issues(self, url):
         """
         Returns a list of comments to a particular issue
-        
+
         Parameters
         ----------
         issue comments url: str

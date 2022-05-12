@@ -14,6 +14,10 @@ class Bubble(OutDriver):
     def send(self, url, data=None):
         self.check_connect()
         headers = {"Authorization": f"Bearer {self._key}"}
-        r = requests.post(headers=headers, url=url, json=data,)
+        r = requests.post(
+            headers=headers,
+            url=url,
+            json=data,
+        )
         r.raise_for_status()
         r.json()

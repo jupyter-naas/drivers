@@ -10,6 +10,9 @@ class Zapier(OutDriver):
 
     def send(self, data=None):
         self.check_connect()
-        r = requests.post(url=self._key, json=data,)
+        r = requests.post(
+            url=self._key,
+            json=data,
+        )
         r.raise_for_status()
         return r.json()

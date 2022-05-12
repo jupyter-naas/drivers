@@ -35,7 +35,10 @@ class Pdf(InDriver):
         elif html:
             json["html"] = html
 
-        r = requests.post(url=f"{self.api_url}/api/render", json=json,)
+        r = requests.post(
+            url=f"{self.api_url}/api/render",
+            json=json,
+        )
         r.raise_for_status()
         open(filename, "wb").write(r.content)
         print(f"file from {url if url else 'html'} saved in {filename}")

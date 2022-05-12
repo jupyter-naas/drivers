@@ -334,7 +334,10 @@ class EmailBuilder(InDriver):
         style = self.__text_style(
             style, color, font_size, text_align, bold, underline, italic
         )
-        return tags.H2(attributes.InlineStyle(**style), tags.Text(text),)
+        return tags.H2(
+            attributes.InlineStyle(**style),
+            tags.Text(text),
+        )
 
     def subheading(
         self,
@@ -366,7 +369,10 @@ class EmailBuilder(InDriver):
         style = self.__text_style(
             style, color, font_size, text_align, bold, underline, italic
         )
-        return tags.P(tags.Text(text), attributes.InlineStyle(**style),)
+        return tags.P(
+            tags.Text(text),
+            attributes.InlineStyle(**style),
+        )
 
     def link(
         self,
@@ -403,7 +409,12 @@ class EmailBuilder(InDriver):
         return tags.Ul(elems)
 
     def button(
-        self, link, text="Open", width="auto", color="white", background_color="black",
+        self,
+        link,
+        text="Open",
+        width="auto",
+        color="white",
+        background_color="black",
     ):
         self.deprecatedPrint()
         return tags.Center(
@@ -568,7 +579,9 @@ class EmailBuilder(InDriver):
             attributes.Width(width),
             {"name": "border", "value": 0},
             attributes.InlineStyle(
-                border_radius="4px", margin=self.__align(align), display="block",
+                border_radius="4px",
+                margin=self.__align(align),
+                display="block",
             ),
             {"name": "alt", "value": name},
         ]
@@ -644,7 +657,8 @@ class EmailBuilder(InDriver):
         return tags.Footer(tags.Hr(), net, com, leg)
 
     def main(
-        self, **kwargs,
+        self,
+        **kwargs,
     ):
         self.deprecatedPrint()
         items = []

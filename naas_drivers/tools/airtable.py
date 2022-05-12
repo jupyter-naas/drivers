@@ -44,10 +44,15 @@ class Airtable(InDriver, OutDriver):
             return self._airtable.insert(data_formated)
 
     def search(
-        self, field_name, field,
+        self,
+        field_name,
+        field,
     ):
         self.check_connect()
-        data = self._airtable.search(field_name, field,)
+        data = self._airtable.search(
+            field_name,
+            field,
+        )
         return self.convert_data_to_df(data)
 
     def update_by_field(self, field_name, field, data):
@@ -55,7 +60,9 @@ class Airtable(InDriver, OutDriver):
         return self._airtable.update_by_field(field_name, field, data)
 
     def delete_by_field(
-        self, field_name, field,
+        self,
+        field_name,
+        field,
     ):
         self.check_connect()
         return self._airtable.delete_by_field(field_name, field)
