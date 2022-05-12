@@ -48,20 +48,30 @@ def load_driver(_func=None, *, extra_requires=""):
                 except Exception as e:
                     if extra_requires is not "":
                         naas_drivers_path = "/".join(__file__.split("/")[:-2])
-                        if os.path.isfile(os.path.join(naas_drivers_path, "setup.py")) is False:
+                        if (
+                            os.path.isfile(os.path.join(naas_drivers_path, "setup.py"))
+                            is False
+                        ):
                             naas_drivers_path = "naas-drivers"
-                        cmd = ["pip", "install", "--user", f'{naas_drivers_path}[{extra_requires}]']
-                        print(f'''
+                        cmd = [
+                            "pip",
+                            "install",
+                            "--user",
+                            f"{naas_drivers_path}[{extra_requires}]",
+                        ]
+                        print(
+                            f"""
         👉 Running this command automatically to install missing requirements. $> {(" ").join(cmd)}
 
         ⚠️ You may need to restart your kernel / execution to be able to use the installed packages.
 
         💡 You can also run this command prior to execution next time to install these packages the way you want (venv, etc).
-            ''')
+            """
+                        )
                         process = Popen(cmd, stdout=PIPE, stderr=PIPE)
                         stdout, stderr = process.communicate()
-                        print(stdout.decode("utf-8") )
-                        print(stderr.decode("utf-8") , file=sys.stderr)
+                        print(stdout.decode("utf-8"))
+                        print(stderr.decode("utf-8"), file=sys.stderr)
                         loaded = loader_fn()
                         __loaded_drivers[name] = loaded
                     else:
@@ -69,7 +79,7 @@ def load_driver(_func=None, *, extra_requires=""):
             return __loaded_drivers[name]
 
         return wrapper
-    
+
     if _func is None:
         return fn_wrapper
     else:
@@ -383,11 +393,13 @@ def bazimo():
 
     return Bazimo()
 
+
 @load_driver(extra_requires="sharepoint")
 def sharepoint():
     from naas_drivers.tools.sharepoint import Sharepoint
 
     return Sharepoint()
+
 
 @load_driver(extra_requires="ml")
 def huggingface():

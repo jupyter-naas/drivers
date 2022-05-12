@@ -95,10 +95,7 @@ class Jupyter(InDriver, OutDriver):
     def get_users(self):
         self.check_connect()
         r = requests.get(
-            f"{self.api_url}/users",
-            headers={
-                "Authorization": f"token {self.token}",
-            },
+            f"{self.api_url}/users", headers={"Authorization": f"token {self.token}",},
         )
 
         r.raise_for_status()
@@ -108,9 +105,7 @@ class Jupyter(InDriver, OutDriver):
         self.check_connect()
         r = requests.get(
             f"{self.api_url}/users/{username}",
-            headers={
-                "Authorization": f"token {self.token}",
-            },
+            headers={"Authorization": f"token {self.token}",},
         )
 
         r.raise_for_status()
@@ -120,9 +115,7 @@ class Jupyter(InDriver, OutDriver):
         self.check_connect()
         r = requests.delete(
             f"{self.base_url}/user/{username}/api/terminals/{termId}",
-            headers={
-                "Authorization": f"token {self.token}",
-            },
+            headers={"Authorization": f"token {self.token}",},
         )
 
         r.raise_for_status()
@@ -132,9 +125,7 @@ class Jupyter(InDriver, OutDriver):
         self.check_connect()
         r = requests.get(
             f"{self.base_url}/user/{username}/api/terminals",
-            headers={
-                "Authorization": f"token {self.token}",
-            },
+            headers={"Authorization": f"token {self.token}",},
         )
 
         r.raise_for_status()
@@ -144,9 +135,7 @@ class Jupyter(InDriver, OutDriver):
         self.check_connect()
         r = requests.delete(
             f"{self.base_url}/user/{username}/api/sessions/{sessionId}",
-            headers={
-                "Authorization": f"token {self.token}",
-            },
+            headers={"Authorization": f"token {self.token}",},
         )
 
         r.raise_for_status()
@@ -156,9 +145,7 @@ class Jupyter(InDriver, OutDriver):
         self.check_connect()
         r = requests.get(
             f"{self.base_url}/user/{username}/api/sessions",
-            headers={
-                "Authorization": f"token {self.token}",
-            },
+            headers={"Authorization": f"token {self.token}",},
         )
 
         r.raise_for_status()
@@ -195,9 +182,7 @@ class Jupyter(InDriver, OutDriver):
         self.check_connect()
         r = requests.delete(
             f"{self.api_url}/users/{username}/server",
-            headers={
-                "Authorization": f"token {self.token}",
-            },
+            headers={"Authorization": f"token {self.token}",},
         )
         r.raise_for_status()
         return r
@@ -206,9 +191,7 @@ class Jupyter(InDriver, OutDriver):
         self.check_connect()
         r = requests.post(
             f"{self.api_url}/users/{username}/server",
-            headers={
-                "Authorization": f"token {self.token}",
-            },
+            headers={"Authorization": f"token {self.token}",},
             body=user_options,
         )
         r.raise_for_status()

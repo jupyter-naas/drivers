@@ -59,4 +59,3 @@ class OutDriver(ConnectDriver):
         self.check_connect()
         self.print_error(basic_error)
         return basic_error
-

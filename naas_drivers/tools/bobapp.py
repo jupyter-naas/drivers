@@ -253,10 +253,7 @@ class Users(CRUDBOB):
         # Init service
         service = {
             "authMethod": serv,
-            "login": {
-                "username": email,
-                "password": password,
-            },
+            "login": {"username": email, "password": password,},
         }
 
         # Create service section

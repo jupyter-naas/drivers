@@ -55,12 +55,7 @@ class Cityfalcon(InDriver):
     def get(
         self,
         action,
-        fields=[
-            "image",
-            "title",
-            "logo",
-            "link",
-        ],
+        fields=["image", "title", "logo", "link",],
         country="US",
         limit=None,
         min_score=20,

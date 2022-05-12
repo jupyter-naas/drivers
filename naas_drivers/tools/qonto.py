@@ -589,24 +589,13 @@ class Statements(Transactions):
         }
 
         table_cash = {
-            "col_size": {
-                0: "80%",
-                1: "20%",
-            },
-            "col_align": {
-                0: "left",
-                1: "right",
-            },
+            "col_size": {0: "80%", 1: "20%",},
+            "col_align": {0: "left", 1: "right",},
         }
 
         table_last_week = {
             "col_size": {0: "40%", 1: "20%", 2: "20%", 3: "20%"},
-            "col_align": {
-                0: "left",
-                1: "center",
-                2: "center",
-                3: "right",
-            },
+            "col_align": {0: "left", 1: "center", 2: "center", 3: "right",},
         }
 
         # Email content

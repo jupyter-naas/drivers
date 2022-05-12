@@ -91,10 +91,8 @@ class GoogleAnalytics(InDriver, OutDriver):
                 setattr(self, computed_name, Metric())
 
             def custom_get_trend(metric_id):
-                return (
-                    lambda dimensions, start_date=None, end_date=None: self.get_trend(
-                        metric_id, dimensions, start_date, end_date
-                    )
+                return lambda dimensions, start_date=None, end_date=None: self.get_trend(
+                    metric_id, dimensions, start_date, end_date
                 )
 
             setattr(

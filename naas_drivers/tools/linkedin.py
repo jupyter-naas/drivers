@@ -837,10 +837,7 @@ class Message(LinkedIn):
                     "com.linkedin.voyager.messaging.create.MessageCreate": {
                         "body": content,
                         "attachments": [],
-                        "attributedBody": {
-                            "text": content,
-                            "attributes": [],
-                        },
+                        "attributedBody": {"text": content, "attributes": [],},
                         "mediaAttachments": [],
                     }
                 }
@@ -1025,8 +1022,7 @@ class Company(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_info(self,
-                 company_url="https://www.linkedin.com/company/naas-ai/"):
+    def get_info(self, company_url="https://www.linkedin.com/company/naas-ai/"):
         """
         Return an dataframe object with 16 columns:
         - COMPANY_ID
@@ -1057,13 +1053,15 @@ class Company(LinkedIn):
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         res.raise_for_status()
         return pd.DataFrame(res.json()).reset_index(drop=True)
-    
-    def get_followers(self,
-                      company_url="https://www.linkedin.com/company/naas-ai/",
-                      start=0,
-                      count=1,
-                      limit=10,
-                      sleep=True):
+
+    def get_followers(
+        self,
+        company_url="https://www.linkedin.com/company/naas-ai/",
+        start=0,
+        count=1,
+        limit=10,
+        sleep=True,
+    ):
         """
         Return an dataframe object with 9 columns:
         - FIRSTNAME

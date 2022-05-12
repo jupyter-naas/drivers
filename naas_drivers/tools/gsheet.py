@@ -17,9 +17,7 @@ class Gsheet(InDriver, OutDriver):
         self.sheets_api = os.getenv("GSHEETS_API")
 
     def connect(
-        self,
-        spreadsheet_id: str,
-        api_url: str = None,
+        self, spreadsheet_id: str, api_url: str = None,
     ):
         self.spreadsheet_id = spreadsheet_id.split("spreadsheets/d/")[-1].split("/")[0]
         self.sheets_api = api_url if api_url else os.getenv("GSHEETS_API")
@@ -27,9 +25,7 @@ class Gsheet(InDriver, OutDriver):
         return self
 
     def delete(
-        self,
-        sheet_name: str,
-        rows: list = [],
+        self, sheet_name: str, rows: list = [],
     ):
         self.check_connect()
         resp = requests.delete(
@@ -41,9 +37,7 @@ class Gsheet(InDriver, OutDriver):
         return data
 
     def get(
-        self,
-        sheet_name: str,
-        items_per_page: int = BIG_NUM_TO_GETALL,
+        self, sheet_name: str, items_per_page: int = BIG_NUM_TO_GETALL,
     ) -> pd.DataFrame:
         self.check_connect()
         resp = requests.get(
