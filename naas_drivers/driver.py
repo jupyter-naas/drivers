@@ -1,7 +1,4 @@
-import os
-import sys
 import pandas as pd
-from subprocess import Popen, PIPE
 
 basic_text = "Not defined, it should to allow user to connect"
 key_text = "Connect key missing"

@@ -5,7 +5,6 @@ import uuid
 import os
 import warnings
 from IPython.core import display
-import htmlBuilder
 from htmlBuilder import tags, attributes
 
 #  https://litmus.com/community/templates/31-accessible-product-announcement-email

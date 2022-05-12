@@ -46,7 +46,7 @@ def load_driver(_func=None, *, extra_requires=""):
                     loaded = loader_fn()
                     __loaded_drivers[name] = loaded
                 except Exception as e:
-                    if extra_requires is not "":
+                    if extra_requires != "":
                         naas_drivers_path = "/".join(__file__.split("/")[:-2])
                         if (
                             os.path.isfile(os.path.join(naas_drivers_path, "setup.py"))
