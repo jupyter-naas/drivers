@@ -7,12 +7,12 @@ extras_require = {
         "dev": [
             "pytest==6.2.4",
             "pytest-mock==3.6.0",
-            "requests-mock==1.9.1",
-            "twine==3.4.1",
-            "flake8==3.9.1",
+            "requests-mock==1.9.3",
+            "twine==3.5.0",
+            "flake8==4.0.1",
             "black==22.3.0",
-            "commitizen==2.17.4",
-            "pytest-cov==2.11.1",
+            "commitizen==2.17.13",
+            "pytest-cov==2.12.1",
         ],
         "airtable": [
             "airtable-python-wrapper==0.15.2",
