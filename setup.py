@@ -72,7 +72,7 @@ extras_require = {
         ],
         "streamlit": [
             "pyngrok==5.0.5",
-            "streamlit==0.82.0",
+            "streamlit==1.9.0",
         ],
         "teams": [
             "pymsteams==0.1.14",
