@@ -21,7 +21,7 @@ extras_require = {
             "imap_tools==0.39.0"
         ],
         "ipython": [
-            "ipython==7.22.0",
+            "ipython==7.23.1",
         ],
         "emailbuilder": [
             "htmlbuilder==0.1.2",
