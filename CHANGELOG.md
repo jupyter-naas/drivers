@@ -1,3 +1,9 @@
+## 0.96.3 (2022-05-13)
+
+### Fix
+
+- Bump dev requirements to match naas
+
 ## 0.96.2 (2022-05-13)
 
 ### Fix
