@@ -131,7 +131,8 @@ extras_require = {
         ]
     }
 
-extras_require['full'] = [env for env in extras_require for env in extras_require[env]]
+extras_require['full'] = [env for env in extras_require if env != 'dev' for env in extras_require[env]]
+extras_require['fulldev'] = [env for env in extras_require for env in extras_require[env]]
 extras_require['all'] = extras_require['full']
 
 setup(
