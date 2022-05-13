@@ -91,7 +91,7 @@ extras_require = {
             "transformers==4.12.5",
             "tensorflow==2.8.0",
             "torch==1.8.1",
-            "keras==2.6.0"
+            "keras==2.8.0"
         ],
         "sharepoint": [
             "SharePlum==0.5.1"
