@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 extras_require = {
         "dev": [
-            "pytest==6.2.3",
+            "pytest==6.2.4",
             "pytest-mock==3.6.0",
             "requests-mock==1.9.1",
             "twine==3.4.1",
