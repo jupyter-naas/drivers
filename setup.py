@@ -10,7 +10,7 @@ extras_require = {
             "requests-mock==1.9.3",
             "twine==3.5.0",
             "flake8==4.0.1",
-            "black==21.4b2",
+            "black>=21.4b2",
             "commitizen==2.17.13",
             "pytest-cov==2.12.1",
         ],
