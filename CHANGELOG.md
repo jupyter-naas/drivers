@@ -1,3 +1,10 @@
+## 0.96.12 (2022-05-16)
+
+### Fix
+
+- add company to linkedin get likes
+- add company to linkedin get likes
+
 ## 0.96.11 (2022-05-16)
 
 ### Fix
