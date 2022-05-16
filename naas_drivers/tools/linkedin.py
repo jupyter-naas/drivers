@@ -23,7 +23,10 @@ class LinkedIn:
 
     @staticmethod
     def get_activity_id(url):
-        return url.split("activity-")[-1].split("-")[0]
+        if "-activity-" in url:
+            return url.split("-activity-")[-1].split("-")[0]
+        if ":activity:" in url:
+            return url.split(":activity:")[-1]
 
     def print_deprecated(self, new_funct):
         if self.deprected:
@@ -980,11 +983,73 @@ class Post(LinkedIn):
         res.raise_for_status()
         return pd.DataFrame(res.json()).reset_index(drop=True)
 
-    def get_likes(self, url):
-        req_url = f"{LINKEDIN_API}/post/getLikes?post_link={url}"
-        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        res.raise_for_status()
-        return pd.DataFrame(res.json()).reset_index(drop=True)
+    def get_likes(
+        self, post_url, activity_id=None, start=0, count=100, limit=-1, sleep=True
+    ):
+        """
+        Return an dataframe object with 12 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - PUBLIC_ID
+        - FIRSTNAME
+        - LASTNAME
+        - FULLNAME
+        - OCCUPATION
+        - PROFILE_PICTURE
+        - BACKGROUND_PICTURE
+        - PROFILE_TYPE
+        - REACTION_TYPE
+        - POST_URL
+
+        Parameters
+        ----------
+        post_url: str:
+            Post url from Linkedin.
+            Example : "https://www.linkedin.com/posts/j%C3%A9r%C3%A9my-ravenel-8a396910_"
+                      "thoughts-monday-work-activity-6891437034473426945-OOOg"
+
+        activity_id: str (default None):
+            Linkedin unique post id identifier
+            Example : "6891437034473426945"
+
+        start: int (default 0):
+            Number of requests sent to LinkedIn API.
+            (!) If count > 1, published date will not be returned.
+
+        count: int (default 1, max 100):
+            Number of requests sent to LinkedIn API.
+            (!) If count > 1, followed at will not be returned.
+
+        limit: int (default 10, unlimited=-1):
+            Number of followers return by function. It will start with the most recent followers.
+
+        sleep: boolean (default True):
+            Sleeping time between function will be randomly between 3 to 5 seconds.
+
+        """
+        # Get profile
+        if activity_id is None:
+            activity_id = LinkedIn.get_activity_id(post_url)
+            if activity_id is None:
+                return "Please enter a valid post_url or activity_id"
+        df = pd.DataFrame()
+        while True:
+            if limit != -1 and limit < count:
+                count = limit
+            req_url = f"{LINKEDIN_API}/post/getLikes?activity_id={activity_id}&start={start}&count={count}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            res.raise_for_status()
+            res_json = res.json()
+            if len(res_json) == 0:
+                break
+            tmp_df = pd.DataFrame(res_json)
+            df = pd.concat([df, tmp_df], axis=0)
+            start += count
+            if limit != -1:
+                limit -= count
+            if sleep:
+                time.sleep(TIME_SLEEP)
+        return df.reset_index(drop=True)
 
 
 class Event(LinkedIn):
