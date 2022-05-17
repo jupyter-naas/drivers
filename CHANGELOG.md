@@ -1,3 +1,10 @@
+## 0.96.13 (2022-05-17)
+
+### Fix
+
+- update get comments linkedin
+- update get comments linkedin
+
 ## 0.96.12 (2022-05-16)
 
 ### Fix
