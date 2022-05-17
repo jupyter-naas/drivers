@@ -1,3 +1,9 @@
+## 0.97.0 (2022-05-17)
+
+### Feat
+
+- Re enable extra dependencies (#273)
+
 ## 0.96.13 (2022-05-17)
 
 ### Fix
