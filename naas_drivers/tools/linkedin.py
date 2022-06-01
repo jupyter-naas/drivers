@@ -14,7 +14,7 @@ RELEASE_MESSAGE = (
 )
 DATE_FORMAT = "%Y-%m-%d"
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
-TIME_SLEEP = secrets.randbelow(3) + 2
+TIME_SLEEP = secrets.randbelow(5) + 5
 HEADERS = {"Content-Type": "application/json"}
 
 
