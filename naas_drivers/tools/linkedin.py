@@ -525,11 +525,12 @@ class Network(LinkedIn):
             if limit != -1:
                 limit -= count
             time.sleep(TIME_SLEEP)
-        df_followers = df_followers.drop_duplicates("PROFILE_URN").reset_index(
-            drop=True
-        )
-        if limit != -1:
-            df_followers = df_followers[:limit_init]
+        if len(df_followers) > 0:
+            df_followers = df_followers.drop_duplicates("PROFILE_ID").reset_index(
+                drop=True
+            )
+            if limit != -1:
+                df_followers = df_followers[:limit_init]
         return df_followers
 
     def get_connections(self, start=0, count=100, limit=1000):
