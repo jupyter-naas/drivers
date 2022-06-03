@@ -352,6 +352,13 @@ def naascredits():
     return NaasCredits()
 
 
+@load_driver()
+def naasevents():
+    from naas_drivers.tools.naas_events import NaasEvents
+
+    return NaasEvents()
+
+
 @load_driver
 def budgetinsight():
     from naas_drivers.tools.budgetinsight import BudgetInsight
