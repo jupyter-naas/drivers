@@ -209,7 +209,7 @@ class Jupyter(InDriver, OutDriver):
             headers={
                 "Authorization": f"token {self.token}",
             },
-            body=user_options,
+            json=user_options,
         )
         r.raise_for_status()
         return r
