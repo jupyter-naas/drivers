@@ -96,6 +96,9 @@ extras_require = {
         "sharepoint": [
             "SharePlum==0.5.1"
         ],
+        "snowflake": [
+            "snowflake-connector-python==2.7.8"
+        ],
         "extra": [
             "pyppeteer==0.2.5",
             "pdfkit==0.6.1",
