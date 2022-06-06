@@ -111,7 +111,7 @@ extras_require = {
         "urllib3==1.26.4",
         "chardet==4.0.0",
         "idna==2.9",
-        "requests==2.25.1",
+        "requests==2.27.1",
         "python-dateutil==2.8.1",
         "pytz==2021.1",
     ],
@@ -140,7 +140,7 @@ setup(
     install_requires=[
         "pandas==1.2.4",
         "pandas-datareader==0.9.0",
-        "requests==2.25.1",
+        "requests==2.27.1",
         "mprop==0.16.0",
         "numpy~=1.19.0",
     ],
