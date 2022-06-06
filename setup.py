@@ -81,7 +81,7 @@ extras_require = {
     "pydash": [
         "pydash==5.1.0",
     ],
-    "ml": ["transformers==4.12.5", "tensorflow==2.6.0", "torch==1.8.1", "keras==2.6.0"],
+    "ml": ["transformers==4.19.2", "tensorflow==2.6.0", "torch==1.8.1", "keras==2.6.0"],
     "sharepoint": ["SharePlum==0.5.1"],
     "extra": [
         "pyppeteer==0.2.5",
