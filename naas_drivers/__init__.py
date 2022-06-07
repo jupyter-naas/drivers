@@ -4,7 +4,7 @@ from mprop import mproperty
 from subprocess import Popen, PIPE
 import sys
 
-__version__ = "0.97.0"
+__version__ = "0.100.0"
 
 __github_repo = "jupyter-naas/drivers"
 
@@ -350,6 +350,13 @@ def naascredits():
     from naas_drivers.tools.naas_credits import NaasCredits
 
     return NaasCredits()
+
+
+@load_driver()
+def naasevents():
+    from naas_drivers.tools.naas_events import NaasEvents
+
+    return NaasEvents()
 
 
 @load_driver

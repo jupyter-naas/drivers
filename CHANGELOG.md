@@ -1,3 +1,33 @@
+## 0.100.0 (2022-06-06)
+
+### Feat
+
+- Add naas event driver (#280)
+
+## 0.99.0 (2022-06-03)
+
+### Feat
+
+- get jobs from jupyter
+
+## 0.98.2 (2022-06-03)
+
+### Fix
+
+- **jupyter**: Change body by json
+
+## 0.98.1 (2022-06-02)
+
+### Fix
+
+- update emailbuilder.py
+
+## 0.98.0 (2022-06-02)
+
+### Feat
+
+- update linkedin.py
+
 ## 0.97.0 (2022-05-17)
 
 ### Feat

@@ -209,7 +209,7 @@ class Jupyter(InDriver, OutDriver):
             headers={
                 "Authorization": f"token {self.token}",
             },
-            body=user_options,
+            json=user_options,
         )
         r.raise_for_status()
         return r
@@ -221,3 +221,13 @@ class Jupyter(InDriver, OutDriver):
             user_options = user.get("servers").get("").get("user_options")
             self.stop_user(username)
             self.start_user(username, user_options)
+            
+    def get_jobs(self, username):
+        self.check_connect()
+        try:
+            headers = {"Authorization": f"token {self.token}"}
+            url = f'https://app.naas.ai/user/{username}/proxy/5000/job'
+            res = requests.get(url, headers=headers)
+            return res.json()
+        except ValueError:
+            return []
