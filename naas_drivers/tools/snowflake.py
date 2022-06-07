@@ -108,9 +108,9 @@ class Snowflake(InDriver, OutDriver):
 
     def connect(
             self,
+            account: str,
             username: str,
             password: str,
-            account: str,
             warehouse: str = "",
             database: str = "",
             schema: str = "",
@@ -119,22 +119,23 @@ class Snowflake(InDriver, OutDriver):
         """
         Connects to Snowflake account with given credentials.
         Connection is established and both `connection` and `cursor` are being set up
-        @param username: SF account username
-        @param password: SF account password
         @param account: SF account identifier, can be fetched from login URL,
             e.g. <account_identifier>.snowflakecomputing.com
+        @param username: SF account username
+        @param password: SF account password
         @param warehouse: (optional) SF warehouse to set up while creating a connection
         @param database: (optional) SF database to set up while creating a connection
         @param schema: (optional) SF schema to set up while creating a connection
         @param role: (optional) SF role to set up while creating a connection
         """
         self._connection = snowflake.connector.connect(
+            account=account,
             user=username,
-            password=password,
-            account=account
+            password=password
         )
         self._cursor = self._connection.cursor()
         self._set_environment(warehouse, database, schema, role)
+        self.connected = True
 
     def execute(
             self,
