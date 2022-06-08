@@ -5,6 +5,12 @@ import urllib
 from datetime import datetime
 import secrets
 import pydash as _pd
+import naas
+from naas_drivers.tools.emailbuilder import EmailBuilder
+from naas_drivers.tools.naas_auth import NaasAuth
+
+emailbuilder = EmailBuilder()
+naasauth = NaasAuth()
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
 RELEASE_MESSAGE = (
@@ -16,10 +22,59 @@ DATE_FORMAT = "%Y-%m-%d"
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 TIME_SLEEP = secrets.randbelow(5) + 5
 HEADERS = {"Content-Type": "application/json"}
+EMAIL_COOKIES = "⚠️ Naas.ai - Update your Linkedin cookies"
 
 
 class LinkedIn:
     deprecated = True
+
+    @staticmethod
+    def get_user_email():
+        email = None
+        user = naasauth.connect().user.me()
+        email = user.get("username")
+        return email
+
+    @staticmethod
+    def email_linkedin_limit(email):
+        content = {
+            "header_naas": (
+                "<a href='https://www.naas.ai/'>"
+                "<img align='center' width='30%' target='_blank' style='border-radius:5px;'"
+                "src='https://landen.imgix.net/jtci2pxwjczr/assets/5ice39g4.png?w=160'"
+                "alt='Please provide more information.'/>"
+                "</a>"
+            ),
+            "txt_0": emailbuilder.text(
+                "Hi there,<br><br>"
+                "Your LinkedIn cookies needs to be renewed.<br><br>"
+                "Please go to naas and update them in your notebook 'Setup LinkedIn'.<br>"
+            ),
+            "button": emailbuilder.button(
+                f"https://app.naas.ai/user/{email}/", "Go to Naas"
+            ),
+            "signature": "Naas Team",
+            "footer": emailbuilder.footer_company(naas=True),
+        }
+        email_content = emailbuilder.generate(display="iframe", **content)
+        return email_content
+
+    @staticmethod
+    def send_email_renewed_cookies():
+        email = LinkedIn.get_user_email()
+        email_content = LinkedIn.email_linkedin_limit(email)
+        naas.notification.send(
+            email_to=email, subject=EMAIL_COOKIES, html=email_content
+        )
+
+    @staticmethod
+    def manage_api_error(res):
+        if res.status_code != 200:
+            if int(res.status_code) == 302:
+                LinkedIn.send_email_renewed_cookies()
+                raise requests.TooManyRedirects(res.status_code, res.text)
+            else:
+                raise BaseException(res.status_code, res.text)
 
     @staticmethod
     def get_activity_id(url):
@@ -67,7 +122,11 @@ class LinkedIn:
             occupation = occupation.strip().replace("\n", " ")
         return occupation
 
-    def connect(self, li_at: str = None, jessionid: str = None):
+    def connect(
+        self,
+        li_at: str = None,
+        jessionid: str = None,
+    ):
         # Init lk attribute
         self.li_at = li_at
         self.jessionid = jessionid
@@ -323,19 +382,20 @@ class Profile(LinkedIn):
 
     def get_resume(self, profile_url=None, profile_urn=None):
         """
-        Return an dataframe object with 12 columns:
-        - PROFILE_ID
-        - PROFILE_URL
-        - FULL_NAME
-        - CATEGORY
-        - TITLE
-        - DATE_START
-        - DATE_END
-        - PLACE_ID
-        - PLACE
-        - FIELD
-        - LOCATION
-        - DESCRIPTION
+        Return an dataframe object with 13 columns:
+        - PROFILE_ID                    object
+        - PROFILE_URL                   object
+        - FULL_NAME                     object
+        - CATEGORY                      object
+        - TITLE                         object
+        - DATE_START                    object
+        - DATE_END                      object
+        - PLACE_ID                      object
+        - PLACE                         object
+        - FIELD                         object
+        - LOCATION                      object
+        - DESCRIPTION                   object
+        - DATE_EXTRACT                  object
 
         Parameters
         ----------
@@ -353,9 +413,12 @@ class Profile(LinkedIn):
                 return "Please enter a valid profile_url or profile_urn"
         req_url = f"{LINKEDIN_API}/profile/getResume?profile_urn={profile_urn}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        # Raise error
         res.raise_for_status()
-        # Return dataframe
+
+        # Manage LinkedIn API errors
+        LinkedIn.manage_api_error(res)
+
+        # Get json result
         res_json = res.json()
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
@@ -371,37 +434,39 @@ class Profile(LinkedIn):
         pagination_token=None,
     ):
         """
-        Return an dataframe object with 30 columns:
-        - ACTIVITY_ID       object
-        - PAGINATION_TOKEN  object
-        - PUBLISHED_DATE    object
-        - AUTHOR_NAME       object
-        - SUBDESCRIPTION    object
-        - TITLE             object
-        - TEXT              object
-        - CHARACTER_COUNT   int64
-        - TAGS              object
-        - TAGS_COUNT        int64
-        - EMOJIS            object
-        - EMOJIS_COUNT      int64
-        - LINKS             object
-        - LINKS_COUNT       int64
-        - PROFILE_MENTION   object
-        - COMPANY_MENTION   object
-        - CONTENT           object
-        - CONTENT_TITLE     object
-        - CONTENT_URL       object
-        - CONTENT_ID        object
-        - IMAGE_URL         object
-        - POLL_ID           object
-        - POLL_QUESTION     object
-        - POLL_RESULTS      object
-        - POST_URL          object
-        - VIEWS             int64
-        - COMMENTS          int64
-        - LIKES             int64
-        - SHARES            int64
-        - ENGAGEMENT_SCORE  float64
+        Return an dataframe object with 32 columns:
+        - ACTIVITY_ID                   object
+        - PAGINATION_TOKEN              object
+        - PUBLISHED_DATE                object
+        - AUTHOR_NAME                   object
+        - AUTHOR_URL                    object
+        - SUBDESCRIPTION                object
+        - TITLE                         object
+        - TEXT                          object
+        - CHARACTER_COUNT               int64
+        - TAGS                          object
+        - TAGS_COUNT                    int64
+        - EMOJIS                        object
+        - EMOJIS_COUNT                  int64
+        - LINKS                         object
+        - LINKS_COUNT                   int64
+        - PROFILE_MENTION               object
+        - COMPANY_MENTION               object
+        - CONTENT                       object
+        - CONTENT_TITLE                 object
+        - CONTENT_URL                   object
+        - CONTENT_ID                    object
+        - IMAGE_URL                     object
+        - POLL_ID                       object
+        - POLL_QUESTION                 object
+        - POLL_RESULTS                  object
+        - POST_URL                      object
+        - VIEWS                         int64
+        - COMMENTS                      int64
+        - LIKES                         int64
+        - SHARES                        int64
+        - ENGAGEMENT_SCORE              float64
+        - DATE_EXTRACT                  object
 
         Parameters
         ----------
@@ -447,22 +512,21 @@ class Profile(LinkedIn):
         # Loop init
         start = 0
         df = pd.DataFrame()
+        if limit != -1 and count > limit:
+            limit = count
         while True:
-            if limit != -1 and count > limit:
-                limit = count
-            if limit != -1 and start > limit - 1:
-                break
             if pagination_token is not None:
                 req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&count={count}&pagination_token={pagination_token}"
             else:
                 req_url = f"{LINKEDIN_API}/profile/getPostsFeed?profile_id={profile_id}&count={count}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-            try:
-                res.raise_for_status()
-            except requests.HTTPError:
-                res_json = {}
-            else:
-                res_json = res.json()
+            res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
+            res_json = res.json()
             if len(res_json) == 0:
                 break
             # Get response in dataframe
@@ -478,7 +542,6 @@ class Profile(LinkedIn):
                         break
             # Get pagination token + update start
             pagination_token = tmp_df.loc[0, "PAGINATION_TOKEN"]
-            start += count
 
             # Concat dataframe
             df = pd.concat([df, tmp_df], axis=0)
@@ -489,11 +552,15 @@ class Profile(LinkedIn):
             # Time sleep to avoid linkedin ban
             if sleep:
                 time.sleep(TIME_SLEEP)
+            start += count
+            if limit != -1 and start >= limit:
+                break
         # Cleaning
-        df.PUBLISHED_DATE = pd.to_datetime(df.PUBLISHED_DATE).dt.tz_localize(
-            "Europe/Paris"
-        )
-        df.PUBLISHED_DATE = df.PUBLISHED_DATE.astype(str)
+        if len(df) > 0:
+            df.PUBLISHED_DATE = pd.to_datetime(df.PUBLISHED_DATE).dt.tz_localize(
+                "Europe/Paris"
+            )
+            df.PUBLISHED_DATE = df.PUBLISHED_DATE.astype(str)
         return df.reset_index(drop=True)
 
 
@@ -504,26 +571,55 @@ class Network(LinkedIn):
         self.headers = headers
 
     def get_followers(self, start=0, count=100, limit=1000):
+        """
+        Return an dataframe object with 13 columns:
+        - PROFILE_ID                    object
+        - PROFILE_URL                   object
+        - PUBLIC_ID                     object
+        - FIRSTNAME                     object
+        - LASTNAME                      object
+        - FULLNAME                      object
+        - OCCUPATION                    object
+        - PROFILE_PICTURE               object
+        - BACKGROUND_PICTURE            object
+        - FOLLOWER_COUNT                int64
+        - FOLLOWING                     bool
+        - INFLUENCER                    bool
+        - DATE_EXTRACT                  object
+
+        Parameters
+        ----------
+        start: int (default 0):
+            Starting requests to LinkedIn API.
+
+        count: int (default 100, max 100):
+            Number of requests sent to LinkedIn API.
+
+        limit: int (default 1000, unlimited=-1):
+            Number of result return by function.
+
+        """
         limit_init = limit
         df_followers = pd.DataFrame()
+        if limit != -1 and limit < count:
+            count = limit
         while True:
-            if limit != -1 and limit < count:
-                count = limit
             req_url = f"{LINKEDIN_API}/network/getFollowers?start={start}&count={count}&limit={limit}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-            try:
-                res.raise_for_status()
-            except requests.HTTPError:
-                res_json = {}
-            else:
-                res_json = res.json()
+            res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
+            res_json = res.json()
             if len(res_json) == 0:
                 break
             df = pd.DataFrame(res_json)
             df_followers = pd.concat([df_followers, df], axis=0)
             start += count
-            if limit != -1:
-                limit -= count
+            if limit != -1 and start >= limit:
+                break
             time.sleep(TIME_SLEEP)
         if len(df_followers) > 0:
             df_followers = df_followers.drop_duplicates("PROFILE_ID").reset_index(
@@ -531,33 +627,60 @@ class Network(LinkedIn):
             )
             if limit != -1:
                 df_followers = df_followers[:limit_init]
-        return df_followers
+        return df_followers.reset_index(drop=True)
 
     def get_connections(self, start=0, count=100, limit=1000):
+        """
+        Return an dataframe object with 9 columns:
+        - FIRSTNAME                     object
+        - LASTNAME                      object
+        - OCCUPATION                    object
+        - CREATED_AT                    object
+        - PROFILE_URL                   object
+        - PROFILE_PICTURE               object
+        - PROFILE_ID                    object
+        - PUBLIC_ID                     object
+        - DATE_EXTRACT                  object
+
+        Parameters
+        ----------
+        start: int (default 0):
+            Starting requests to LinkedIn API.
+
+        count: int (default 100, max 100):
+            Number of requests sent to LinkedIn API.
+
+        limit: int (default 1000, unlimited=-1):
+            Number of result return by function.
+
+        """
         df_connections = pd.DataFrame()
+        if limit != -1 and limit < count:
+            count = limit
         while True:
-            if limit != -1 and limit < count:
-                count = limit
             req_url = f"{LINKEDIN_API}/network/getConnections?start={start}&count={count}&limit={limit}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-            try:
-                res.raise_for_status()
-            except requests.HTTPError:
-                res_json = {}
-            else:
-                res_json = res.json()
+            res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
+            res_json = res.json()
             if len(res_json) == 0:
                 break
             df = pd.DataFrame(res_json)
             df_connections = pd.concat([df_connections, df], axis=0)
             start += count
-            if limit != -1:
-                limit -= count
+            if limit != -1 and start >= limit:
+                break
             time.sleep(TIME_SLEEP)
-        df_connections = df_connections.sort_values(
-            by="CREATED_AT", ascending=False
-        ).astype(str)
-        return df_connections.drop_duplicates().reset_index(drop=True)
+        df_connections = (
+            df_connections.drop_duplicates()
+            .sort_values(by="CREATED_AT", ascending=False)
+            .astype(str)
+        )
+        return df_connections.reset_index(drop=True)
 
 
 class Invitation(LinkedIn):
@@ -585,6 +708,18 @@ class Invitation(LinkedIn):
         - INVITATION_STATUS
         - INVITATION_ID
         - SHARED_SECRET
+
+        Parameters
+        ----------
+        start: int (default 0):
+            Starting requests to LinkedIn API.
+
+        count: int (default 100, max 100):
+            Number of requests sent to LinkedIn API.
+
+        limit: int (default -1, unlimited=-1):
+            Number of result return by function.
+
         """
         df = pd.DataFrame()
         while True:
@@ -592,12 +727,13 @@ class Invitation(LinkedIn):
                 count = limit
             req_url = f"{LINKEDIN_API}/invitation/get?start={start}&count={count}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-            try:
-                res.raise_for_status()
-            except requests.HTTPError:
-                res_json = {}
-            else:
-                res_json = res.json()
+            res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
+            res_json = res.json()
             if len(res_json) == 0:
                 break
             tmp_df = pd.DataFrame(res_json)
@@ -610,21 +746,34 @@ class Invitation(LinkedIn):
 
     def get_sent(self, start=0, count=100, limit=-1):
         """
-        Return an dataframe object with 14 columns:
-        - PROFILE_ID
-        - PROFILE_URL
-        - PUBLIC_ID
-        - FIRSTNAME
-        - LASTNAME
-        - FULLNAME
-        - OCCUPATION
-        - PROFILE_PICTURE
-        - MESSAGE
-        - SENT_AT
-        - INVITATION_TYPE
-        - INVITATION_DESC
-        - INVITATION_STATUS
-        - INVITATION_ID
+        Return an dataframe object with 15 columns:
+        - PROFILE_ID                    object
+        - PROFILE_URL                   object
+        - PUBLIC_ID                     object
+        - FIRSTNAME                     object
+        - LASTNAME                      object
+        - FULLNAME                      object
+        - OCCUPATION                    object
+        - PROFILE_PICTURE               object
+        - MESSAGE                       object
+        - SENT_AT                       object
+        - INVITATION_TYPE               object
+        - INVITATION_DESC               object
+        - INVITATION_STATUS             object
+        - INVITATION_ID                 object
+        - DATE_EXTRACT                  object
+
+        Parameters
+        ----------
+        start: int (default 0):
+            Starting requests to LinkedIn API.
+
+        count: int (default 100, max 100):
+            Number of requests sent to LinkedIn API.
+
+        limit: int (default -1, unlimited=-1):
+            Number of result return by function.
+
         """
         df = pd.DataFrame()
         while True:
@@ -632,12 +781,13 @@ class Invitation(LinkedIn):
                 count = limit
             req_url = f"{LINKEDIN_API}/invitation/getSent?start={start}&count={count}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-            try:
-                res.raise_for_status()
-            except requests.HTTPError:
-                res_json = {}
-            else:
-                res_json = res.json()
+            res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
+            res_json = res.json()
             if len(res_json) == 0:
                 break
             tmp_df = pd.DataFrame(res_json)
@@ -781,20 +931,19 @@ class Message(LinkedIn):
         }
         df_result = None
         while True:
-            req_url = f"{LINKEDIN_API}/message/getConversations?{urllib.parse.urlencode(params, safe='(),')}"
-            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             if limit != -1:
                 limit -= limit_max
                 if limit < 0:
                     limit = 0
-            try:
-                res.raise_for_status()
-            except requests.RequestException as e:
-                return e
-            else:
-                res_json = res.json()
-            if res.status_code != 200:
-                return res.text
+            req_url = f"{LINKEDIN_API}/message/getConversations?{urllib.parse.urlencode(params, safe='(),')}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
+            res_json = res.json()
             df = pd.DataFrame(res_json)
             created_before = (
                 (int)(
@@ -822,12 +971,13 @@ class Message(LinkedIn):
         if conversation_urn:
             req_url += f"&conversation_urn={conversation_urn}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError:
-            res_json = {}
-        else:
-            res_json = res.json()
+        res.raise_for_status()
+
+        # Manage LinkedIn API errors
+        LinkedIn.manage_api_error(res)
+
+        # Get json result
+        res_json = res.json()
         df = pd.DataFrame(res_json)
         time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
@@ -890,37 +1040,39 @@ class Post(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_stats(self, post_url, activity_id=None):
+    def get_stats(self, post_url=None, activity_id=None):
         """
-        Return an dataframe object with 28 columns:
-        - ACTIVITY_ID       object
-        - AUTHOR_NAME       object
-        - SUBDESCRIPTION    object
-        - TITLE             object
-        - TEXT              object
-        - CHARACTER_COUNT   int64
-        - TAGS              object
-        - TAGS_COUNT        int64
-        - EMOJIS            object
-        - EMOJIS_COUNT      int64
-        - LINKS             object
-        - LINKS_COUNT       int64
-        - PROFILE_MENTION   object
-        - COMPANY_MENTION   object
-        - CONTENT           object
-        - CONTENT_TITLE     object
-        - CONTENT_URL       object
-        - CONTENT_ID        object
-        - IMAGE_URL         object
-        - POLL_ID           object
-        - POLL_QUESTION     object
-        - POLL_RESULTS      object
-        - POST_URL          object
-        - VIEWS             int64
-        - COMMENTS          int64
-        - LIKES             int64
-        - SHARES            int64
-        - ENGAGEMENT_SCORE  float64
+        Return an dataframe object with 30 columns:
+        - ACTIVITY_ID                   object
+        - AUTHOR_NAME                   object
+        - AUTHOR_URL                    object
+        - SUBDESCRIPTION                object
+        - TITLE                         object
+        - TEXT                          object
+        - CHARACTER_COUNT               int64
+        - TAGS                          object
+        - TAGS_COUNT                    int64
+        - EMOJIS                        object
+        - EMOJIS_COUNT                  int64
+        - LINKS                         object
+        - LINKS_COUNT                   int64
+        - PROFILE_MENTION               object
+        - COMPANY_MENTION               object
+        - CONTENT                       object
+        - CONTENT_TITLE                 object
+        - CONTENT_URL                   object
+        - CONTENT_ID                    object
+        - IMAGE_URL                     object
+        - POLL_ID                       object
+        - POLL_QUESTION                 object
+        - POLL_RESULTS                  object
+        - POST_URL                      object
+        - VIEWS                         int64
+        - COMMENTS                      int64
+        - LIKES                         int64
+        - SHARES                        int64
+        - ENGAGEMENT_SCORE              int64
+        - DATE_EXTRACT                  object
 
         Parameters
         ----------
@@ -942,19 +1094,30 @@ class Post(LinkedIn):
         req_url = f"{LINKEDIN_API}/post/getStats?activity_id={activity_id}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         res.raise_for_status()
+
+        # Manage LinkedIn API errors
+        LinkedIn.manage_api_error(res)
+
+        # Get json result
         return pd.DataFrame(res.json()).reset_index(drop=True)
 
-    def get_polls(self, post_url, activity_id=None):
+    def get_polls(self, post_url=None, activity_id=None):
         """
-        Return an dataframe object with 8 columns:
-        - PROFILE_ID            object
-        - PUBLIC_ID             object
-        - FIRSTNAME             object
-        - FULLNAME              object
-        - OCCUPATION            object
-        - PROFILE_PICTURE       object
-        - BACKGROUND_PICTURE    object
-        - POLL_RESULT           object
+        Return an dataframe object with 14 columns:
+        - PROFILE_ID                    object
+        - PROFILE_URL                   object
+        - PUBLIC_ID                     object
+        - FIRSTNAME                     object
+        - LASTNAME                      object
+        - FULLNAME                      object
+        - OCCUPATION                    object
+        - PROFILE_PICTURE               object
+        - BACKGROUND_PICTURE            object
+        - POLL_ID                       object
+        - POLL_QUESTION                 object
+        - POLL_RESULT                   object
+        - POST_URL                      object
+        - DATE_EXTRACT                  object
 
         Parameters
         ----------
@@ -976,30 +1139,36 @@ class Post(LinkedIn):
         req_url = f"{LINKEDIN_API}/post/getPolls?activity_id={activity_id}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         res.raise_for_status()
+
+        # Manage LinkedIn API errors
+        LinkedIn.manage_api_error(res)
+
+        # Get json result
         return pd.DataFrame(res.json()).reset_index(drop=True)
 
     def get_comments(
-        self, post_url, activity_id=None, start=0, count=100, limit=-1, sleep=True
+        self, post_url=None, activity_id=None, start=0, count=100, limit=-1, sleep=True
     ):
         """
-        Return an dataframe object with 17 columns:
-        - PROFILE_ID
-        - PROFILE_URL
-        - PUBLIC_ID
-        - FIRSTNAME
-        - LASTNAME
-        - FULLNAME
-        - OCCUPATION
-        - PROFILE_PICTURE
-        - BACKGROUND_PICTURE
-        - PROFILE_TYPE
-        - TEXT
-        - CREATED_TIME
-        - LANGUAGE
-        - DISTANCE
-        - COMMENTS
-        - LIKES
-        - POST_URL
+        Return an dataframe object with 18 columns:
+        - PROFILE_ID                    object
+        - PROFILE_URL                   object
+        - PUBLIC_ID                     object
+        - FIRSTNAME                     object
+        - LASTNAME                      object
+        - FULLNAME                      object
+        - OCCUPATION                    object
+        - PROFILE_PICTURE               object
+        - BACKGROUND_PICTURE            object
+        - PROFILE_TYPE                  object
+        - TEXT                          object
+        - CREATED_TIME                  object
+        - LANGUAGE                      object
+        - DISTANCE                      object
+        - COMMENTS                      int64
+        - LIKES                         int64
+        - POST_URL                      object
+        - DATE_EXTRACT                  object
 
         Parameters
         ----------
@@ -1039,6 +1208,11 @@ class Post(LinkedIn):
             req_url = f"{LINKEDIN_API}/post/getComments?activity_id={activity_id}&start={start}&count={count}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
             res_json = res.json()
             if len(res_json) == 0:
                 break
@@ -1052,22 +1226,23 @@ class Post(LinkedIn):
         return df.reset_index(drop=True)
 
     def get_likes(
-        self, post_url, activity_id=None, start=0, count=100, limit=-1, sleep=True
+        self, post_url=None, activity_id=None, start=0, count=100, limit=-1, sleep=True
     ):
         """
-        Return an dataframe object with 12 columns:
-        - PROFILE_ID
-        - PROFILE_URL
-        - PUBLIC_ID
-        - FIRSTNAME
-        - LASTNAME
-        - FULLNAME
-        - OCCUPATION
-        - PROFILE_PICTURE
-        - BACKGROUND_PICTURE
-        - PROFILE_TYPE
-        - REACTION_TYPE
-        - POST_URL
+        Return an dataframe object with 13 columns:
+        - PROFILE_ID                    object
+        - PROFILE_URL                   object
+        - PUBLIC_ID                     object
+        - FIRSTNAME                     object
+        - LASTNAME                      object
+        - FULLNAME                      object
+        - OCCUPATION                    object
+        - PROFILE_PICTURE               object
+        - BACKGROUND_PICTURE            object
+        - PROFILE_TYPE                  object
+        - REACTION_TYPE                 object
+        - POST_URL                      object
+        - DATE_EXTRACT                  object
 
         Parameters
         ----------
@@ -1107,6 +1282,11 @@ class Post(LinkedIn):
             req_url = f"{LINKEDIN_API}/post/getLikes?activity_id={activity_id}&start={start}&count={count}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
             res_json = res.json()
             if len(res_json) == 0:
                 break
@@ -1130,14 +1310,15 @@ class Event(LinkedIn):
         self, event_url="https://www.linkedin.com/events/6762355783188525056/"
     ):
         """
-        Return an dataframe object with 7 columns:
-        - FULLNAME
-        - PROFILE_ID
-        - PROFILE_URL
-        - PUBLIC_ID
-        - OCCUPATION
-        - LOCATION
-        - DISTANCE
+        Return an dataframe object with 8 columns:
+        - FULLNAME                      object
+        - PROFILE_ID                    object
+        - PROFILE_URL                   object
+        - PUBLIC_ID                     object
+        - OCCUPATION                    object
+        - LOCATION                      object
+        - DISTANCE                      object
+        - DATE_EXTRACT                  object
 
         Parameters
         ----------
@@ -1160,23 +1341,25 @@ class Company(LinkedIn):
 
     def get_info(self, company_url="https://www.linkedin.com/company/naas-ai/"):
         """
-        Return an dataframe object with 16 columns:
-        - COMPANY_ID
-        - COMPANY_URL
-        - COMPANY_NAME
-        - UNIVERSAL_NAME
-        - LOGO_URL
-        - INDUSTRY_URN
-        - WEBSITE
-        - TAGLINE
-        - SPECIALITIES
-        - DESCRIPTION
-        - COUNTRY
-        - REGION
-        - CITY
-        - STAFF_COUNT
-        - STAFF_RANGE
-        - FOLLOWER_COUNT
+        Return an dataframe object with 18 columns:
+        - COMPANY_ID                    object
+        - COMPANY_URL                   object
+        - COMPANY_NAME                  object
+        - UNIVERSAL_NAME                object
+        - LOGO_URL                      object
+        - INDUSTRY_ID                   object
+        - INDUSTRY                      object
+        - WEBSITE                       object
+        - TAGLINE                       object
+        - SPECIALITIES                  object
+        - DESCRIPTION                   object
+        - COUNTRY                       object
+        - REGION                        object
+        - CITY                          object
+        - STAFF_COUNT                   object
+        - STAFF_RANGE                   object
+        - FOLLOWER_COUNT                object
+        - DATE_EXTRACT                  object
 
         Parameters
         ----------
@@ -1185,10 +1368,17 @@ class Company(LinkedIn):
             Example : "https://www.linkedin.com/company/naas-ai/"
 
         """
+        df = pd.DataFrame()
         req_url = f"{LINKEDIN_API}/company/getInfo?company_url={company_url}"
         res = requests.post(req_url, json=self.cookies, headers=HEADERS)
         res.raise_for_status()
-        return pd.DataFrame(res.json()).reset_index(drop=True)
+
+        # Manage LinkedIn API errors
+        LinkedIn.manage_api_error(res)
+
+        # Get json result
+        df = pd.DataFrame(res.json())
+        return df.reset_index(drop=True)
 
     def get_followers(
         self,
@@ -1199,16 +1389,18 @@ class Company(LinkedIn):
         sleep=True,
     ):
         """
-        Return an dataframe object with 9 columns:
-        - FIRSTNAME
-        - LASTNAME
-        - OCCUPATION
-        - PROFILE_PICTURE
-        - PROFILE_URL
-        - PROFILE_ID
-        - PUBLIC_ID
-        - FOLLOWED_AT
-        - DISTANCE
+        Return an dataframe object with 11 columns:
+        - FIRSTNAME                     object
+        - LASTNAME                      object
+        - OCCUPATION                    object
+        - PROFILE_PICTURE               object
+        - PROFILE_URL                   object
+        - PROFILE_ID                    object
+        - PUBLIC_ID                     object
+        - FOLLOWED_AT                   object
+        - DISTANCE                      object
+        - STATUS                        object
+        - DATE_EXTRACT                  object
 
         Parameters
         ----------
@@ -1237,10 +1429,12 @@ class Company(LinkedIn):
                 count = limit
             req_url = f"{LINKEDIN_API}/company/getFollowers?company_url={company_url}&start={start}&count={count}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-            try:
-                res.raise_for_status()
-            except requests.HTTPError as e:
-                return e
+            res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
             res_json = res.json()
             if len(res_json) == 0:
                 break
@@ -1251,4 +1445,125 @@ class Company(LinkedIn):
                 limit -= count
             if sleep:
                 time.sleep(TIME_SLEEP)
+        return df.reset_index(drop=True)
+
+    def __get_posts_views(self, activity_id):
+        views = 0
+        req_url = f"{LINKEDIN_API}/company/getPostsViews?activity_id={activity_id}"
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        res.raise_for_status()
+
+        # Manage LinkedIn API errors
+        LinkedIn.manage_api_error(res)
+
+        # Get result
+        views = res.json().get("VIEWS")
+        time.sleep(3)
+        return views
+
+    def get_posts_feed(
+        self,
+        company_url,
+        start=0,
+        count=100,
+        limit=-1,
+        sleep=True,
+    ):
+        """
+        Return an dataframe object with 31 columns:
+        - ACTIVITY_ID                   object
+        - PUBLISHED_DATE                object
+        - AUTHOR_NAME                   object
+        - AUTHOR_URL                    object
+        - SUBDESCRIPTION                object
+        - TITLE                         object
+        - TEXT                          object
+        - CHARACTER_COUNT               int64
+        - TAGS                          object
+        - TAGS_COUNT                    int64
+        - EMOJIS                        object
+        - EMOJIS_COUNT                  int64
+        - LINKS                         object
+        - LINKS_COUNT                   int64
+        - PROFILE_MENTION               object
+        - COMPANY_MENTION               object
+        - CONTENT                       object
+        - CONTENT_TITLE                 object
+        - CONTENT_URL                   object
+        - CONTENT_ID                    object
+        - IMAGE_URL                     object
+        - POLL_ID                       object
+        - POLL_QUESTION                 object
+        - POLL_RESULTS                  object
+        - POST_URL                      object
+        - VIEWS                         int64
+        - COMMENTS                      int64
+        - LIKES                         int64
+        - SHARES                        int64
+        - ENGAGEMENT_SCORE              float64
+        - DATE_EXTRACT                  object
+
+        Parameters
+        ----------
+        company_url: str:
+            Company url from Linkedin.
+            Example : "https://www.linkedin.com/company/naas-ai/"
+
+        start: int (default 0):
+            Starting request sent to LinkedIn API.
+
+        count: int (default 1, max 100):
+            Number of requests sent to LinkedIn API.
+            (!) If count > 1, published date will not be returned.
+
+        limit: int (default 10, unlimited=-1):
+            Number of posts return by function. It will start with the most recent post.
+
+        sleep: boolean (default True):
+            Sleeping time between function will be randomly between 5 to 10 seconds.
+
+        """
+        # Loop init
+        df = pd.DataFrame()
+        if limit != -1 and count > limit:
+            count = limit
+        while True:
+            req_url = f"{LINKEDIN_API}/company/getPostsFeed?company_url={company_url}&start={start}&count={count}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
+            res_json = res.json()
+            if len(res_json) == 0:
+                break
+            # Get response in dataframe
+            tmp_df = pd.DataFrame(res_json)
+
+            # Concat dataframe
+            df = pd.concat([df, tmp_df], axis=0)
+
+            # Time sleep to avoid linkedin ban
+            if sleep:
+                time.sleep(TIME_SLEEP)
+            start += count
+            if limit != -1 and start >= limit:
+                break
+        # Cleaning
+        if len(df) > 0:
+            df.PUBLISHED_DATE = pd.to_datetime(df.PUBLISHED_DATE).dt.tz_localize(
+                "Europe/Paris"
+            )
+            df.PUBLISHED_DATE = df.PUBLISHED_DATE.astype(str)
+
+            # Add views + engagement score
+            df["VIEWS"] = df.apply(
+                lambda row: self.__get_posts_views(row.ACTIVITY_ID), axis=1
+            )
+            df["ENGAGEMENT_SCORE"] = 0
+            df.loc[df["VIEWS"] != 0, "ENGAGEMENT_SCORE"] = (
+                df["COMMENTS"] + df["LIKES"]
+            ) / df["VIEWS"]
         return df.reset_index(drop=True)
