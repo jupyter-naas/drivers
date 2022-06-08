@@ -1,3 +1,15 @@
+## 0.101.0 (2022-06-08)
+
+### Feat
+
+- linkedin get posts feed from company
+- linkedin get posts feed from company
+
+### Fix
+
+- module import top of file
+- remove fstring placeholder
+
 ## 0.100.0 (2022-06-06)
 
 ### Feat
