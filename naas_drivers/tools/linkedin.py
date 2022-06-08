@@ -7,10 +7,9 @@ import secrets
 import pydash as _pd
 import naas
 from naas_drivers.tools.emailbuilder import EmailBuilder
-
-emailbuilder = EmailBuilder()
 from naas_drivers.tools.naas_auth import NaasAuth
 
+emailbuilder = EmailBuilder()
 naasauth = NaasAuth()
 
 LINKEDIN_API = "https://3hz1hdpnlf.execute-api.eu-west-1.amazonaws.com/prod"
