@@ -47,7 +47,7 @@ class LinkedIn:
                 "</a>"
             ),
             "txt_0": emailbuilder.text(
-                f"Hi there,<br><br>"
+                "Hi there,<br><br>"
                 "Your LinkedIn cookies needs to be renewed.<br><br>"
                 "Please go to naas and update them in your notebook 'Setup LinkedIn'.<br>"
             ),
