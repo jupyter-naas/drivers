@@ -127,7 +127,7 @@ extras_require["all"] = extras_require["full"]
 
 setup(
     name="naas-drivers",
-    version="0.101.0",
+    version="0.101.1",
     author="Maxime Jublou",
     author_email="maxime@naas.ai",
     license="BSD",
