@@ -1399,7 +1399,6 @@ class Company(LinkedIn):
         - PUBLIC_ID                     object
         - FOLLOWED_AT                   object
         - DISTANCE                      object
-        - STATUS                        object
         - DATE_EXTRACT                  object
 
         Parameters
@@ -1445,6 +1444,8 @@ class Company(LinkedIn):
                 limit -= count
             if sleep:
                 time.sleep(TIME_SLEEP)
+        if len(df) > 0:
+            df = df.sort_values(by="FOLLOWED_AT", ascending=False)
         return df.reset_index(drop=True)
 
     def __get_posts_views(self, activity_id):
