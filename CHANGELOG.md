@@ -1,3 +1,9 @@
+## 0.101.2 (2022-06-14)
+
+### Fix
+
+- update linkedin get followers from company
+
 ## 0.101.1 (2022-06-09)
 
 ### Fix
