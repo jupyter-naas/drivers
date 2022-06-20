@@ -1,3 +1,9 @@
+## 0.102.0 (2022-06-20)
+
+### Feat
+
+- create Snowflake driver for basic usage (#282)
+
 ## 0.101.2 (2022-06-14)
 
 ### Fix
