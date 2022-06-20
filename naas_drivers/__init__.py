@@ -413,3 +413,10 @@ def huggingface():
     from naas_drivers.tools.huggingface import Huggingface
 
     return Huggingface()
+
+
+@load_driver(extra_requires="snowflake")
+def snowflake():
+    from naas_drivers.tools.snowflake import Snowflake
+
+    return Snowflake()

@@ -83,6 +83,9 @@ extras_require = {
     ],
     "ml": ["transformers==4.12.5", "tensorflow==2.6.0", "torch==1.8.1", "keras==2.6.0"],
     "sharepoint": ["SharePlum==0.5.1"],
+    "snowflake": [
+        "snowflake-connector-python==2.7.8"
+    ],
     "extra": [
         "pyppeteer==0.2.5",
         "pdfkit==0.6.1",
