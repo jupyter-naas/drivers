@@ -1,3 +1,9 @@
+## 0.102.1 (2022-06-20)
+
+### Fix
+
+- Delete / in notion blocks delete
+
 ## 0.102.0 (2022-06-20)
 
 ### Feat
