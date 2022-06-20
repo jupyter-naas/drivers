@@ -226,9 +226,7 @@ class Notion(InDriver, OutDriver):
             )
 
         def delete(self, block_id):
-            return self.__from_dict(
-                self.client.blocks.delete(block_id=f"/{block_id}")
-            )  # TODO: Remove '/' when PR is merged.
+            return self.__from_dict(self.client.blocks.delete(block_id=f"{block_id}"))
 
     class Users(__InnerBase):
         def __from_dict(self, data):
