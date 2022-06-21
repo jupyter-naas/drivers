@@ -1,3 +1,10 @@
+## 0.102.2 (2022-06-21)
+
+### Fix
+
+- snowflake test not working credentials needed
+- snowflake test not working credentials needed
+
 ## 0.102.1 (2022-06-20)
 
 ### Fix
