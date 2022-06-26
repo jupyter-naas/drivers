@@ -7,7 +7,9 @@ from email import encoders
 from typing import Any, Dict, cast
 import pandas as pd
 import smtplib
-from imap_tools import MailBox, A, AND
+from imap_tools import MailBox, A, AND, MailMessage
+from datetime import datetime, date
+from typing import Literal, Union
 
 
 class Email(OutDriver):
@@ -114,6 +116,123 @@ class Email(OutDriver):
                 if mark and mark == "archive":
                     mailbox.delete([msg.uid])
             return pd.DataFrame.from_records(emails)
+
+    def get_emails_by_subject(self, subject: str, exact: bool = False):
+        """
+        Get emails with a given subject. Matches all emails which subjects contain the argument. Case-insensitive.
+        Args:
+            subject (str): the subject to match
+            exact (bool, optional): whether to match the exact subject; defaults to False
+        Returns:
+            pd.DataFrame
+        """
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            emails = []
+            # subject = subject returns case-insensitive substring matches
+            for msg in mailbox.fetch(AND(subject=subject)):
+                if exact:
+                    if msg.subject == subject:
+                        parsed = self.__parse_message(msg)
+                        emails.append(parsed)
+                    else:
+                        continue
+                else:
+                    parsed = self.__parse_message(msg)
+                    emails.append(parsed)
+            return pd.DataFrame.from_records(emails)
+
+    def get_emails_by_date(
+        self,
+        date: Union[datetime, date],
+        condition=Literal["on", "before", "after", "before or on", "after or on"],
+    ):
+        """
+        Get emails with a given date.
+        Args:
+            date (datetime): the date to match
+            condition (str, optional): the condition to match the date; defaults to "on". Possible values are: "on", "before", "after", "before or on", "after or on".
+        Returns:
+            pd.DataFrame
+        """
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            emails = []
+            query = ""
+            if condition == "on":
+                query = AND(date=date)
+            elif condition == "before":
+                query = AND(date__lt=date)
+            elif condition == "after":
+                query = AND(date__gt=date)
+            elif condition == "before or on":
+                query = AND(date__lte=date)
+            elif condition == "after or on":
+                query = AND(date__gte=date)
+
+            for msg in mailbox.fetch(query):
+                parsed = self.__parse_message(msg)
+                emails.append(parsed)
+            return pd.DataFrame.from_records(emails)
+
+    def get_emails_by_sender(self, sender: str, exact: bool = False):
+        """
+        Get emails with a given sender. Matches all emails which senders contain the argument. Case-insensitive.
+        Args:
+            sender (str): the sender to match (e.g Bob bob@cashstory.com)
+            exact (bool, optional): whether to match the exact sender; defaults to False
+        Returns:
+            pd.DataFrame
+        """
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            emails = []
+            # sender = sender returns case-insensitive substring matches
+            for msg in mailbox.fetch(AND(from_=sender)):
+                if exact:
+                    if msg.from_ == sender:
+                        parsed = self.__parse_message(msg)
+                        emails.append(parsed)
+                    else:
+                        continue
+                else:
+                    parsed = self.__parse_message(msg)
+                    emails.append(parsed)
+            return pd.DataFrame.from_records(emails)
+
+    def get_emails_by_imap_query(self, query: str):
+        """
+        Get emails with a given IMAP query. You shoud import AND, OR, NOT from imap_query.
+        E.g AND(subject="hello", from_=bob@cashstory.com") would return all emails with the subject "hello" and the sender bob@cashstory.com.
+        Args:
+            query (str): the IMAP query to match
+        Returns:
+            pd.DataFrame
+        """
+        with MailBox(self.smtp_server).login(self.username, self.password) as mailbox:
+            emails = []
+            for msg in mailbox.fetch(query):
+                parsed = self.__parse_message(msg)
+                emails.append(parsed)
+            return pd.DataFrame.from_records(emails)
+
+    def __parse_message(self, message: MailMessage):
+        parsed = {
+            "uid": message.uid,
+            "subject": message.subject,
+            "from": message.from_values,
+            "to": list(message.to_values),
+            "cc": list(message.cc_values),
+            "bcc": list(message.bcc_values),
+            "reply_to": list(message.reply_to_values),
+            "date": message.date,
+            "text": message.text,
+            "html": message.html,
+            "flags": message.flags,
+            "headers": message.headers,
+            "size_rfc822": message.size_rfc822,
+            "size": message.size,
+            "obj": message.obj,
+            "attachments": len(message.attachments),
+        }
+        return parsed
 
     def send(
         self,
