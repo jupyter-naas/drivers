@@ -150,7 +150,8 @@ class Email(OutDriver):
         Get emails with a given date.
         Args:
             date (datetime): the date to match
-            condition (str, optional): the condition to match the date; defaults to "on". Possible values are: "on", "before", "after", "before or on", "after or on".
+            condition (str, optional): the condition to match the date; defaults to "on".
+            Possible values are: "on", "before", "after", "before or on", "after or on".
         Returns:
             pd.DataFrame
         """
@@ -200,7 +201,8 @@ class Email(OutDriver):
     def get_emails_by_imap_query(self, query: str):
         """
         Get emails with a given IMAP query. You shoud import AND, OR, NOT from imap_query.
-        E.g AND(subject="hello", from_=bob@cashstory.com") would return all emails with the subject "hello" and the sender bob@cashstory.com.
+        E.g AND(subject="hello", from_=bob@cashstory.com") would return all emails with the
+        subject "hello" and the sender bob@cashstory.com.
         Args:
             query (str): the IMAP query to match
         Returns:
