@@ -80,7 +80,7 @@ class Snowflake(InDriver, OutDriver):
             self.cursor.execute(f"USE WAREHOUSE {warehouse};")
             self._warehouse = warehouse
         else:
-            raise TypeError('Wrong type for property [warehouse] - `str` required')
+            raise TypeError("Wrong type for property [warehouse] - `str` required")
 
     @database.setter
     def database(self, database: str) -> None:
@@ -88,7 +88,7 @@ class Snowflake(InDriver, OutDriver):
             self.cursor.execute(f"USE DATABASE {database};")
             self._database = database
         else:
-            raise TypeError('Wrong type for property [database] - `str` required')
+            raise TypeError("Wrong type for property [database] - `str` required")
 
     @schema.setter
     def schema(self, schema: str) -> None:
@@ -96,7 +96,7 @@ class Snowflake(InDriver, OutDriver):
             self.cursor.execute(f"USE SCHEMA {schema};")
             self._schema = schema
         else:
-            raise TypeError('Wrong type for property [schema] - `str` required')
+            raise TypeError("Wrong type for property [schema] - `str` required")
 
     @role.setter
     def role(self, role: str) -> None:
@@ -104,17 +104,17 @@ class Snowflake(InDriver, OutDriver):
             self.cursor.execute(f"USE ROLE {role};")
             self._role = role
         else:
-            raise TypeError('Wrong type for property [role] - `str` required')
+            raise TypeError("Wrong type for property [role] - `str` required")
 
     def connect(
-            self,
-            account: str,
-            username: str,
-            password: str,
-            warehouse: str = "",
-            database: str = "",
-            schema: str = "",
-            role: str = ""
+        self,
+        account: str,
+        username: str,
+        password: str,
+        warehouse: str = "",
+        database: str = "",
+        schema: str = "",
+        role: str = "",
     ) -> None:
         """
         Connects to Snowflake account with given credentials.
@@ -129,22 +129,20 @@ class Snowflake(InDriver, OutDriver):
         @param role: (optional) SF role to set up while creating a connection
         """
         self._connection = snowflake.connector.connect(
-            account=account,
-            user=username,
-            password=password
+            account=account, user=username, password=password
         )
         self._cursor = self._connection.cursor()
         self._set_environment(warehouse, database, schema, role)
         self.connected = True
 
     def execute(
-            self,
-            sql: str,
-            warehouse: str = '',
-            database: str = '',
-            schema: str = '',
-            role: str = '',
-            n: int = 10
+        self,
+        sql: str,
+        warehouse: str = "",
+        database: str = "",
+        schema: str = "",
+        role: str = "",
+        n: int = 10,
     ) -> (List, List):
         """
         Execute passed command. Could be anything, starting from DQL query, and ending with DDL commands
@@ -158,9 +156,19 @@ class Snowflake(InDriver, OutDriver):
         """
 
         # Switching warehouse, database, schema, and role for function call purposes
-        warehouse_old, database_old, schema_old, role_old = self.warehouse, self.database, self.schema, self.role
+        warehouse_old, database_old, schema_old, role_old = (
+            self.warehouse,
+            self.database,
+            self.schema,
+            self.role,
+        )
         self._set_environment(warehouse, database, schema, role)
-        self.warehouse, self.database, self.schema, self.role = warehouse_old, database_old, schema_old, role_old
+        self.warehouse, self.database, self.schema, self.role = (
+            warehouse_old,
+            database_old,
+            schema_old,
+            role_old,
+        )
 
         res = self._cursor.execute(sql)
         if res.rowcount < n:
@@ -171,13 +179,13 @@ class Snowflake(InDriver, OutDriver):
             return res.fetchall(), res.description
 
     def query(
-            self,
-            sql: str,
-            warehouse: str = '',
-            database: str = '',
-            schema: str = '',
-            role: str = '',
-            n: int = 10
+        self,
+        sql: str,
+        warehouse: str = "",
+        database: str = "",
+        schema: str = "",
+        role: str = "",
+        n: int = 10,
     ) -> (List, List):
         """
         Query data and return results in the form of plain vanilla List: (results, columns_metadata)
@@ -192,13 +200,13 @@ class Snowflake(InDriver, OutDriver):
         return self.execute(sql, warehouse, database, schema, role, n)
 
     def query_pd(
-            self,
-            sql: str,
-            warehouse: str = '',
-            database: str = '',
-            schema: str = '',
-            role: str = '',
-            n: int = 10
+        self,
+        sql: str,
+        warehouse: str = "",
+        database: str = "",
+        schema: str = "",
+        role: str = "",
+        n: int = 10,
     ) -> DataFrame:
         """
         Query data and return results in the form of pandas.DataFrame
@@ -213,7 +221,9 @@ class Snowflake(InDriver, OutDriver):
         res = self.query(sql, warehouse, database, schema, role, n)
 
         # TODO: Apply dtypes mapping from ResultMetadata objects
-        return DataFrame(res[0], columns=[result_metadata.name for result_metadata in res[1]])
+        return DataFrame(
+            res[0], columns=[result_metadata.name for result_metadata in res[1]]
+        )
 
     def close_connection(self) -> None:
         """
@@ -228,11 +238,7 @@ class Snowflake(InDriver, OutDriver):
         self._connection = None
 
     def _set_environment(
-            self,
-            warehouse: str = '',
-            database: str = '',
-            schema: str = '',
-            role: str = ''
+        self, warehouse: str = "", database: str = "", schema: str = "", role: str = ""
     ) -> None:
         """
         Tries to set Snowflake environment in bulk: warehouse, database, schema, and role
@@ -241,16 +247,21 @@ class Snowflake(InDriver, OutDriver):
         @param schema: schema to set in the environment
         @param role: role to set in the environment
         """
-        warehouse, database, schema, role = warehouse.strip(), database.strip(), schema.strip(), role.strip()
+        warehouse, database, schema, role = (
+            warehouse.strip(),
+            database.strip(),
+            schema.strip(),
+            role.strip(),
+        )
         try:
-            if warehouse != '':
+            if warehouse != "":
                 self.warehouse = warehouse
-            if database != '':
+            if database != "":
                 self.database = database
-            if schema != '':
+            if schema != "":
                 self.schema = schema
-            if role != '':
+            if role != "":
                 self.role = role
         except ProgrammingError as pe:
-            logging.error(f'Error while setting SF environment. More on that: {pe}')
+            logging.error(f"Error while setting SF environment. More on that: {pe}")
             sys.exit()

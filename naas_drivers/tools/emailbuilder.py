@@ -623,7 +623,7 @@ class EmailBuilder(InDriver):
         if naas:
             networks = self.__default_networks()
             company = self.__default_company()
-            #legal = self.__default_legal()
+            # legal = self.__default_legal()
         if networks:
             for elem in networks:
                 if elem.keys() >= frozenset({"img_src", "href"}):
