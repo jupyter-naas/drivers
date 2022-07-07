@@ -555,9 +555,6 @@ class Profile(LinkedIn):
             start += count
             if limit != -1 and start >= limit:
                 break
-        # Cleaning
-        if len(df) > 0:
-            df.PUBLISHED_DATE = df.PUBLISHED_DATE.astype(str)
         return df.reset_index(drop=True)
 
 
@@ -1551,8 +1548,6 @@ class Company(LinkedIn):
                 break
         # Cleaning
         if len(df) > 0:
-            df.PUBLISHED_DATE = df.PUBLISHED_DATE.astype(str)
-
             # Add views + engagement score
             df["VIEWS"] = df.apply(
                 lambda row: self.__get_posts_views(row.ACTIVITY_ID), axis=1
