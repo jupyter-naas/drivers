@@ -557,9 +557,6 @@ class Profile(LinkedIn):
                 break
         # Cleaning
         if len(df) > 0:
-            df.PUBLISHED_DATE = pd.to_datetime(df.PUBLISHED_DATE).dt.tz_localize(
-                "Europe/Paris"
-            )
             df.PUBLISHED_DATE = df.PUBLISHED_DATE.astype(str)
         return df.reset_index(drop=True)
 
@@ -1554,9 +1551,6 @@ class Company(LinkedIn):
                 break
         # Cleaning
         if len(df) > 0:
-            df.PUBLISHED_DATE = pd.to_datetime(df.PUBLISHED_DATE).dt.tz_localize(
-                "Europe/Paris"
-            )
             df.PUBLISHED_DATE = df.PUBLISHED_DATE.astype(str)
 
             # Add views + engagement score
