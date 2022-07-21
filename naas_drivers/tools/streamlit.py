@@ -10,7 +10,7 @@ class Streamlit():
         self.path = path
         self.port = port
         os.system(f"fuser -n tcp -k {self.port}")
-        cmd = f"streamlit run {self.path} --server.port {self.port}"
+        cmd = f"streamlit run {self.path} --server.port {self.port}  --logger.level debug"
         with subprocess.Popen(
             [cmd],
             shell=True,
@@ -21,9 +21,15 @@ class Streamlit():
         ) as proc:
             print(cmd)
             print(proc)
-            for line in proc.stdout.readlines():
-                if debug:
-                    print(line, end="")
-            for line in proc.stderr.readlines():
-                if debug:
-                    print(line, end="")
+            username = os.environ.get('JUPYTERHUB_USER', None)
+            if username:
+                print(f"\n🎉 Streamlit application is accessible here: 'https://app.naas.ai/user/{username}/proxy/{port}/'")
+                
+            while proc.returncode is None:
+                    line = proc.stdout.readline()
+                    if debug:
+                        print(line.rstrip())
+                    line = proc.stderr.readline()
+                    if debug:
+                        print(line.rstrip())
+            
