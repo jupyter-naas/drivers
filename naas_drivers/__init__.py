@@ -415,6 +415,13 @@ def huggingface():
     return Huggingface()
 
 
+@load_driver(extra_requires="twitter")
+def twitter():
+    from naas_drivers.tools.twitter import Twitter
+
+    return Twitter()
+
+
 @load_driver(extra_requires="snowflake")
 def snowflake():
     from naas_drivers.tools.snowflake import Snowflake
