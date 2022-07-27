@@ -1,3 +1,73 @@
+## 0.103.3 (2022-07-21)
+
+### Fix
+
+- **Streamlit**: Remove ngrok and update streamlit version (#303)
+
+## 0.103.2 (2022-07-07)
+
+### Fix
+
+- error published date
+- error published date
+
+## 0.103.1 (2022-07-07)
+
+### Fix
+
+- add timestamp in api, remove error driver
+- add timestamp in api, remove error driver
+
+## 0.103.0 (2022-06-27)
+
+### Feat
+
+- new email methods (#296)
+
+## 0.102.2 (2022-06-21)
+
+### Fix
+
+- snowflake test not working credentials needed
+- snowflake test not working credentials needed
+
+## 0.102.1 (2022-06-20)
+
+### Fix
+
+- Delete / in notion blocks delete
+
+## 0.102.0 (2022-06-20)
+
+### Feat
+
+- create Snowflake driver for basic usage (#282)
+
+## 0.101.2 (2022-06-14)
+
+### Fix
+
+- update linkedin get followers from company
+
+## 0.101.1 (2022-06-09)
+
+### Fix
+
+- updated get issues from repo driver
+- updated get issues from repo driver
+
+## 0.101.0 (2022-06-08)
+
+### Feat
+
+- linkedin get posts feed from company
+- linkedin get posts feed from company
+
+### Fix
+
+- module import top of file
+- remove fstring placeholder
+
 ## 0.100.0 (2022-06-06)
 
 ### Feat

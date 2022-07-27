@@ -68,7 +68,7 @@ extras_require = {
     ],
     "streamlit": [
         "pyngrok==5.0.5",
-        "streamlit==1.9.0",
+        "streamlit>=1.8.1",
     ],
     "teams": [
         "pymsteams==0.1.14",
@@ -83,6 +83,9 @@ extras_require = {
     ],
     "ml": ["transformers==4.12.5", "tensorflow==2.6.0", "torch==1.8.1", "keras==2.6.0"],
     "sharepoint": ["SharePlum==0.5.1"],
+    "snowflake": [
+        "snowflake-connector-python==2.7.8"
+    ],
     "extra": [
         "pyppeteer==0.2.5",
         "pdfkit==0.6.1",
@@ -127,7 +130,7 @@ extras_require["all"] = extras_require["full"]
 
 setup(
     name="naas-drivers",
-    version="0.100.0",
+    version="0.103.3",
     author="Maxime Jublou",
     author_email="maxime@naas.ai",
     license="BSD",

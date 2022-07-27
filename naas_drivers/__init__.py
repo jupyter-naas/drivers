@@ -4,7 +4,7 @@ from mprop import mproperty
 from subprocess import Popen, PIPE
 import sys
 
-__version__ = "0.100.0"
+__version__ = "0.103.3"
 
 __github_repo = "jupyter-naas/drivers"
 
@@ -420,3 +420,10 @@ def twitter():
     from naas_drivers.tools.twitter import Twitter
 
     return Twitter()
+
+
+@load_driver(extra_requires="snowflake")
+def snowflake():
+    from naas_drivers.tools.snowflake import Snowflake
+
+    return Snowflake()
