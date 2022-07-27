@@ -146,7 +146,7 @@ setup(
     install_requires=[
         "pandas==1.2.4",
         "pandas-datareader==0.9.0",
-        "requests==2.25.1",
+        "requests==2.28.1",
         "mprop==0.16.0",
         "numpy~=1.19.0",
     ],
