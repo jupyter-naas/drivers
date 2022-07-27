@@ -77,6 +77,9 @@ extras_require = {
         "cson==0.8",
         "pyjwt==2.1.0",
     ],
+    "twitter": [
+        "tweepy==4.10.0",
+    ],
     "youtube": ["youtube_transcript_api==0.4.3"],
     "pydash": [
         "pydash==5.1.0",
