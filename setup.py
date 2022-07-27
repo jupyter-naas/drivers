@@ -84,7 +84,7 @@ extras_require = {
     "pydash": [
         "pydash==5.1.0",
     ],
-    "ml": ["transformers==4.12.5", "tensorflow==2.6.0", "torch==1.8.1", "keras==2.6.0"],
+    "ml": ["transformers==4.21.0", "tensorflow==2.6.0", "torch==1.8.1", "keras==2.6.0"],
     "sharepoint": ["SharePlum==0.5.1"],
     "snowflake": [
         "snowflake-connector-python==2.7.8"
@@ -117,7 +117,7 @@ extras_require = {
         "urllib3==1.26.4",
         "chardet==4.0.0",
         "idna==2.9",
-        "requests==2.25.1",
+        "requests>=2.25.1",
         "python-dateutil==2.8.1",
         "pytz==2021.1",
     ],
