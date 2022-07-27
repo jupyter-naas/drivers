@@ -117,7 +117,7 @@ extras_require = {
         "urllib3==1.26.4",
         "chardet==4.0.0",
         "idna==2.9",
-        "requests==2.25.1",
+        "requests>=2.25.1",
         "python-dateutil==2.8.1",
         "pytz==2021.1",
     ],
