@@ -1,6 +1,5 @@
 import tweepy
 import pandas as pd
-import json
 from typing import List
 import datetime
 import pydash
