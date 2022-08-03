@@ -40,7 +40,7 @@ extras_require = {
         "google-auth-oauthlib==0.4.4",
     ],
     "markdown": [
-        "markdown2==2.4.0",
+        "markdown2==2.4.3",
     ],
     "mongo": [
         "pymongo==3.11.3",
@@ -146,7 +146,7 @@ setup(
     install_requires=[
         "pandas==1.2.4",
         "pandas-datareader==0.9.0",
-        "requests==2.25.1",
+        "requests>=2.25.1",
         "mprop==0.16.0",
         "numpy~=1.19.0",
     ],
