@@ -1,6 +1,6 @@
-from typing import List
-import logging
 import sys
+import logging
+from typing import Dict
 from pandas import DataFrame
 
 import snowflake.connector
@@ -42,6 +42,11 @@ class Snowflake(InDriver, OutDriver):
         self._database = None
         self._schema = None
         self._role = None
+
+        self.api = DotDict({
+            'database': Database,
+            'schema': Schema
+        })
 
         global snowflake_instance
         snowflake_instance = self
@@ -107,14 +112,14 @@ class Snowflake(InDriver, OutDriver):
             raise TypeError('Wrong type for property [role] - `str` required')
 
     def connect(
-            self,
-            account: str,
-            username: str,
-            password: str,
-            warehouse: str = "",
-            database: str = "",
-            schema: str = "",
-            role: str = ""
+        self,
+        account: str,
+        username: str,
+        password: str,
+        warehouse: str = "",
+        database: str = "",
+        schema: str = "",
+        role: str = ""
     ) -> None:
         """
         Connects to Snowflake account with given credentials.
@@ -138,14 +143,15 @@ class Snowflake(InDriver, OutDriver):
         self.connected = True
 
     def execute(
-            self,
-            sql: str,
-            warehouse: str = '',
-            database: str = '',
-            schema: str = '',
-            role: str = '',
-            n: int = 10
-    ) -> (List, List):
+        self,
+        sql: str,
+        warehouse: str = '',
+        database: str = '',
+        schema: str = '',
+        role: str = '',
+        n: int = 10,
+        return_statement: bool = False
+    ) -> Dict:
         """
         Execute passed command. Could be anything, starting from DQL query, and ending with DDL commands
         @param sql: command/query to execute
@@ -154,31 +160,38 @@ class Snowflake(InDriver, OutDriver):
         @param schema: (optional) schema to use for passed command
         @param role: (optional) role to use for passed command
         @param n: (optional) query result length limit
+        @param return_statement: (optional) whether to return generated statement
         @return: List: (results, columns_metadata) containing query outcome
         """
-
-        # Switching warehouse, database, schema, and role for function call purposes
         warehouse_old, database_old, schema_old, role_old = self.warehouse, self.database, self.schema, self.role
-        self._set_environment(warehouse, database, schema, role)
-        self.warehouse, self.database, self.schema, self.role = warehouse_old, database_old, schema_old, role_old
+
+        # If applicable (any param has been changed), switch environment for a single command execution
+        alter_environment = any([env_elem != '' for env_elem in [warehouse, database, schema, role]])
+        if alter_environment:
+            self._set_environment(warehouse, database, schema, role)
 
         res = self._cursor.execute(sql)
-        if res.rowcount < n:
-            n = res.rowcount
-        if n > 0:
-            return res.fetchmany(n), res.description
-        if n == -1:
-            return res.fetchall(), res.description
+        result_dict = {
+            'results': res.fetchall() if n == -1 else res.fetchmany(n),
+            'description': res.description,
+            'statement': sql if return_statement else ''
+        }
+
+        if alter_environment:
+            self._set_environment(warehouse_old, database_old, schema_old, role_old)
+
+        return result_dict
 
     def query(
-            self,
-            sql: str,
-            warehouse: str = '',
-            database: str = '',
-            schema: str = '',
-            role: str = '',
-            n: int = 10
-    ) -> (List, List):
+        self,
+        sql: str,
+        warehouse: str = '',
+        database: str = '',
+        schema: str = '',
+        role: str = '',
+        n: int = 10,
+        return_statement: bool = False
+    ) -> Dict:
         """
         Query data and return results in the form of plain vanilla List: (results, columns_metadata)
         @param sql: query to execute
@@ -187,18 +200,20 @@ class Snowflake(InDriver, OutDriver):
         @param schema: (optional) schema to use for passed query
         @param role: (optional) role to use for passed query
         @param n: (optional) query result length limit
+        @param return_statement: (optional) whether to return generated statement
         @return: List: (results, columns_metadata) containing query outcome
         """
-        return self.execute(sql, warehouse, database, schema, role, n)
+        return self.execute(sql, warehouse, database, schema, role, n, return_statement)
 
     def query_pd(
-            self,
-            sql: str,
-            warehouse: str = '',
-            database: str = '',
-            schema: str = '',
-            role: str = '',
-            n: int = 10
+        self,
+        sql: str,
+        warehouse: str = '',
+        database: str = '',
+        schema: str = '',
+        role: str = '',
+        n: int = 10,
+        return_statement: bool = False
     ) -> DataFrame:
         """
         Query data and return results in the form of pandas.DataFrame
@@ -208,12 +223,13 @@ class Snowflake(InDriver, OutDriver):
         @param schema: (optional) schema to use for passed query
         @param role: (optional) role to use for passed query
         @param n: (optional) query result length limit
+        @param return_statement: (optional) whether to return generated statement
         @return: pandas.DataFrame table containing query outcome
         """
-        res = self.query(sql, warehouse, database, schema, role, n)
+        res = self.query(sql, warehouse, database, schema, role, n, return_statement)
 
         # TODO: Apply dtypes mapping from ResultMetadata objects
-        return DataFrame(res[0], columns=[result_metadata.name for result_metadata in res[1]])
+        return DataFrame(res['results'], columns=[result_metadata.name for result_metadata in res['description']])
 
     def close_connection(self) -> None:
         """
@@ -228,11 +244,11 @@ class Snowflake(InDriver, OutDriver):
         self._connection = None
 
     def _set_environment(
-            self,
-            warehouse: str = '',
-            database: str = '',
-            schema: str = '',
-            role: str = ''
+        self,
+        warehouse: str = '',
+        database: str = '',
+        schema: str = '',
+        role: str = ''
     ) -> None:
         """
         Tries to set Snowflake environment in bulk: warehouse, database, schema, and role
@@ -254,3 +270,93 @@ class Snowflake(InDriver, OutDriver):
         except ProgrammingError as pe:
             logging.error(f'Error while setting SF environment. More on that: {pe}')
             sys.exit()
+
+
+class Database:
+
+    @staticmethod
+    def create(
+        database_name: str,
+        or_replace: bool = False,
+        return_statement: bool = False
+    ) -> Dict:
+        """
+        Executes command to create a Snowflake database with a given name
+        @param database_name: database name to create
+        @param or_replace: replace schema if exists
+        @param return_statement: whether to return generated statement
+        @return: command execution message string
+        """
+        statement = "CREATE" \
+                    f"{' OR REPLACE' if or_replace else ''}" \
+                    f" DATABASE {database_name}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+
+    @staticmethod
+    def drop(
+        database_name: str,
+        if_exists: bool = False,
+        return_statement: bool = False
+    ) -> Dict:
+        """
+        Executes command to drop a Snowflake database with a given name
+        @param database_name: database name to create
+        @param if_exists: adds `IF EXISTS` statement to a command
+        @param return_statement: whether to return generated statement
+        @return: command execution message string
+        """
+        statement = "DROP DATABASE" \
+                    f"{' IF EXISTS' if if_exists else ''}" \
+                    f" {database_name}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+
+
+class Schema:
+
+    @staticmethod
+    def create(
+        schema_name: str,
+        or_replace: bool = False,
+        return_statement: bool = False
+    ) -> Dict:
+        """
+        Executes command to create a Snowflake schema with a given name
+        @param schema_name: schema name to create
+        @param or_replace: replace schema if exists
+        @param return_statement: whether to return generated statement
+        @return: command execution message string
+        """
+        statement = "CREATE" \
+                    f"{' OR REPLACE' if or_replace else ''}" \
+                    f" SCHEMA {schema_name}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+
+    @staticmethod
+    def drop(
+        schema_name: str,
+        if_exists: bool = False,
+        return_statement: bool = False
+    ) -> Dict:
+        """
+        Executes command to drop a Snowflake schema with a given name
+        @param schema_name: database name to create
+        @param if_exists: adds `IF EXISTS` statement to a command
+        @param return_statement: whether to return generated statement
+        @return: command execution message string
+        """
+        statement = "DROP SCHEMA" \
+                    f"{' IF EXISTS' if if_exists else ''}" \
+                    f" {schema_name}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+
+
+class DotDict(dict):
+    """
+    Read-only dictionary with dot.notation attributes access
+    TODO: Move this class definition to utils file
+    """
+    __getattr__ = dict.get
