@@ -2,6 +2,7 @@ import sys
 import logging
 from typing import Dict
 from pandas import DataFrame
+from types import SimpleNamespace
 
 import snowflake.connector
 from snowflake.connector.errors import ProgrammingError
@@ -43,7 +44,7 @@ class Snowflake(InDriver, OutDriver):
         self._schema = None
         self._role = None
 
-        self.api = DotDict({
+        self.api = SimpleNamespace(**{
             'database': Database,
             'schema': Schema,
             'file_format': FileFormat
@@ -413,11 +414,3 @@ class FileFormat:
                     f" {file_format_name}"
 
         return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
-
-
-class DotDict(dict):
-    """
-    Read-only dictionary with dot.notation attributes access
-    TODO: Move this class definition to utils file
-    """
-    __getattr__ = dict.get
