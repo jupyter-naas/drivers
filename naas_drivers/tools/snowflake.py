@@ -45,7 +45,8 @@ class Snowflake(InDriver, OutDriver):
 
         self.api = DotDict({
             'database': Database,
-            'schema': Schema
+            'schema': Schema,
+            'file_format': FileFormat
         })
 
         global snowflake_instance
@@ -285,7 +286,7 @@ class Database:
         @param database_name: database name to create
         @param or_replace: replace schema if exists
         @param return_statement: whether to return generated statement
-        @return: command execution message string
+        @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "CREATE" \
                     f"{' OR REPLACE' if or_replace else ''}" \
@@ -301,10 +302,10 @@ class Database:
     ) -> Dict:
         """
         Executes command to drop a Snowflake database with a given name
-        @param database_name: database name to create
+        @param database_name: database name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
         @param return_statement: whether to return generated statement
-        @return: command execution message string
+        @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP DATABASE" \
                     f"{' IF EXISTS' if if_exists else ''}" \
@@ -326,7 +327,7 @@ class Schema:
         @param schema_name: schema name to create
         @param or_replace: replace schema if exists
         @param return_statement: whether to return generated statement
-        @return: command execution message string
+        @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "CREATE" \
                     f"{' OR REPLACE' if or_replace else ''}" \
@@ -342,14 +343,74 @@ class Schema:
     ) -> Dict:
         """
         Executes command to drop a Snowflake schema with a given name
-        @param schema_name: database name to create
+        @param schema_name: schema name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
         @param return_statement: whether to return generated statement
-        @return: command execution message string
+        @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP SCHEMA" \
                     f"{' IF EXISTS' if if_exists else ''}" \
                     f" {schema_name}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+
+
+class FileFormat:
+
+    AVAILABLE_FORMAT_TYPES = ['CSV', 'JSON', 'AVRO', 'ORC', 'PARQUET', 'XML']
+
+    @staticmethod
+    def create(
+        file_format_name: str,
+        file_format_type: str,
+        or_replace: bool = False,
+        if_not_exists: bool = False,
+        return_statement: bool = False,
+        **kwargs
+    ) -> Dict:
+        """
+        Executes command to create a Snowflake file format with a given name
+        @param file_format_name: file format name to create
+        @param file_format_type: type of the file format to be created
+        @param or_replace: replace file format if exists
+        @param if_not_exists: create object if it doesn't exist so far
+        @param return_statement: whether to return generated statement
+        @param kwargs: additional arguments to be passed to the statement
+            so far validation is on the Snowflake engine side
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        file_format_type = file_format_type.upper().strip()
+        if file_format_type not in FileFormat.AVAILABLE_FORMAT_TYPES:
+            raise ValueError(f'File Format type `{file_format_type}` not available for now')
+
+        statement = "CREATE" \
+                    f"{' OR REPLACE' if or_replace else ''}" \
+                    f" FILE FORMAT{' IF NOT EXISTS' if if_not_exists else ''} {file_format_name}" \
+                    f" TYPE = {file_format_type}"
+
+        # looping through kwargs for extra arguments passed in statement
+        # while executing final command, Snowflake will do the validation
+        for key, value in kwargs.items():
+            statement += f" {key} = {value}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+
+    @staticmethod
+    def drop(
+        file_format_name: str,
+        if_exists: bool = False,
+        return_statement: bool = False
+    ) -> Dict:
+        """
+        Executes command to drop a Snowflake file format with a given name
+        @param file_format_name: file format name to drop
+        @param if_exists: adds `IF EXISTS` statement to a command
+        @param return_statement: whether to return generated statement
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "DROP FILE FORMAT" \
+                    f"{' IF EXISTS' if if_exists else ''}" \
+                    f" {file_format_name}"
 
         return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
 
