@@ -2,7 +2,6 @@ import sys
 import logging
 from typing import Dict, List
 from pandas import DataFrame
-from types import SimpleNamespace
 
 import snowflake.connector
 from snowflake.connector.errors import ProgrammingError
@@ -39,20 +38,16 @@ class Snowflake(InDriver, OutDriver):
 
         self._connection = None
         self._cursor = None
-        self._warehouse = None
-        self._database = None
-        self._schema = None
-        self._role = None
 
-        self.api = SimpleNamespace(**{
-            'database': Database,
-            'schema': Schema,
-            'file_format': FileFormat,
-            'stage': Stage,
-            'warehouse': Warehouse,
-            'role': Role
-        })
+        # Creating Snowflake objects
+        self._database = Database(self)
+        self._file_format = FileFormat(self)
+        self._role = Role(self)
+        self._schema = Schema(self)
+        self._stage = Stage(self)
+        self._warehouse = Warehouse(self)
 
+        # Providing global instance to use after loading snowflake driver module
         global snowflake_instance
         snowflake_instance = self
 
@@ -69,52 +64,28 @@ class Snowflake(InDriver, OutDriver):
         return self._cursor
 
     @property
-    def warehouse(self) -> str:
-        return self._warehouse
-
-    @property
-    def database(self) -> str:
+    def database(self):
         return self._database
 
     @property
-    def schema(self) -> str:
+    def file_format(self):
+        return self._file_format
+
+    @property
+    def role(self):
+        return self._role
+
+    @property
+    def schema(self):
         return self._schema
 
     @property
-    def role(self) -> str:
-        return self._role
+    def stage(self):
+        return self._stage
 
-    @warehouse.setter
-    def warehouse(self, warehouse: str) -> None:
-        if isinstance(warehouse, str):
-            self.cursor.execute(f"USE WAREHOUSE {warehouse};")
-            self._warehouse = warehouse
-        else:
-            raise TypeError('Wrong type for property [warehouse] - `str` required')
-
-    @database.setter
-    def database(self, database: str) -> None:
-        if isinstance(database, str):
-            self.cursor.execute(f"USE DATABASE {database};")
-            self._database = database
-        else:
-            raise TypeError('Wrong type for property [database] - `str` required')
-
-    @schema.setter
-    def schema(self, schema: str) -> None:
-        if isinstance(schema, str):
-            self.cursor.execute(f"USE SCHEMA {schema};")
-            self._schema = schema
-        else:
-            raise TypeError('Wrong type for property [schema] - `str` required')
-
-    @role.setter
-    def role(self, role: str) -> None:
-        if isinstance(role, str):
-            self.cursor.execute(f"USE ROLE {role};")
-            self._role = role
-        else:
-            raise TypeError('Wrong type for property [role] - `str` required')
+    @property
+    def warehouse(self):
+        return self._warehouse
 
     def connect(
         self,
@@ -144,94 +115,61 @@ class Snowflake(InDriver, OutDriver):
             password=password
         )
         self._cursor = self._connection.cursor()
-        self._set_environment(warehouse, database, schema, role)
+        self.set_environment(warehouse, database, schema, role)
         self.connected = True
 
     def execute(
         self,
         sql: str,
-        warehouse: str = '',
-        database: str = '',
-        schema: str = '',
-        role: str = '',
         n: int = 10,
         return_statement: bool = False
     ) -> Dict:
         """
         Execute passed command. Could be anything, starting from DQL query, and ending with DDL commands
         @param sql: command/query to execute
-        @param warehouse: (optional) warehouse to use for passed command
-        @param database: (optional) database to use for passed command
-        @param schema: (optional) schema to use for passed command
-        @param role: (optional) role to use for passed command
         @param n: (optional) query result length limit
         @param return_statement: (optional) whether to return generated statement
         @return: List: (results, columns_metadata) containing query outcome
         """
-        warehouse_old, database_old, schema_old, role_old = self.warehouse, self.database, self.schema, self.role
-
-        # If applicable (any param has been changed), switch environment for a single command execution
-        alter_environment = any([env_elem != '' for env_elem in [warehouse, database, schema, role]])
-        if alter_environment:
-            self._set_environment(warehouse, database, schema, role)
-
         res = self._cursor.execute(sql)
+
         result_dict = {
             'results': res.fetchall() if n == -1 else res.fetchmany(n),
             'description': res.description,
             'statement': sql if return_statement else ''
         }
 
-        if alter_environment:
-            self._set_environment(warehouse_old, database_old, schema_old, role_old)
-
         return result_dict
 
     def query(
         self,
         sql: str,
-        warehouse: str = '',
-        database: str = '',
-        schema: str = '',
-        role: str = '',
         n: int = 10,
         return_statement: bool = False
     ) -> Dict:
         """
         Query data and return results in the form of plain vanilla List: (results, columns_metadata)
         @param sql: query to execute
-        @param warehouse: (optional) warehouse to use for passed query
-        @param database: (optional) database to use for passed query
-        @param schema: (optional) schema to use for passed query
-        @param role: (optional) role to use for passed query
         @param n: (optional) query result length limit
         @param return_statement: (optional) whether to return generated statement
         @return: List: (results, columns_metadata) containing query outcome
         """
-        return self.execute(sql, warehouse, database, schema, role, n, return_statement)
+        return self.execute(sql, n, return_statement)
 
     def query_pd(
         self,
         sql: str,
-        warehouse: str = '',
-        database: str = '',
-        schema: str = '',
-        role: str = '',
         n: int = 10,
         return_statement: bool = False
     ) -> DataFrame:
         """
         Query data and return results in the form of pandas.DataFrame
         @param sql: query to execute
-        @param warehouse: (optional) warehouse to use for passed query
-        @param database: (optional) database to use for passed query
-        @param schema: (optional) schema to use for passed query
-        @param role: (optional) role to use for passed query
         @param n: (optional) query result length limit
         @param return_statement: (optional) whether to return generated statement
         @return: pandas.DataFrame table containing query outcome
         """
-        res = self.query(sql, warehouse, database, schema, role, n, return_statement)
+        res = self.execute(sql, n, return_statement)
 
         # TODO: Apply dtypes mapping from ResultMetadata objects
         return DataFrame(res['results'], columns=[result_metadata.name for result_metadata in res['description']])
@@ -304,7 +242,7 @@ class Snowflake(InDriver, OutDriver):
         self._cursor = None
         self._connection = None
 
-    def _set_environment(
+    def set_environment(
         self,
         warehouse: str = '',
         database: str = '',
@@ -321,13 +259,13 @@ class Snowflake(InDriver, OutDriver):
         warehouse, database, schema, role = warehouse.strip(), database.strip(), schema.strip(), role.strip()
         try:
             if warehouse != '':
-                self.warehouse = warehouse
+                self._warehouse.use(warehouse)
             if database != '':
-                self.database = database
+                self._database.use(database)
             if schema != '':
-                self.schema = schema
+                self._schema.use(schema)
             if role != '':
-                self.role = role
+                self._role.use(role)
         except ProgrammingError as pe:
             logging.error(f'Error while setting SF environment. More on that: {pe}')
             sys.exit()
@@ -335,8 +273,14 @@ class Snowflake(InDriver, OutDriver):
 
 class Database:
 
-    @staticmethod
+    def __init__(
+        self,
+        snowflake_driver: Snowflake
+    ):
+        self.__snowflake_driver = snowflake_driver
+
     def use(
+        self,
         database_name: str,
         return_statement: bool = False
     ) -> Dict:
@@ -348,10 +292,21 @@ class Database:
         statement = "USE" \
                     f" DATABASE {database_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
-    @staticmethod
+    def get_current(
+        self,
+    ) -> str:
+        """
+        Returns the name of the database in use by the current session
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "SELECT CURRENT_DATABASE()"
+
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=True)['results'][0][0]
+
     def create(
+        self,
         database_name: str,
         or_replace: bool = False,
         return_statement: bool = False
@@ -367,10 +322,10 @@ class Database:
                     f"{' OR REPLACE' if or_replace else ''}" \
                     f" DATABASE {database_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
-    @staticmethod
     def drop(
+        self,
         database_name: str,
         if_exists: bool = False,
         return_statement: bool = False
@@ -386,13 +341,19 @@ class Database:
                     f"{' IF EXISTS' if if_exists else ''}" \
                     f" {database_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
 
 class Schema:
 
-    @staticmethod
+    def __init__(
+        self,
+        snowflake_driver: Snowflake
+    ):
+        self.__snowflake_driver = snowflake_driver
+
     def use(
+        self,
         schema_name: str,
         return_statement: bool = False
     ) -> Dict:
@@ -404,10 +365,21 @@ class Schema:
         statement = "USE" \
                     f" SCHEMA {schema_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
-    @staticmethod
+    def get_current(
+        self,
+    ) -> str:
+        """
+        Returns the name of the schema in use by the current session
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "SELECT CURRENT_SCHEMA()"
+
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=True)['results'][0][0]
+
     def create(
+        self,
         schema_name: str,
         or_replace: bool = False,
         return_statement: bool = False
@@ -423,10 +395,10 @@ class Schema:
                     f"{' OR REPLACE' if or_replace else ''}" \
                     f" SCHEMA {schema_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
-    @staticmethod
     def drop(
+        self,
         schema_name: str,
         if_exists: bool = False,
         return_statement: bool = False
@@ -442,15 +414,20 @@ class Schema:
                     f"{' IF EXISTS' if if_exists else ''}" \
                     f" {schema_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
 
 class FileFormat:
 
-    AVAILABLE_FORMAT_TYPES = ['CSV', 'JSON', 'AVRO', 'ORC', 'PARQUET', 'XML']
+    def __init__(
+        self,
+        snowflake_driver: Snowflake
+    ):
+        self.__snowflake_driver = snowflake_driver
+        self.__AVAILABLE_FORMAT_TYPES = ['CSV', 'JSON', 'AVRO', 'ORC', 'PARQUET', 'XML']
 
-    @staticmethod
     def create(
+        self,
         file_format_name: str,
         file_format_type: str,
         or_replace: bool = False,
@@ -470,7 +447,7 @@ class FileFormat:
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         file_format_type = file_format_type.upper().strip()
-        if file_format_type not in FileFormat.AVAILABLE_FORMAT_TYPES:
+        if file_format_type not in self.__AVAILABLE_FORMAT_TYPES:
             raise ValueError(f'File Format type `{file_format_type}` not available for now')
 
         statement = "CREATE" \
@@ -483,10 +460,10 @@ class FileFormat:
         for key, value in kwargs.items():
             statement += f" {key} = {value}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
-    @staticmethod
     def drop(
+        self,
         file_format_name: str,
         if_exists: bool = False,
         return_statement: bool = False
@@ -502,13 +479,19 @@ class FileFormat:
                     f"{' IF EXISTS' if if_exists else ''}" \
                     f" {file_format_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
 
 class Stage:
 
-    @staticmethod
+    def __init__(
+        self,
+        snowflake_driver: Snowflake
+    ):
+        self.__snowflake_driver = snowflake_driver
+
     def create(
+        self,
         stage_name: str,
         or_replace: bool = False,
         is_temporary: bool = False,
@@ -542,10 +525,10 @@ class Stage:
         for key, value in kwargs.items():
             statement += f" {key} = {value}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
-    @staticmethod
     def drop(
+        self,
         stage_name: str,
         if_exists: bool = False,
         return_statement: bool = False
@@ -561,10 +544,10 @@ class Stage:
                     f"{' IF EXISTS' if if_exists else ''}" \
                     f" {stage_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
-    @staticmethod
     def put(
+        self,
         filepath: str,
         internal_stage_name: str,
         parallel: int = 4,
@@ -594,10 +577,10 @@ class Stage:
                     f" SOURCE_COMPRESSION = {source_compression}" \
                     f" OVERWRITE = {'TRUE' if overwrite else 'FALSE'}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
-    @staticmethod
     def list(
+        self,
         stage_name: str,
         regex_pattern: str = '',
         return_statement: bool = False
@@ -613,13 +596,19 @@ class Stage:
                     f" {stage_name}" \
                     f"{f' PATTERN = {regex_pattern}' if regex_pattern != '' else ''}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
 
 
 class Role:
 
-    @staticmethod
+    def __init__(
+        self,
+        snowflake_driver: Snowflake
+    ):
+        self.__snowflake_driver = snowflake_driver
+
     def use(
+        self,
         role_name: str,
         return_statement: bool = False
     ) -> Dict:
@@ -631,17 +620,35 @@ class Role:
         statement = "USE" \
                     f" ROLE {role_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+
+    def get_current(
+        self,
+    ) -> str:
+        """
+        Returns the name of the role in use by the current session
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "SELECT CURRENT_ROLE()"
+
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=True)['results'][0][0]
 
 
 class Warehouse:
 
-    @staticmethod
+    def __init__(
+        self,
+        snowflake_driver: Snowflake
+    ):
+        self.__snowflake_driver = snowflake_driver
+
     def use(
+        self,
         warehouse_name: str,
         return_statement: bool = False
     ) -> Dict:
         """
+
         @param warehouse_name: name of the warehouse to use
         @param return_statement: whether to return generated statement
         @return: result dictionary (see: `Snowflake.execute()`)
@@ -649,4 +656,15 @@ class Warehouse:
         statement = "USE" \
                     f" WAREHOUSE {warehouse_name}"
 
-        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+
+    def get_current(
+        self,
+    ) -> str:
+        """
+        Returns the name of the warehouse in use by the current session
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "SELECT CURRENT_WAREHOUSE()"
+
+        return self.__snowflake_driver.execute(statement, n=1, return_statement=True)['results'][0][0]
