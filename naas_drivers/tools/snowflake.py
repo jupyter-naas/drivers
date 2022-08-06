@@ -18,10 +18,9 @@ class Snowflake(InDriver, OutDriver):
 
     Basic drill recommendation:
         - `snowflake.connect()` - to connect to the account with given credentials
-        - `snowflake.<warehouse/schema/database>()` - to eventually set up SF working environment for the whole session
-        - `snowflake.execute()` - to run any command you want
-        - `snowflake.query() / snowflake.query_pd()` - additional, more convenient functionality to run DQL queries,
-            and, eventually, return data in form of the pandas.DataFrame.
+        - `snowflake.set_environment()` - to set up SF working environment for the whole session
+        - `snowflake.execute()` or `snowflake.query_pd()` - to run any command you want
+            (and eventually get the results in a nice Pandas DataFrame)
 
     For more information, please refer to functions' documentation.
 
@@ -45,6 +44,7 @@ class Snowflake(InDriver, OutDriver):
         self._role = Role(self)
         self._schema = Schema(self)
         self._stage = Stage(self)
+        self._storage_integration = StorageIntegration(self)
         self._warehouse = Warehouse(self)
 
         # Providing global instance to use after loading snowflake driver module
@@ -84,6 +84,10 @@ class Snowflake(InDriver, OutDriver):
         return self._stage
 
     @property
+    def storage_integration(self):
+        return self._storage_integration
+
+    @property
     def warehouse(self):
         return self._warehouse
 
@@ -104,10 +108,10 @@ class Snowflake(InDriver, OutDriver):
             e.g. <account_identifier>.snowflakecomputing.com
         @param username: SF account username
         @param password: SF account password
-        @param warehouse: (optional) SF warehouse to set up while creating a connection
-        @param database: (optional) SF database to set up while creating a connection
-        @param schema: (optional) SF schema to set up while creating a connection
-        @param role: (optional) SF role to set up while creating a connection
+        @param warehouse: SF warehouse to set up while creating a connection
+        @param database: SF database to set up while creating a connection
+        @param schema: SF schema to set up while creating a connection
+        @param role: SF role to set up while creating a connection
         """
         self._connection = snowflake.connector.connect(
             account=account,
@@ -127,9 +131,8 @@ class Snowflake(InDriver, OutDriver):
         """
         Execute passed command. Could be anything, starting from DQL query, and ending with DDL commands
         @param sql: command/query to execute
-        @param n: (optional) query result length limit
-        @param silent: (optional) whether to return result dictionary with multiple information
-            or not (run in silent mode)
+        @param n: query result length limit
+        @param silent: whether to return result dictionary with multiple information or not (run in silent mode)
         @return: dictionary containing query information outcome (results, columns_metadata, and sql statement)
         """
         res = self._cursor.execute(sql)
@@ -151,10 +154,10 @@ class Snowflake(InDriver, OutDriver):
         """
         Query data and return results in the form of pandas.DataFrame
         @param sql: query to execute
-        @param n: (optional) query result length limit
+        @param n: query result length limit
         @return: pandas.DataFrame table containing query outcome
         """
-        res = self.execute(sql, n, silent=False)
+        res = self.execute(sql, n)
 
         # TODO: Apply dtypes mapping from ResultMetadata objects
         return DataFrame(res['results'], columns=[result_metadata.name for result_metadata in res['description']])
@@ -179,7 +182,8 @@ class Snowflake(InDriver, OutDriver):
             (i.e., <database_name>.<schema_name> or <schema_name> if database is already selected)
         @param source_stage: internal or external location where the files containing data to be loaded are staged
             caution: it can be also a SELECT statement so data from stage is transformed
-        @param transformed_columns: if `source_stage` is a SELECT statement, it's possible to
+        @param transformed_columns: if `source_stage` is a SELECT statement,
+            specifies an explicit set of fields/columns (separated by commas) to load from the staged data files
         @param files: a list of one or more files names (in an array) to be loaded
         @param regex_pattern: a regular expression pattern for filtering files from the output
         @param file_format_name: the format of the data files to load (so far only name is accepted as an input)
@@ -187,7 +191,7 @@ class Snowflake(InDriver, OutDriver):
             instead of loading them into the specified table.
             Caution: does not support COPY statements that transform data during a load.
             If applied along with transformation SELECT statement, it will throw error on Snowflake side
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "COPY INTO" \
@@ -222,8 +226,6 @@ class Snowflake(InDriver, OutDriver):
         self._cursor.close()
         self._connection.close()
 
-        self._schema = None
-        self._database = None
         self._cursor = None
         self._connection = None
 
@@ -236,7 +238,7 @@ class Snowflake(InDriver, OutDriver):
             - database
             - schema
             - warehouse
-        @return: dictionary of currently used environment elements
+        @return: dictionary of current session environment elements
         """
 
         return {
@@ -289,8 +291,9 @@ class Database:
         silent: bool = False
     ) -> Optional[Dict]:
         """
+        Sets particular database for a session
         @param database_name: name of the database to use
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "USE" \
@@ -319,7 +322,7 @@ class Database:
         Executes command to create a Snowflake database with a given name
         @param database_name: database name to create
         @param or_replace: replace schema if exists
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "CREATE" \
@@ -338,7 +341,7 @@ class Database:
         Executes command to drop a Snowflake database with a given name
         @param database_name: database name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP DATABASE" \
@@ -362,8 +365,9 @@ class Schema:
         silent: bool = False
     ) -> Optional[Dict]:
         """
+        Sets particular schema for a session
         @param schema_name: name of the schema to use
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "USE" \
@@ -392,7 +396,7 @@ class Schema:
         Executes command to create a Snowflake schema with a given name
         @param schema_name: schema name to create
         @param or_replace: replace schema if exists
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "CREATE" \
@@ -411,7 +415,7 @@ class Schema:
         Executes command to drop a Snowflake schema with a given name
         @param schema_name: schema name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP SCHEMA" \
@@ -445,7 +449,7 @@ class FileFormat:
         @param file_format_type: type of the file format to be created
         @param or_replace: replace file format if exists
         @param if_not_exists: create object if it doesn't exist so far
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @param kwargs: additional arguments to be passed to the statement
             so far validation is on the Snowflake engine side
         @return: result dictionary (see: `Snowflake.execute()`)
@@ -476,7 +480,7 @@ class FileFormat:
         Executes command to drop a Snowflake file format with a given name
         @param file_format_name: file format name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP FILE FORMAT" \
@@ -511,7 +515,7 @@ class Stage:
         @param is_temporary: create a temporary stage
         @param if_not_exists: create object if it doesn't exist so far
         @param file_format_name: file format name to use while creating a stage
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @param kwargs: additional arguments to be passed to the statement
             so far validation is on the Snowflake engine side
         @return: result dictionary (see: `Snowflake.execute()`)
@@ -541,7 +545,7 @@ class Stage:
         Executes command to drop a Snowflake stage with a given name
         @param stage_name: stage name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP STAGE" \
@@ -570,7 +574,7 @@ class Stage:
         @param auto_compress: whether Snowflake uses gzip to compress files during upload
         @param source_compression: method of compression used on already-compressed files that are being staged
         @param overwrite: whether Snowflake overwrites an existing file with the same name during upload
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "PUT" \
@@ -593,7 +597,7 @@ class Stage:
         Lists files that are inside in a particular stage
         @param stage_name: the location where the data files are staged
         @param regex_pattern: a regular expression pattern for filtering files from the output
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "LIST" \
@@ -617,8 +621,9 @@ class Role:
         silent: bool = False
     ) -> Optional[Dict]:
         """
+        Sets particular role for a session
         @param role_name: name of the role to use
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "USE" \
@@ -638,6 +643,76 @@ class Role:
         return self.__snowflake_driver.execute(statement, n=1)['results'][0][0]
 
 
+class StorageIntegration:
+
+    def __init__(
+        self,
+        snowflake_driver: Snowflake
+    ):
+        self.__snowflake_driver = snowflake_driver
+
+    def create(
+        self,
+        storage_integration_name: str,
+        storage_provider: str,
+        storage_allowed_locations: List[str],
+        or_replace: bool = False,
+        if_not_exists: bool = False,
+        enabled: bool = True,
+        silent: bool = False,
+        **kwargs
+    ) -> Optional[Dict]:
+        """
+        Executes command to create a Snowflake stage with a given name
+        @param storage_integration_name: storage integration name to create
+        @param storage_provider: cloud provider to create stage and fetch data from
+        @param storage_allowed_locations: explicitly limits external stages
+            that use the integration to reference one or more storage locations
+        @param or_replace: replace file format if exists
+        @param if_not_exists: create object if it doesn't exist so far
+        @param enabled: specifies whether this storage integration is available for usage in stages
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        storage_allowed_loccations_string = ",".join([f"'{file}'" for file in storage_allowed_locations])
+
+        statement = "CREATE" \
+                    f"{' OR REPLACE' if or_replace else ''}" \
+                    f" STORAGE INTEGRATION{' IF NOT EXISTS' if if_not_exists else ''} {storage_integration_name}" \
+                    f" TYPE = EXTERNAL_STAGE" \
+                    f" ENABLED = {'TRUE' if enabled else 'FALSE'}" \
+                    f" STORAGE_PROVIDER = {storage_provider}" \
+                    f" STORAGE_ALLOWED_LOCATIONS = ({storage_allowed_loccations_string})"
+
+        # looping through kwargs for extra arguments passed in statement
+        # while executing final command, especially cloud-provider-specific parameters,
+        # Snowflake will do the validation
+        for key, value in kwargs.items():
+            statement += f" {key} = {value}"
+
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
+
+    def drop(
+        self,
+        storage_integration_name: str,
+        if_exists: bool = False,
+        silent: bool = False
+    ) -> Optional[Dict]:
+        """
+        Executes command to drop a Snowflake storage integration with a given name
+        @param storage_integration_name: storage integration name to drop
+        @param if_exists: adds `IF EXISTS` statement to a command
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "DROP STORAGE INTEGRATION" \
+                    f"{' IF EXISTS' if if_exists else ''}" \
+                    f" {storage_integration_name}"
+
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
+
+
 class Warehouse:
 
     def __init__(
@@ -652,9 +727,9 @@ class Warehouse:
         silent: bool = False
     ) -> Optional[Dict]:
         """
-
+        Sets particular warehouse for a session
         @param warehouse_name: name of the warehouse to use
-        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
+        @param silent: whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "USE" \
