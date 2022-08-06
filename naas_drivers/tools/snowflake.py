@@ -141,21 +141,6 @@ class Snowflake(InDriver, OutDriver):
 
         return result_dict
 
-    def query(
-        self,
-        sql: str,
-        n: int = 10,
-        return_statement: bool = False
-    ) -> Dict:
-        """
-        Query data and return results in the form of plain vanilla List: (results, columns_metadata)
-        @param sql: query to execute
-        @param n: (optional) query result length limit
-        @param return_statement: (optional) whether to return generated statement
-        @return: List: (results, columns_metadata) containing query outcome
-        """
-        return self.execute(sql, n, return_statement)
-
     def query_pd(
         self,
         sql: str,
