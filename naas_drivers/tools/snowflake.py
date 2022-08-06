@@ -1,6 +1,6 @@
 import sys
 import logging
-from typing import Dict
+from typing import Dict, List
 from pandas import DataFrame
 from types import SimpleNamespace
 
@@ -234,6 +234,62 @@ class Snowflake(InDriver, OutDriver):
         # TODO: Apply dtypes mapping from ResultMetadata objects
         return DataFrame(res['results'], columns=[result_metadata.name for result_metadata in res['description']])
 
+    def copy_into(
+        self,
+        table_name: str,
+        source_stage: str,
+        transformed_columns: str = '',
+        files: List[str] = None,
+        regex_pattern: str = '',
+        file_format_name: str = '',
+        validation_mode: str = '',
+        return_statement: bool = False,
+        **kwargs
+    ) -> Dict:
+        """
+        Copy data from stage to Snowflake table
+        As this function contains a lot of nuances, please refer to the documentation:
+            https://docs.snowflake.com/en/sql-reference/sql/copy-into-table.html
+        @param table_name: the name of the table into which data is loaded. Optionally, can specify namespace too
+            (i.e., <database_name>.<schema_name> or <schema_name> if database is already selected)
+        @param source_stage: internal or external location where the files containing data to be loaded are staged
+            caution: it can be also a SELECT statement so data from stage is transformed
+        @param transformed_columns: if `source_stage` is a SELECT statement, it's possible to
+        @param files: a list of one or more files names (in an array) to be loaded
+        @param regex_pattern: a regular expression pattern for filtering files from the output
+        @param file_format_name: the format of the data files to load (so far only name is accepted as an input)
+        @param validation_mode: instructs the COPY command to validate the data files
+            instead of loading them into the specified table.
+            Caution: does not support COPY statements that transform data during a load.
+            If applied along with transformation SELECT statement, it will throw error on Snowflake side
+        @param return_statement: whether to return generated statement
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "COPY INTO" \
+                    f" {table_name}"
+
+        # If applicable, then data load with transformation has been scheduled
+        # If not, it's a standard data load
+        if source_stage.upper().strip().startswith('SELECT'):
+            statement += f"{' ' + transformed_columns if transformed_columns != '' else ''}" \
+                         f" FROM ({source_stage})"
+        else:
+            statement += f" FROM {source_stage}"
+
+        files_string = ",".join([f"'{file}'" for file in files]) if files is not None else ""
+        statement += f"{f' ({files_string})' if files_string != '' else ''}"
+
+        statement += f"{f' PATTERN = {regex_pattern}' if regex_pattern != '' else ''}" \
+                     f"{f' FILE FORMAT = (FORMAT_NAME = {file_format_name})' if file_format_name != '' else ''}" \
+                     f"{f' VALIDATION_MODE = {validation_mode}' if validation_mode != '' else ''}"
+
+        # looping through kwargs for extra arguments passed in statement
+        # while executing final command, Snowflake will do the validation
+        for key, value in kwargs.items():
+            statement += f" {key} = {value}"
+
+        return self.execute(statement, n=1, return_statement=return_statement)
+
     def close_connection(self) -> None:
         """
         Closes a connection to Snowflake account, resets all the internal parameters
@@ -444,8 +500,10 @@ class Stage:
         statement = "CREATE" \
                     f"{' OR REPLACE' if or_replace else ''}" \
                     f"{' TEMPORARY' if is_temporary else ''}" \
-                    f" STAGE{' IF NOT EXISTS' if if_not_exists else ''} {stage_name}" \
-                    f"{'' if file_format_name == '' else f' FILE_FORMAT = {file_format_name}'}"
+                    f" STAGE" \
+                    f"{' IF NOT EXISTS' if if_not_exists else ''}" \
+                    f" {stage_name}" \
+                    f"{f' FILE_FORMAT = {file_format_name}' if file_format_name != '' else ''}"
 
         # looping through kwargs for extra arguments passed in statement
         # while executing final command, Snowflake will do the validation
