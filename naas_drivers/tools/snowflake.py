@@ -227,6 +227,25 @@ class Snowflake(InDriver, OutDriver):
         self._cursor = None
         self._connection = None
 
+    def get_environment(
+        self
+    ) -> Dict:
+        """
+        Returns current session environment that consists of:
+            - role
+            - database
+            - schema
+            - warehouse
+        @return: dictionary of currently used environment elements
+        """
+
+        return {
+            'role': self._role.get_current(),
+            'database': self._database.get_current(),
+            'schema': self._schema.get_current(),
+            'warehouse': self._warehouse.get_current()
+        }
+
     def set_environment(
         self,
         warehouse: str = '',
