@@ -1,6 +1,6 @@
 import sys
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 from pandas import DataFrame
 
 import snowflake.connector
@@ -122,39 +122,39 @@ class Snowflake(InDriver, OutDriver):
         self,
         sql: str,
         n: int = 10,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         Execute passed command. Could be anything, starting from DQL query, and ending with DDL commands
         @param sql: command/query to execute
         @param n: (optional) query result length limit
-        @param return_statement: (optional) whether to return generated statement
-        @return: List: (results, columns_metadata) containing query outcome
+        @param silent: (optional) whether to return result dictionary with multiple information
+            or not (run in silent mode)
+        @return: dictionary containing query information outcome (results, columns_metadata, and sql statement)
         """
         res = self._cursor.execute(sql)
 
-        result_dict = {
-            'results': res.fetchall() if n == -1 else res.fetchmany(n),
-            'description': res.description,
-            'statement': sql if return_statement else ''
-        }
-
-        return result_dict
+        if silent:
+            return None
+        else:
+            return {
+                'results': res.fetchall() if n == -1 else res.fetchmany(n),
+                'description': res.description,
+                'statement': sql
+            }
 
     def query_pd(
         self,
         sql: str,
-        n: int = 10,
-        return_statement: bool = False
+        n: int = 10
     ) -> DataFrame:
         """
         Query data and return results in the form of pandas.DataFrame
         @param sql: query to execute
         @param n: (optional) query result length limit
-        @param return_statement: (optional) whether to return generated statement
         @return: pandas.DataFrame table containing query outcome
         """
-        res = self.execute(sql, n, return_statement)
+        res = self.execute(sql, n, silent=False)
 
         # TODO: Apply dtypes mapping from ResultMetadata objects
         return DataFrame(res['results'], columns=[result_metadata.name for result_metadata in res['description']])
@@ -168,9 +168,9 @@ class Snowflake(InDriver, OutDriver):
         regex_pattern: str = '',
         file_format_name: str = '',
         validation_mode: str = '',
-        return_statement: bool = False,
+        silent: bool = False,
         **kwargs
-    ) -> Dict:
+    ) -> Optional[Dict]:
         """
         Copy data from stage to Snowflake table
         As this function contains a lot of nuances, please refer to the documentation:
@@ -187,7 +187,7 @@ class Snowflake(InDriver, OutDriver):
             instead of loading them into the specified table.
             Caution: does not support COPY statements that transform data during a load.
             If applied along with transformation SELECT statement, it will throw error on Snowflake side
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "COPY INTO" \
@@ -213,7 +213,7 @@ class Snowflake(InDriver, OutDriver):
         for key, value in kwargs.items():
             statement += f" {key} = {value}"
 
-        return self.execute(statement, n=1, return_statement=return_statement)
+        return self.execute(statement, n=1, silent=silent)
 
     def close_connection(self) -> None:
         """
@@ -267,17 +267,17 @@ class Database:
     def use(
         self,
         database_name: str,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         @param database_name: name of the database to use
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "USE" \
                     f" DATABASE {database_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def get_current(
         self,
@@ -288,45 +288,45 @@ class Database:
         """
         statement = "SELECT CURRENT_DATABASE()"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=True)['results'][0][0]
+        return self.__snowflake_driver.execute(statement, n=1)['results'][0][0]
 
     def create(
         self,
         database_name: str,
         or_replace: bool = False,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         Executes command to create a Snowflake database with a given name
         @param database_name: database name to create
         @param or_replace: replace schema if exists
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "CREATE" \
                     f"{' OR REPLACE' if or_replace else ''}" \
                     f" DATABASE {database_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def drop(
         self,
         database_name: str,
         if_exists: bool = False,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         Executes command to drop a Snowflake database with a given name
         @param database_name: database name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP DATABASE" \
                     f"{' IF EXISTS' if if_exists else ''}" \
                     f" {database_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
 
 class Schema:
@@ -340,17 +340,17 @@ class Schema:
     def use(
         self,
         schema_name: str,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         @param schema_name: name of the schema to use
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "USE" \
                     f" SCHEMA {schema_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def get_current(
         self,
@@ -361,45 +361,45 @@ class Schema:
         """
         statement = "SELECT CURRENT_SCHEMA()"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=True)['results'][0][0]
+        return self.__snowflake_driver.execute(statement, n=1)['results'][0][0]
 
     def create(
         self,
         schema_name: str,
         or_replace: bool = False,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         Executes command to create a Snowflake schema with a given name
         @param schema_name: schema name to create
         @param or_replace: replace schema if exists
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "CREATE" \
                     f"{' OR REPLACE' if or_replace else ''}" \
                     f" SCHEMA {schema_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def drop(
         self,
         schema_name: str,
         if_exists: bool = False,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         Executes command to drop a Snowflake schema with a given name
         @param schema_name: schema name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP SCHEMA" \
                     f"{' IF EXISTS' if if_exists else ''}" \
                     f" {schema_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
 
 class FileFormat:
@@ -417,16 +417,16 @@ class FileFormat:
         file_format_type: str,
         or_replace: bool = False,
         if_not_exists: bool = False,
-        return_statement: bool = False,
+        silent: bool = False,
         **kwargs
-    ) -> Dict:
+    ) -> Optional[Dict]:
         """
         Executes command to create a Snowflake file format with a given name
         @param file_format_name: file format name to create
         @param file_format_type: type of the file format to be created
         @param or_replace: replace file format if exists
         @param if_not_exists: create object if it doesn't exist so far
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @param kwargs: additional arguments to be passed to the statement
             so far validation is on the Snowflake engine side
         @return: result dictionary (see: `Snowflake.execute()`)
@@ -445,26 +445,26 @@ class FileFormat:
         for key, value in kwargs.items():
             statement += f" {key} = {value}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def drop(
         self,
         file_format_name: str,
         if_exists: bool = False,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         Executes command to drop a Snowflake file format with a given name
         @param file_format_name: file format name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP FILE FORMAT" \
                     f"{' IF EXISTS' if if_exists else ''}" \
                     f" {file_format_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
 
 class Stage:
@@ -482,9 +482,9 @@ class Stage:
         is_temporary: bool = False,
         if_not_exists: bool = False,
         file_format_name: str = '',
-        return_statement: bool = False,
+        silent: bool = False,
         **kwargs
-    ) -> Dict:
+    ) -> Optional[Dict]:
         """
         Executes command to create a Snowflake stage with a given name
         @param stage_name: stage name to create
@@ -492,7 +492,7 @@ class Stage:
         @param is_temporary: create a temporary stage
         @param if_not_exists: create object if it doesn't exist so far
         @param file_format_name: file format name to use while creating a stage
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @param kwargs: additional arguments to be passed to the statement
             so far validation is on the Snowflake engine side
         @return: result dictionary (see: `Snowflake.execute()`)
@@ -510,26 +510,26 @@ class Stage:
         for key, value in kwargs.items():
             statement += f" {key} = {value}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def drop(
         self,
         stage_name: str,
         if_exists: bool = False,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         Executes command to drop a Snowflake stage with a given name
         @param stage_name: stage name to drop
         @param if_exists: adds `IF EXISTS` statement to a command
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "DROP STAGE" \
                     f"{' IF EXISTS' if if_exists else ''}" \
                     f" {stage_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def put(
         self,
@@ -539,8 +539,8 @@ class Stage:
         auto_compress: bool = True,
         source_compression: str = 'AUTO_DETECT',
         overwrite: bool = False,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         Executes command to put data to Snowflake internal stage from a local machine
         @param filepath: local path to a file
@@ -551,7 +551,7 @@ class Stage:
         @param auto_compress: whether Snowflake uses gzip to compress files during upload
         @param source_compression: method of compression used on already-compressed files that are being staged
         @param overwrite: whether Snowflake overwrites an existing file with the same name during upload
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "PUT" \
@@ -562,26 +562,26 @@ class Stage:
                     f" SOURCE_COMPRESSION = {source_compression}" \
                     f" OVERWRITE = {'TRUE' if overwrite else 'FALSE'}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def list(
         self,
         stage_name: str,
         regex_pattern: str = '',
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         Lists files that are inside in a particular stage
         @param stage_name: the location where the data files are staged
         @param regex_pattern: a regular expression pattern for filtering files from the output
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "LIST" \
                     f" {stage_name}" \
                     f"{f' PATTERN = {regex_pattern}' if regex_pattern != '' else ''}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
 
 class Role:
@@ -595,17 +595,17 @@ class Role:
     def use(
         self,
         role_name: str,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
         @param role_name: name of the role to use
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "USE" \
                     f" ROLE {role_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def get_current(
         self,
@@ -616,7 +616,7 @@ class Role:
         """
         statement = "SELECT CURRENT_ROLE()"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=True)['results'][0][0]
+        return self.__snowflake_driver.execute(statement, n=1)['results'][0][0]
 
 
 class Warehouse:
@@ -630,18 +630,18 @@ class Warehouse:
     def use(
         self,
         warehouse_name: str,
-        return_statement: bool = False
-    ) -> Dict:
+        silent: bool = False
+    ) -> Optional[Dict]:
         """
 
         @param warehouse_name: name of the warehouse to use
-        @param return_statement: whether to return generated statement
+        @param silent: (optional) whether to run in silent mode (see `Snowflake.execute()`)
         @return: result dictionary (see: `Snowflake.execute()`)
         """
         statement = "USE" \
                     f" WAREHOUSE {warehouse_name}"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=return_statement)
+        return self.__snowflake_driver.execute(statement, n=1, silent=silent)
 
     def get_current(
         self,
@@ -652,4 +652,4 @@ class Warehouse:
         """
         statement = "SELECT CURRENT_WAREHOUSE()"
 
-        return self.__snowflake_driver.execute(statement, n=1, return_statement=True)['results'][0][0]
+        return self.__snowflake_driver.execute(statement, n=1)['results'][0][0]
