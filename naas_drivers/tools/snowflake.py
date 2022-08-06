@@ -48,7 +48,9 @@ class Snowflake(InDriver, OutDriver):
             'database': Database,
             'schema': Schema,
             'file_format': FileFormat,
-            'stage': Stage
+            'stage': Stage,
+            'warehouse': Warehouse,
+            'role': Role
         })
 
         global snowflake_instance
@@ -334,6 +336,21 @@ class Snowflake(InDriver, OutDriver):
 class Database:
 
     @staticmethod
+    def use(
+        database_name: str,
+        return_statement: bool = False
+    ) -> Dict:
+        """
+        @param database_name: name of the database to use
+        @param return_statement: whether to return generated statement
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "USE" \
+                    f" DATABASE {database_name}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+
+    @staticmethod
     def create(
         database_name: str,
         or_replace: bool = False,
@@ -373,6 +390,21 @@ class Database:
 
 
 class Schema:
+
+    @staticmethod
+    def use(
+        schema_name: str,
+        return_statement: bool = False
+    ) -> Dict:
+        """
+        @param schema_name: name of the schema to use
+        @param return_statement: whether to return generated statement
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "USE" \
+                    f" SCHEMA {schema_name}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
 
     @staticmethod
     def create(
@@ -580,5 +612,41 @@ class Stage:
         statement = "LIST" \
                     f" {stage_name}" \
                     f"{f' PATTERN = {regex_pattern}' if regex_pattern != '' else ''}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+
+
+class Role:
+
+    @staticmethod
+    def use(
+        role_name: str,
+        return_statement: bool = False
+    ) -> Dict:
+        """
+        @param role_name: name of the role to use
+        @param return_statement: whether to return generated statement
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "USE" \
+                    f" ROLE {role_name}"
+
+        return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
+
+
+class Warehouse:
+
+    @staticmethod
+    def use(
+        warehouse_name: str,
+        return_statement: bool = False
+    ) -> Dict:
+        """
+        @param warehouse_name: name of the warehouse to use
+        @param return_statement: whether to return generated statement
+        @return: result dictionary (see: `Snowflake.execute()`)
+        """
+        statement = "USE" \
+                    f" WAREHOUSE {warehouse_name}"
 
         return snowflake_instance.execute(statement, n=1, return_statement=return_statement)
