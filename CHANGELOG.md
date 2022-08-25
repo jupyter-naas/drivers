@@ -1,3 +1,9 @@
+## 0.105.0 (2022-08-25)
+
+### Feat
+
+- adding stages to Snowflake driver (#309)
+
 ## 0.104.2 (2022-08-03)
 
 ### Fix
