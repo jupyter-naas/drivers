@@ -1,3 +1,11 @@
+## 0.105.1 (2022-08-26)
+
+### Fix
+
+- replace Exception with BaseException
+- pass sonarcloud
+- send message with profile invitation
+
 ## 0.105.0 (2022-08-25)
 
 ### Feat
