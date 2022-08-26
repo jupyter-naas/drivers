@@ -900,7 +900,7 @@ class Invitation(LinkedIn):
             if len(message) < 300:
                 payload["customMessage"] = message
             else:
-                raise Exception(
+                raise BaseException(
                     f"Message too long ({len(message)} characters). Max size is 300 characters"
                 )
         # Post request
