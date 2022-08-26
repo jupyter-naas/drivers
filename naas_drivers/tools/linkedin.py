@@ -8,6 +8,7 @@ import pydash as _pd
 import naas
 from naas_drivers.tools.emailbuilder import EmailBuilder
 from naas_drivers.tools.naas_auth import NaasAuth
+import json
 
 emailbuilder = EmailBuilder()
 naasauth = NaasAuth()
@@ -875,40 +876,45 @@ class Invitation(LinkedIn):
             "ignore", invitation_id, invitation_shared_secret, is_generic
         )
 
-    def send(self, recipient_url=None, message="", recipient_urn=None):
+    def send(self, recipient_url=None, message=None):
+        """
+        Return res.json()
+
+        Parameters
+        ----------
+        recipient_url: str: (default None)
+            Profile url from Linkedin.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+
+        message: str: (default None)
+            Message send with invitation. Must not exceed characters 300 characters.
+            Example : "Hi, \nI will be happy to connect with you."
+        """
         if recipient_url is not None:
-            recipient_urn = self.get_profile_urn(recipient_url)
-        if recipient_urn is None:
-            return True
+            recipient_id = self.get_profile_urn(recipient_url)
+        # Set payload
+        payload = {"inviteeProfileUrn": f"urn:li:fsd_profile:{recipient_id}"}
+        # Add message in your invitations
         if message:
-            message = ',"message":"' + message + '"'
-            message = ""
-        data = (
-            (
-                '{"trackingId":"yvzykVorToqcOuvtxjSFMg==","invitations":[],"excludeInvitations":[],'
-                '"invitee":{"com.linkedin.voyager.growth.invitation.InviteeProfile":{"profileId":'
-            )
-            + '"'
-            + recipient_urn
-            + '"'
-            + "}}"
-            + message
-            + "}"
-        )
-        head = self.headers
-        head["accept"] = "application/vnd.linkedin.normalized+json+2.1"
+            # Validating message length (max size is 300 characters)
+            if len(message) < 300:
+                payload["customMessage"] = message
+            else:
+                raise Exception(
+                    f"Message too long ({len(message)} characters). Max size is 300 characters"
+                )
+        # Post request
+        req_url = "https://www.linkedin.com/voyager/api/voyagerRelationshipsDashMemberRelationships?action=verifyQuotaAndCreate"
         res = requests.post(
-            "https://www.linkedin.com/voyager/api/growth/normInvitations",
-            data=data,
-            headers=head,
+            req_url,
+            data=json.dumps(payload),
             cookies=self.cookies,
+            headers=self.headers,
         )
+        res.raise_for_status()
+        res_json = res.json()
         time.sleep(TIME_SLEEP)
-        try:
-            res.raise_for_status()
-            return "✉️ Invitation successfully sent !"
-        except requests.HTTPError as e:
-            return e
+        return "✉️ Invitation successfully sent !"
 
 
 class Message(LinkedIn):
