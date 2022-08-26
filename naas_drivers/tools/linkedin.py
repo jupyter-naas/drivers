@@ -912,7 +912,6 @@ class Invitation(LinkedIn):
             headers=self.headers,
         )
         res.raise_for_status()
-        res_json = res.json()
         time.sleep(TIME_SLEEP)
         return "✉️ Invitation successfully sent !"
 
