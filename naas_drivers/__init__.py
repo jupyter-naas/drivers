@@ -427,3 +427,10 @@ def snowflake():
     from naas_drivers.tools.snowflake import Snowflake
 
     return Snowflake()
+
+
+@load_driver(extra_requires="google-cloud-bigquery,pandas-gbq")
+def bigquery():
+    from naas_drivers.tools.bigquery import BigQuery
+
+    return BigQuery()
