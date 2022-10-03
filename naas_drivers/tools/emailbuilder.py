@@ -205,14 +205,13 @@ class EmailBuilder(InDriver):
 
     def __default_company(self):
         return [
-            "Naas: Notebooks-as-a-service",
+            "Naas: All-in-one data platform",
             "<a target='_blank' href='https://www.naas.ai/'>www.naas.ai</a>",
         ]
 
     def __default_legal(self):
         return [
-            "Powered by CASHSTORY © 2021",
-            "CashStory SAS, 5 rue Hermel, 75018 Paris, France",
+            "Powered by CASHSTORY SAS © 2022"
         ]
 
     def __text_style(
