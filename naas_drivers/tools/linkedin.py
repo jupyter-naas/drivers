@@ -314,7 +314,7 @@ class Profile(LinkedIn):
         - CONNECTED_AT
         - BIRTHDATE
         - ADDRESS
-        - TWITER
+        - TWITTER
         - PHONENUMBER
         - WEBSITES
         - INTERESTS
@@ -373,7 +373,7 @@ class Profile(LinkedIn):
             "CONNECTED_AT": connected_at,
             "BIRTHDATE": self.get_birthdate(data.get("birthDateOn")),
             "ADDRESS": data.get("address"),
-            "TWITER": lk_twiter,
+            "TWITTER": lk_twiter,
             "PHONENUMBER": lk_phone,
             "WEBSITES": lk_urls,
             "INTERESTS": data.get("interests"),
