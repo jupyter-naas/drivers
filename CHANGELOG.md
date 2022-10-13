@@ -1,3 +1,9 @@
+## 0.106.4 (2022-10-13)
+
+### Fix
+
+- linkedin profile URL correction + sleep param
+
 ## 0.106.3 (2022-10-06)
 
 ## 0.106.2 (2022-10-03)
