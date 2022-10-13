@@ -64,10 +64,7 @@ class HSCRUD:
             params=params,
             allow_redirects=False,
         )
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
+        res.raise_for_status()
         return res.json()
 
     def get_all(self, columns=None):
@@ -112,10 +109,7 @@ class HSCRUD:
             params.pop("properties")
             self.params = params
         self.params = params
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
+        res.raise_for_status()
         return res.json()
 
     def patch(self, uid, data):
@@ -127,10 +121,7 @@ class HSCRUD:
             json=data,
             allow_redirects=False,
         )
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
+        res.raise_for_status()
         # Message success
         print(f"✔️ {self.msg} (id={uid}) successfully updated.")
         return res.json()
@@ -144,10 +135,7 @@ class HSCRUD:
             json=data,
             allow_redirects=False,
         )
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
+        res.raise_for_status()
         res_json = res.json()
         uid = res_json.get("id")
         # Message success
@@ -163,10 +151,7 @@ class HSCRUD:
                 params=self.params,
                 allow_redirects=False,
             )
-            try:
-                res.raise_for_status()
-            except requests.HTTPError as e:
-                return e
+            res.raise_for_status()
             # Message success
             print(f"✔️ {self.msg} (id={uid}) successfully deleted.")
             return uid
@@ -295,10 +280,7 @@ class Pipeline:
             params=self.params,
             allow_redirects=False,
         )
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
+        res.raise_for_status()
         deal_stages = []
         results = res.json().get("results")
         for res in results:
@@ -365,10 +347,7 @@ class Association:
                 params=self.params,
                 allow_redirects=False,
             )
-            try:
-                res.raise_for_status()
-            except requests.HTTPError as e:
-                return e
+            res.raise_for_status()
             data = res.json()
             df = pd.DataFrame.from_records(data["results"])
             if len(df) == 0:
@@ -400,10 +379,7 @@ class Association:
                 params=self.params,
                 allow_redirects=False,
             )
-            try:
-                res.raise_for_status()
-            except requests.HTTPError as e:
-                return e
+            res.raise_for_status()
             print(
                 f"✔️ {object_name} '{object_id}' and {associate} "
                 f"'{id_associate}' successfully associated !"
@@ -444,10 +420,7 @@ class Note:
             params=self.params,
             allow_redirects=False,
         )
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
+        res.raise_for_status()
         # Message success
         return "✔️ Note successfully created."
 
