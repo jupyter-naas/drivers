@@ -165,7 +165,7 @@ class Profile(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_identity(self, profile_url=None):
+    def get_identity(self, profile_url=None, sleep=True):
         """
         Return an dataframe object with 15 columns:
         - FIRSTNAME
@@ -241,6 +241,9 @@ class Profile(LinkedIn):
                     profile_pic_url = f"{profile_root}{profile_url_end}"
         lk_id = data.get("entityUrn", "").replace("urn:li:fs_profile:", "")
         result = {
+            "PROFILE_ID": lk_id,
+            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
+            "PUBLIC_ID": lk_public_id,
             "FIRSTNAME": data.get("firstName"),
             "LASTNAME": data.get("lastName"),
             "SUMMARY": data.get("summary"),
@@ -251,16 +254,14 @@ class Profile(LinkedIn):
             "COUNTRY": data.get("geoCountryName"),
             "LOCATION": data.get("locationName"),
             "BIRTHDATE": self.get_birthdate(data.get("birthDateOn")),
-            "PROFILE_ID": lk_id,
-            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
-            "PUBLIC_ID": lk_public_id,
             "BACKGROUND_PICTURE": bg_pic_url,
             "PROFILE_PICTURE": profile_pic_url,
         }
-        time.sleep(TIME_SLEEP)
+        if sleep:
+            time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
-    def get_network(self, profile_url=None):
+    def get_network(self, profile_url=None, sleep=True):
         """
         Return an dataframe object with 7 columns:
         - PROFILE_ID
@@ -290,21 +291,23 @@ class Profile(LinkedIn):
         # Parse json
         res_json = res.json()
         data = res_json.get("data", {})
+        profile_id = data.get("entityUrn", "").replace(
+            "urn:li:fs_profileNetworkInfo:", ""
+        )
         result = {
-            "PROFILE_ID": data.get("entityUrn", "").replace(
-                "urn:li:fs_profileNetworkInfo:", ""
-            ),
-            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
+            "PROFILE_ID": profile_id,
+            "PROFILE_URL": f"https://www.linkedin.com/in/{profile_id}",
             "PUBLIC_ID": lk_id,
             "DISTANCE": data.get("distance", {}).get("value"),
             "FOLLOWING": data.get("following"),
             "FOLLOWABLE": data.get("followable"),
             "FOLLOWERS_COUNT": data.get("followersCount"),
         }
-        time.sleep(TIME_SLEEP)
+        if sleep:
+            time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
-    def get_contact(self, profile_url=None):
+    def get_contact(self, profile_url=None, sleep=True):
         """
         Return an dataframe object with 11 columns:
         - PROFILE_ID
@@ -363,11 +366,12 @@ class Profile(LinkedIn):
             for rows in lk_websites:
                 lk_url = rows["url"]
                 lk_urls = f"{lk_urls}{lk_url}, "
+        profile_id = data.get("entityUrn", "").replace(
+            "urn:li:fs_contactinfo:", ""
+        )
         result = {
-            "PROFILE_ID": data.get("entityUrn", "").replace(
-                "urn:li:fs_contactinfo:", ""
-            ),
-            "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
+            "PROFILE_ID": profile_id,
+            "PROFILE_URL": f"https://www.linkedin.com/in/{profile_id}",
             "PUBLIC_ID": lk_id,
             "EMAIL": data.get("emailAddress"),
             "CONNECTED_AT": connected_at,
@@ -376,9 +380,10 @@ class Profile(LinkedIn):
             "TWITTER": lk_twiter,
             "PHONENUMBER": lk_phone,
             "WEBSITES": lk_urls,
-            "INTERESTS": data.get("interests"),
+#             "INTERESTS": data.get("interests"),
         }
-        time.sleep(TIME_SLEEP)
+        if sleep:
+            time.sleep(TIME_SLEEP)
         return pd.DataFrame([result])
 
     def get_resume(self, profile_url=None, profile_urn=None):
