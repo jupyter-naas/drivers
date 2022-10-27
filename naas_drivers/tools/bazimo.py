@@ -14,10 +14,7 @@ class Bazimo:
             "authenticationType": "bearer",
         }
         res = requests.post(url, json=json)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
+        res.raise_for_status()
         res_json = res.json()
         token = res_json.get("token")
 
@@ -58,16 +55,15 @@ class Exports(Bazimo):
             scope = "11"
             header = 5
             sheet_name = "Détail factures"
+            
         # Request url
         url = (
             f"https://bazimo-api.azurewebsites.net/api/tenant/app/exports?scope={scope}"
         )
         headers = {"Authorization": f"bearer {self.token}"}
         res = requests.get(url, headers=headers)
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as e:
-            return e
+        res.raise_for_status()
+
         # Read Excel
         df = pd.read_excel(res.content, sheet_name=sheet_name, header=header)
         return df
