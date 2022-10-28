@@ -32,7 +32,7 @@ class Sharepoint:
             print(f'✅ "{src}" downloaded in "{dst}"')
         except Exception as e:
             print(f'[red]❌ Error while downloading "{src}" into "{dst}"')
-            print(e)
+            raise(e)
 
     def upload_file(self, src: str, dst: str):
         try:
@@ -43,4 +43,4 @@ class Sharepoint:
             print(f'✅ "{src}" uploaded in "{dst}"')
         except Exception as e:
             print(f'[red]❌ Error while uploading "{src}" into "{dst}"')
-            print(e)
+            raise(e)
