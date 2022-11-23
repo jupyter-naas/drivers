@@ -67,11 +67,11 @@ class HSCRUD:
         res.raise_for_status()
         return res.json()
 
-    def get_all(self, columns=None):
+    def get_all(self, hs_properties=None):
         items = []
         params = self.params
-        if columns is not None:
-            params["properties"] = columns
+        if hs_properties is not None:
+            params["properties"] = hs_properties
         more_page = True
         while more_page:
             data = self.__get_by_page(params)
@@ -84,28 +84,31 @@ class HSCRUD:
                 more_page = False
         df = pd.DataFrame(items).reset_index(drop=True)
         params.pop("after")
-        if columns is not None:
+        if hs_properties:
             params.pop("properties")
             self.params = params
-            for col in columns:
-                if col not in df.columns:
-                    index = columns.index(col)
-                    columns.pop(index)
-            # Reorder columns
-            df = df[columns]
+            for col in hs_properties:
+                if col not in df.hs_properties:
+                    index = hs_properties.index(col)
+                    hs_properties.pop(index)
+            # Reorder hs_properties
+            df = df[hs_properties]
         return df
 
-    def get(self, uid, columns=None):
+    def get(self, uid, hs_properties=None, idproperty=None):
         params = self.params
-        if columns is not None:
-            params["properties"] = columns
+        # Get contact with property email
+        if idproperty:
+            params["idProperty"] = idproperty
+        if hs_properties:
+            params["properties"] = hs_properties
         res = requests.get(
             url=f"{self.base_url}/{uid}",
             headers=self.req_headers,
             params=params,
             allow_redirects=False,
         )
-        if columns is not None:
+        if hs_properties:
             params.pop("properties")
             self.params = params
         self.params = params
@@ -425,7 +428,7 @@ class Note:
         return "✔️ Note successfully created."
 
 
-class Hubspot(InDriver, OutDriver):
+class HubSpot(InDriver, OutDriver):
 
     base_url = os.environ.get("HUBSPOT_API_URL", "https://api.hubapi.com/crm/v3")
     api_token = None
@@ -436,8 +439,9 @@ class Hubspot(InDriver, OutDriver):
         self.req_headers = {
             "accept": "application/json",
             "content-type": "application/json",
+            "authorization": f"Bearer {self.token}",
         }
-        self.params = {"limit": "100", "archived": "false", "hapikey": api_token}
+        self.params = {"limit": "100", "archived": "false"}
 
         # Init end point
         self.obj_url = f"{self.base_url}/objects"
