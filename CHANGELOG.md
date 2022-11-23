@@ -1,3 +1,13 @@
+## 0.107.0 (2022-11-23)
+
+### Feat
+
+- update auth method hubspot
+
+### Fix
+
+- remove pydash
+
 ## 0.106.7 (2022-10-28)
 
 ### Fix
