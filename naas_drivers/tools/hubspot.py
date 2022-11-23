@@ -6,7 +6,6 @@ import os
 import string
 import json
 import re
-import pydash
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
