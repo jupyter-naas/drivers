@@ -88,7 +88,7 @@ class HSCRUD:
             params.pop("properties")
             self.params = params
             for col in hs_properties:
-                if col not in df.hs_properties:
+                if col not in df.columns:
                     index = hs_properties.index(col)
                     hs_properties.pop(index)
             # Reorder hs_properties
@@ -110,7 +110,8 @@ class HSCRUD:
         )
         if hs_properties:
             params.pop("properties")
-            self.params = params
+        if idproperty:
+            params.pop("idProperty")
         self.params = params
         res.raise_for_status()
         return res.json()
