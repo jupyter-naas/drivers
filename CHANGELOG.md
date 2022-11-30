@@ -1,3 +1,9 @@
+## 0.107.2 (2022-11-30)
+
+### Fix
+
+- error cleaning properties CRUD get
+
 ## 0.107.1 (2022-11-30)
 
 ### Fix
