@@ -4,7 +4,7 @@ from mprop import mproperty
 from subprocess import Popen, PIPE
 import sys
 
-__version__ = "0.107.0"
+__version__ = "0.106.7"
 
 __github_repo = "jupyter-naas/drivers"
 
@@ -333,9 +333,9 @@ def linkedin():
 
 @load_driver
 def hubspot():
-    from naas_drivers.tools.hubspot import Hubspot
+    from naas_drivers.tools.hubspot import HubSpot
 
-    return Hubspot()
+    return HubSpot()
 
 
 @load_driver
