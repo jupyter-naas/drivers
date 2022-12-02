@@ -243,7 +243,7 @@ class Profile(LinkedIn):
         result = {
             "PROFILE_ID": lk_id,
             "PROFILE_URL": f"https://www.linkedin.com/in/{lk_id}",
-            "PUBLIC_ID": lk_public_id,
+            "PUBLIC_ID": data.get("publicIdentifier"),
             "FIRSTNAME": data.get("firstName"),
             "LASTNAME": data.get("lastName"),
             "SUMMARY": data.get("summary"),
@@ -266,7 +266,6 @@ class Profile(LinkedIn):
         Return an dataframe object with 7 columns:
         - PROFILE_ID
         - PROFILE_URL
-        - PUBLIC_ID
         - DISTANCE
         - FOLLOWING
         - FOLLOWABLE
@@ -297,7 +296,6 @@ class Profile(LinkedIn):
         result = {
             "PROFILE_ID": profile_id,
             "PROFILE_URL": f"https://www.linkedin.com/in/{profile_id}",
-            "PUBLIC_ID": lk_id,
             "DISTANCE": data.get("distance", {}).get("value"),
             "FOLLOWING": data.get("following"),
             "FOLLOWABLE": data.get("followable"),
@@ -312,7 +310,6 @@ class Profile(LinkedIn):
         Return an dataframe object with 11 columns:
         - PROFILE_ID
         - PROFILE_URL
-        - PUBLIC_ID
         - EMAIL
         - CONNECTED_AT
         - BIRTHDATE
@@ -372,7 +369,6 @@ class Profile(LinkedIn):
         result = {
             "PROFILE_ID": profile_id,
             "PROFILE_URL": f"https://www.linkedin.com/in/{profile_id}",
-            "PUBLIC_ID": lk_id,
             "EMAIL": data.get("emailAddress"),
             "CONNECTED_AT": connected_at,
             "BIRTHDATE": self.get_birthdate(data.get("birthDateOn")),
