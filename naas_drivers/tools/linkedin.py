@@ -363,9 +363,7 @@ class Profile(LinkedIn):
             for rows in lk_websites:
                 lk_url = rows["url"]
                 lk_urls = f"{lk_urls}{lk_url}, "
-        profile_id = data.get("entityUrn", "").replace(
-            "urn:li:fs_contactinfo:", ""
-        )
+        profile_id = data.get("entityUrn", "").replace("urn:li:fs_contactinfo:", "")
         result = {
             "PROFILE_ID": profile_id,
             "PROFILE_URL": f"https://www.linkedin.com/in/{profile_id}",
@@ -376,7 +374,7 @@ class Profile(LinkedIn):
             "TWITTER": lk_twiter,
             "PHONENUMBER": lk_phone,
             "WEBSITES": lk_urls,
-#             "INTERESTS": data.get("interests"),
+            #             "INTERESTS": data.get("interests"),
         }
         if sleep:
             time.sleep(TIME_SLEEP)
