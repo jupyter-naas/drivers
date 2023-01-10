@@ -1,3 +1,9 @@
+## 0.108.0 (2023-01-10)
+
+### Feat
+
+- filter date and author get commits github
+
 ## 0.107.4 (2022-12-02)
 
 ### Fix
