@@ -389,8 +389,28 @@ class Repositories(Github):
         Github.__init__(self)
         self.headers = headers
 
-    def get_commits(self, url):
+    def get_commits(self, url, author=None, since=None, until=None, per_page=100, page=1):
         """
+        url: string
+        Repository url.
+
+        author: string
+        GitHub login or email address by which to filter by commit author.
+
+        since: string
+        Only show notifications updated after the given time. This is a timestamp in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ.
+
+        until: string
+        Only commits before this date will be returned. This is a timestamp in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ.
+
+        per_page: integer
+        The number of results per page (max 100).
+        Default: 30
+
+        page: integer
+        Page number of the results to fetch.
+        Default: 1
+        
         Return an dataframe object with 11 columns:
         - ID                   object
         - MESSAGE              object
@@ -415,13 +435,18 @@ class Repositories(Github):
 
         # Get commits
         commits = []
-        page = 1
         while True:
             params = {
                 "state": "open",
-                "per_page": "100",
+                "per_page": per_page,
                 "page": page,
             }
+            if author:
+                params["author"] = author
+            if since:
+                params["since"] = since
+            if until:
+                params["until"] = until
             url = f"https://api.github.com/repos/{repository}/commits?{urlencode(params, safe='(),')}"
             res = requests.get(url, headers=self.headers)
             try:
