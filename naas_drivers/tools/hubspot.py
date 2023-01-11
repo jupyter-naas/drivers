@@ -87,12 +87,6 @@ class HSCRUD:
         if hs_properties:
             params.pop("properties")
             self.params = params
-            for col in hs_properties:
-                if col not in df.columns:
-                    index = hs_properties.index(col)
-                    hs_properties.pop(index)
-            # Reorder hs_properties
-            df = df[hs_properties]
         return df
 
     def get(self, uid, hs_properties=None, idproperty=None):
