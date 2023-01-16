@@ -57,7 +57,7 @@ extras_require = {
         "dacite==1.6.0",
     ],
     "plotly": [
-        "plotly==4.14.3",
+        "plotly==5.12.0",
     ],
     "cython": ["Cython==0.29.23"],
     "prediction": [
