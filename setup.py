@@ -44,7 +44,7 @@ extras_require = {
         "google-auth-oauthlib==0.4.4",
     ],
     "markdown": [
-        "markdown2==2.4.0",
+        "markdown2==2.4.7",
     ],
     "mongo": [
         "pymongo==3.11.3",
