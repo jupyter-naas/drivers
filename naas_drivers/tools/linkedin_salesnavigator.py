@@ -2,13 +2,10 @@ import pandas as pd
 import requests
 import time
 import urllib
-from datetime import datetime
 import secrets
-import pydash as _pd
 import naas
 from naas_drivers.tools.emailbuilder import EmailBuilder
 from naas_drivers.tools.naas_auth import NaasAuth
-import json
 
 emailbuilder = EmailBuilder()
 naasauth = NaasAuth()
