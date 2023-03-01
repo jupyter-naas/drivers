@@ -72,7 +72,6 @@ class LinkedIn:
             else:
                 raise BaseException(res.status_code, res.text)
 
-
     def connect(
         self,
         li_at: str = None,
@@ -92,9 +91,7 @@ class LinkedIn:
         }
 
         # Init headers
-        self.headers = {
-            "Content-Type": "application/json"
-        }
+        self.headers = {"Content-Type": "application/json"}
 
         # Init end point
         self.leads = Leads(self.cookies, self.headers)
@@ -110,16 +107,19 @@ class Leads(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-        
-    def get_list(self, start=0, limit=1000):
+    def get_list(self, url, start=0, count=100, limit=1000):
         # Init
         df = pd.DataFrame()
         if limit != -1 and limit < count:
             count = limit
-            
         # Requests API
         while True:
-            req_url = f"{LINKEDIN_API}/leads/getList?start={start}&limit={limit}"
+            params = {
+                "url": url,
+                "start": start,
+                "count": count,
+            }
+            req_url = f"{LINKEDIN_API}/leads/getList?{urllib.parse.urlencode(params, safe='(),')}"
             res = requests.post(req_url, json=self.cookies, headers=self.headers)
             res.raise_for_status()
 
@@ -135,6 +135,7 @@ class Leads(LinkedIn):
             start += count
             if limit != -1 and start >= limit:
                 break
+            elif limit != -1 and limit - start < count:
+                count = limit - start
             time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
-
