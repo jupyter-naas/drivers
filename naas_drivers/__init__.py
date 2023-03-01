@@ -434,3 +434,10 @@ def bigquery():
     from naas_drivers.tools.bigquery import BigQuery
 
     return BigQuery()
+
+
+@load_driver
+def linkedin_salesnavigator():
+    from naas_drivers.tools.linkedin_salesnavigator import LinkedIn
+
+    return LinkedIn()
