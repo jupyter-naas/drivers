@@ -1,3 +1,17 @@
+## 0.109.0 (2023-03-02)
+
+### Feat
+
+- test and update driver
+- linkedin_salesnavigator get list of leads
+- add linkedin_salesnavigator to init
+
+### Fix
+
+- **__init__**: Version drift
+- **CI**: Bump commitizen-action (#359)
+- remove unused library
+
 ## 0.108.1 (2023-01-11)
 
 ### Fix
