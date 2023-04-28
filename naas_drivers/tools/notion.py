@@ -21,7 +21,7 @@ global notion_instance
 
 def ensure_page_id(page_id):
     if "http" in page_id:
-        page_id = page_id.split("/")[-1].split("-")[-1]
+        page_id = page_id.split("/")[-1].split("-")[-1].split("?")[0]
     return page_id
 
 
