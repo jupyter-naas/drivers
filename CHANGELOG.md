@@ -1,3 +1,9 @@
+## 0.109.2 (2023-04-28)
+
+### Fix
+
+- split parameters to get page id in notion
+
 ## 0.109.1 (2023-03-02)
 
 ### Fix
