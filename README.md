@@ -47,3 +47,8 @@ This auto publish on pypip by github action on main branch.
 * [Maxime Jublou](https://github.com/Dr0p42)
 * [Martin Donadieu](https://github.com/riderx)
 * [Florent Ravenel](https://github.com/FlorentLvr)
+
+## Legal
+### LinkedIn driver
+This code is in no way affiliated with, authorized, maintained, sponsored or endorsed by Linkedin or any of its affiliates or subsidiaries. It uses an independent and unofficial API. Use at your own risk.
+This project violates Linkedin's User Agreement Section 8.2, and because of this, Linkedin may (and will) temporarily or permanently ban your account. We are not responsible for your account being banned.
