@@ -1,3 +1,9 @@
+## 0.110.0 (2023-05-29)
+
+### Feat
+
+- add legal linkedin driver to README.md
+
 ## 0.109.2 (2023-04-28)
 
 ### Fix
