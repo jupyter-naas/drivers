@@ -151,7 +151,7 @@ class Email(OutDriver):
         Args:
             date (datetime): the date to match
             condition (str, optional): the condition to match the date; defaults to "on".
-            Possible values are: "on", "before", "after", "before or on", "after or on".
+            Possible values are: "on", "before", "after or on".
         Returns:
             pd.DataFrame
         """
@@ -161,13 +161,9 @@ class Email(OutDriver):
             if condition == "on":
                 query = AND(date=date)
             elif condition == "before":
-                query = AND(date__lt=date)
-            elif condition == "after":
-                query = AND(date__gt=date)
-            elif condition == "before or on":
-                query = AND(date__lte=date)
+                query = AND(date_lt=date)
             elif condition == "after or on":
-                query = AND(date__gte=date)
+                query = AND(date_gte=date)
 
             for msg in mailbox.fetch(query):
                 parsed = self.__parse_message(msg)
