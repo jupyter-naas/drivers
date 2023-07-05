@@ -36,14 +36,14 @@ jobs:
           python3 -m black naas_drivers
           python3 -m flake8 naas_drivers
           pytest --cov=./naas_drivers --cov-report=xml 
-      - name: Upload coverage to Codecov
-        if: runner.os == 'Linux'
-        uses: codecov/codecov-action@v1.0.3
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
+      # - name: Upload coverage to Codecov
+      #   if: runner.os == 'Linux'
+      #   uses: codecov/codecov-action@v1.0.3
+      #   with:
+      #     token: ${{secrets.CODECOV_TOKEN}}
+      #     file: ./coverage.xml
+      #     flags: unittests
+      #     name: codecov-umbrella
       - name: Build package
         run: python3 setup.py sdist
       - name: Deploy Pypi
