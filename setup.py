@@ -148,7 +148,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     extras_require=extras_require,
     install_requires=[
-        "pandas==1.2.4",
+        "pandas==1.5.3",
         "pandas-datareader==0.9.0",
         "requests>=2.25.1",
         "mprop==0.16.0",
