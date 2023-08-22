@@ -1,3 +1,9 @@
+## 0.111.1 (2023-08-22)
+
+### Fix
+
+- get conversations from LinkedIn
+
 ## 0.111.0 (2023-08-22)
 
 ### Feat
