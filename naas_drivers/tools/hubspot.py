@@ -89,13 +89,15 @@ class HSCRUD:
             self.params = params
         return df
 
-    def get(self, uid, hs_properties=None, idproperty=None):
+    def get(self, uid, hs_properties=None, idproperty=None, hs_associations=None):
         params = self.params
         # Get contact with property email
         if idproperty:
             params["idProperty"] = idproperty
         if hs_properties:
             params["properties"] = hs_properties
+        if hs_associations:
+            params["associations"] = hs_associations
         res = requests.get(
             url=f"{self.base_url}/{uid}",
             headers=self.req_headers,
