@@ -961,7 +961,6 @@ class Message(LinkedIn):
 
         # Init
         df = pd.DataFrame()
-        start = 0
         count = 20
         limit_max = 600
 
