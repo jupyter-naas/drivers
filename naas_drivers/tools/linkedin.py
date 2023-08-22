@@ -921,18 +921,56 @@ class Message(LinkedIn):
         self.cookies = cookies
         self.headers = headers
 
-    def get_conversations(self, limit=-1, count=20):
-        limit_max = 500
-        params = {
-            "limit": limit_max if limit > limit_max or limit == -1 else limit,
-            "count": count,
-        }
-        df_result = None
+    def get_conversations(
+        self,
+        limit=20,
+        sleep=True,
+    ):
+        """
+        Fetches the conversations from LinkedIn API.
+
+        This function sends a POST request to Naas LinkedIn's API endpoint to retrieve conversation data.
+        It retrieves the data in batches (default batch size is 20) and concatenates the results into a pandas DataFrame.
+        The function continues to fetch data until the specified limit is reached, or until there are no more conversations to fetch.
+        An optional sleep parameter can be used to introduce a delay between requests to avoid hitting API rate limits.
+
+        Parameters:
+        limit (int): The maximum number of conversations to fetch. If not specified, defaults to 20. The maximum allowed limit is 600.
+        sleep (bool): Whether to introduce a delay between requests. If not specified, defaults to True.
+
+        Returns:
+        df (pandas.DataFrame): A DataFrame containing the conversation data. The DataFrame consists of the following columns:
+            1. CONVERSATION_ID: The unique identifier for the conversation.
+            2. CONVERSATION_TYPE: The type of conversation (e.g., MEMBER_TO_MEMBER).
+            3. MESSAGE_COUNT: The total number of messages in the conversation.
+            4. UNREAD_MESSAGE_COUNT: The number of unread messages in the conversation.
+            5. FULLNAME: The full name of the other participant in the conversation.
+            6. PROFILE_URL: The LinkedIn profile URL of the other participant.
+            7. PUBLIC_ID: The public identifier of the other participant.
+            8. PROFILE_ID: The profile ID of the other participant.
+            9. FIRSTNAME: The first name of the other participant.
+            10. LASTNAME: The last name of the other participant.
+            11. OCCUPATION: The occupation of the other participant.
+            12. LAST_MESSAGE: The content of the last message in the conversation.
+            13. LAST_MESSAGE_SENT_AT: The timestamp of when the last message was sent.
+            14. LAST_READ_AT: The timestamp of when the last message was read.
+            15. LAST_SENDER_ID: The ID of the last sender.
+            16. LAST_SENDER: The full name of the last sender.
+            17. DATE_EXTRACT: The timestamp of when the conversation data was extracted.
+        """
+
+        # Init
+        df = pd.DataFrame()
+        count = 20
+        limit_max = 600
+
+        # Set count and limit
+        if limit < count:
+            count = limit
+        if limit > limit_max:
+            limit = limit_max
         while True:
-            if limit != -1:
-                limit -= limit_max
-                if limit < 0:
-                    limit = 0
+            params = {"count": count}
             req_url = f"{LINKEDIN_API}/message/getConversations?{urllib.parse.urlencode(params, safe='(),')}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             res.raise_for_status()
@@ -942,23 +980,21 @@ class Message(LinkedIn):
 
             # Get json result
             res_json = res.json()
-            df = pd.DataFrame(res_json)
-            created_before = (
-                (int)(
-                    datetime.strptime(
-                        df["LAST_ACTIVITY"].iloc[-1], DATETIME_FORMAT
-                    ).timestamp()
-                )
-            ) * 1000
-            params["created_before"] = created_before
-            if df_result is None:
-                df_result = df
-            else:
-                df_result = pd.concat([df_result, df])
-            time.sleep(TIME_SLEEP)
-            if limit == 0 or len(df) < params["limit"]:
+            tmp_df = pd.DataFrame(res_json)
+            df = pd.concat([df, tmp_df])
+
+            # Check if result is not empty else break
+            if len(tmp_df) == 0:
                 break
-        return df_result.reset_index(drop=True)
+            if len(df) >= limit:
+                break
+            # Set created before params
+            last_message_sent_at = tmp_df["LAST_MESSAGE_SENT_AT"].iloc[0]
+            created_before = datetime.strptime(last_message_sent_at, DATETIME_FORMAT)
+            params["created_before"] = created_before
+            if sleep:
+                time.sleep(TIME_SLEEP)
+        return df.reset_index(drop=True)
 
     def get_messages(
         self, conversation_url=None, conversation_urn=None, start=0, limit=-1, count=20
