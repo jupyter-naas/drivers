@@ -1,3 +1,9 @@
+## 0.111.0 (2023-08-22)
+
+### Feat
+
+- get associations from object
+
 ## 0.110.2 (2023-07-05)
 
 ### Fix
