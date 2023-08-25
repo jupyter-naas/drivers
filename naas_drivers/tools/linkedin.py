@@ -82,7 +82,7 @@ class LinkedIn:
         if "-activity-" in url:
             return url.split("-activity-")[-1].split("-")[0]
         if ":activity:" in url:
-            return url.split(":activity:")[-1]
+            return url.split(":activity:")[-1].split("/")[0]
 
     def print_deprecated(self, new_funct):
         if self.deprected:
