@@ -1,3 +1,9 @@
+## 0.111.2 (2023-08-25)
+
+### Fix
+
+- hot fix parsing activity post URL
+
 ## 0.111.1 (2023-08-22)
 
 ### Fix
