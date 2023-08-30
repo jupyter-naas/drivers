@@ -997,23 +997,55 @@ class Message(LinkedIn):
         return df.reset_index(drop=True)
 
     def get_messages(
-        self, conversation_url=None, conversation_urn=None, start=0, limit=-1, count=20
+        self,
+        conversation_url=None,
+        count=20,
+        limit=20,
+        sleep=False,
     ):
-        req_url = f"{LINKEDIN_API}/message/getMessages?start={start}&limit={limit}&count{count}"
-        if conversation_url:
-            req_url += f"&conversation_url={conversation_url}"
-        if conversation_urn:
-            req_url += f"&conversation_urn={conversation_urn}"
-        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
-        res.raise_for_status()
+        # Init
+        df = pd.DataFrame()
+        start = 0
+        count = 20
+        limit_max = 100
 
-        # Manage LinkedIn API errors
-        LinkedIn.manage_api_error(res)
+        # Get conversation ID
+        conversation_id = conversation_url.split(
+            "https://www.linkedin.com/messaging/thread/"
+        )[-1].split("/")[0]
 
-        # Get json result
-        res_json = res.json()
-        df = pd.DataFrame(res_json)
-        time.sleep(TIME_SLEEP)
+        # Set count and limit
+        if limit < count:
+            count = limit
+        if limit > limit_max:
+            limit = limit_max
+        while True:
+            params = {
+                "conversation_id": conversation_id,
+                "start": start,
+                "count": count,
+            }
+            print(params)
+            req_url = f"{LINKEDIN_API}/message/getMessages?{urllib.parse.urlencode(params, safe='(),')}"
+            res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+            res.raise_for_status()
+
+            # Manage LinkedIn API errors
+            LinkedIn.manage_api_error(res)
+
+            # Get json result
+            res_json = res.json()
+            if len(res_json) > 0:
+                tmp_df = pd.DataFrame(res_json)
+                df = pd.concat([df, tmp_df])
+            # Check if result is not empty else break
+            if len(res_json) == 0 or len(res_json) < count:
+                break
+            if len(df) >= limit:
+                break
+            start += count
+            if sleep:
+                time.sleep(TIME_SLEEP)
         return df.reset_index(drop=True)
 
     def send(self, content, recipients_url=None, recipients_urn=None):
