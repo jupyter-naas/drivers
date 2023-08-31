@@ -1,4 +1,4 @@
-import pandas as pd
+gimport pandas as pd
 import requests
 import time
 import urllib
@@ -1025,7 +1025,6 @@ class Message(LinkedIn):
                 "start": start,
                 "count": count,
             }
-            print(params)
             req_url = f"{LINKEDIN_API}/message/getMessages?{urllib.parse.urlencode(params, safe='(),')}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             res.raise_for_status()
