@@ -1,3 +1,9 @@
+## 0.112.1 (2023-08-31)
+
+### Fix
+
+- remove print on linkedin.py get_messages()
+
 ## 0.112.0 (2023-08-30)
 
 ### Feat
