@@ -9,15 +9,19 @@ MODELS = {
 
 
 class NaasChatPlugin:
-    def num_tokens_from_string(self, string: str, encoding_name="cl100k_base") -> int:
+    def num_tokens_from_string(
+        self,
+        string: str,
+        encoding_name="cl100k_base"
+    ) -> int:
         """
         Returns the number of tokens in a text string.
 
         This function uses the specified encoding to tokenize the input string, and then returns the number of tokens.
 
         Parameters:
-        string (str): The input string to be tokenized. By default, "cl100k_base"
-        encoding_name (str): The name of the encoding to be used for tokenization.
+        - string (str): The input string to be tokenized. By default, "cl100k_base"
+        - encoding_name (str): The name of the encoding to be used for tokenization.
 
         Returns:
         int: The number of tokens in the input string.
@@ -26,7 +30,12 @@ class NaasChatPlugin:
         num_tokens = len(encoding.encode(string))
         return num_tokens
 
-    def check_tokens(self, prompt, model, limit=0.2):
+    def check_tokens(
+        self,
+        prompt,
+        model,
+        limit=0.2
+    ):
         """
         Checks the number of tokens in the prompt and warns if it exceeds the maximum limit or the recommended limit.
 
@@ -35,9 +44,10 @@ class NaasChatPlugin:
         If the number of tokens exceeds either limit, a warning is printed.
 
         Parameters:
-        prompt (str): The input prompt to be checked.
-        model (str): The name of the model to be used for tokenization. Must be one of 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4'
-        limit (float): The recommended limit as a fraction of the maximum limit. Default is 0.2 (20%).
+        - prompt (str): The input prompt to be checked.
+        - model (str): The name of the model to be used for tokenization.
+        Must be one of 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4'
+        - limit (float): The recommended limit as a fraction of the maximum limit. Default is 0.2 (20%).
 
         Returns:
         int: The number of tokens in the prompt.
@@ -57,20 +67,27 @@ class NaasChatPlugin:
         prompt_tokens = self.num_tokens_from_string(prompt, "cl100k_base")
         if prompt_tokens >= max_tokens:
             print(
-                f"⛔ Be careful, your system prompt is too big. Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})"
+                f"""⛔ Be careful, your system prompt is too big.
+                Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})"""
             )
         elif prompt_tokens > recommended_limit:
             print(
-                f"⚠️ Be careful, your system prompt looks too big. Tokens: {prompt_tokens} (limit recommended: {int(limit*100)}% -> {recommended_limit})"
+                f"""⚠️ Be careful, your system prompt looks too big.
+                Tokens: {prompt_tokens} (limit recommended: {int(limit*100)}% -> {recommended_limit})"""
             )
         else:
             print(
-                f"✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})"
+                f"""✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})"""
             )
         return prompt_tokens, max_tokens
 
     def create_plugin(
-        self, name, prompt, model="gpt-3.5-turbo-16k", temperature=0, output_path=None
+        self,
+        name,
+        prompt,
+        model="gpt-3.5-turbo-16k",
+        temperature=0,
+        output_path=None
     ):
         """
         Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path.
@@ -79,11 +96,11 @@ class NaasChatPlugin:
         It then creates an asset with the JSON file and returns the asset link.
 
         Parameters:
-        name (str): The name of the plugin.
-        prompt (str): The prompt for the plugin.
-        model (str): The name of the model to be used for tokenization. Default is "gpt-3.5-turbo-16k".
-        temperature (int): The temperature parameter for the model. Default is 0.
-        output_path (str): The path where the JSON file should be saved. If not provided, it will be created from the plugin name.
+        - name (str): The name of the plugin.
+        - prompt (str): The prompt for the plugin.
+        - model (str): The name of the model to be used for tokenization. Default is "gpt-3.5-turbo-16k".
+        - temperature (int): The temperature parameter for the model. Default is 0.
+        - output_path (str): The path where the JSON file should be saved. If not provided, it will be created from the plugin name.
 
         Returns:
         str: The output path of the naas chat plugin.
