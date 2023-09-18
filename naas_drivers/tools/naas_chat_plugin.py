@@ -9,11 +9,7 @@ MODELS = {
 
 
 class NaasChatPlugin:
-    def num_tokens_from_string(
-        self,
-        string: str,
-        encoding_name="cl100k_base"
-    ) -> int:
+    def num_tokens_from_string(self, string: str, encoding_name="cl100k_base") -> int:
         """
         Returns the number of tokens in a text string.
 
@@ -30,12 +26,7 @@ class NaasChatPlugin:
         num_tokens = len(encoding.encode(string))
         return num_tokens
 
-    def check_tokens(
-        self,
-        prompt,
-        model,
-        limit=0.2
-    ):
+    def check_tokens(self, prompt, model, limit=0.2):
         """
         Checks the number of tokens in the prompt and warns if it exceeds the maximum limit or the recommended limit.
 
@@ -83,12 +74,7 @@ class NaasChatPlugin:
         return prompt_tokens, max_tokens
 
     def create_plugin(
-        self,
-        name,
-        prompt,
-        model="gpt-3.5-turbo-16k",
-        temperature=0,
-        output_path=None
+        self, name, prompt, model="gpt-3.5-turbo-16k", temperature=0, output_path=None
     ):
         """
         Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path.
