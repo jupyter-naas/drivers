@@ -49,6 +49,9 @@ extras_require = {
     "mongo": [
         "pymongo==3.11.3",
     ],
+    "naas_chat_plugin": [
+        "tiktoken==0.4.0",
+    ],
     "newsapi": [
         "newsapi-python==0.2.6",
     ],

@@ -441,3 +441,9 @@ def linkedin_salesnavigator():
     from naas_drivers.tools.linkedin_salesnavigator import LinkedIn
 
     return LinkedIn()
+
+@load_driver
+def naas_chat_plugin():
+    from naas_drivers.tools.naas_chat_plugin import NaasChatPlugin
+
+    return NaasChatPlugin()
