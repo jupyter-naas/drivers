@@ -10,7 +10,11 @@ MODELS = {
 
 
 class Plugin:
-    def num_tokens_from_string(string: str, encoding_name="cl100k_base") -> int:
+    @staticmethod
+    def num_tokens_from_string(
+        string: str,
+        encoding_name="cl100k_base"
+    ) -> int:
         """
         Returns the number of tokens in a text string.
 
@@ -26,8 +30,13 @@ class Plugin:
         encoding = tiktoken.get_encoding(encoding_name)
         num_tokens = len(encoding.encode(string))
         return num_tokens
-
-    def check_tokens(prompt, model, limit=0.2):
+    
+    @staticmethod
+    def check_tokens(
+        prompt,
+        model,
+        limit=0.2
+    ):
         """
         Checks the number of tokens in the prompt and warns if it exceeds the maximum limit or the recommended limit.
 
@@ -53,7 +62,7 @@ class Plugin:
         recommended_limit = int(max_tokens * limit)
 
         # Check tokens
-        prompt_tokens = num_tokens_from_string(prompt, "cl100k_base")
+        prompt_tokens = Plugin.num_tokens_from_string(prompt, "cl100k_base")
         if prompt_tokens >= max_tokens:
             print(
                 f"⛔ Be careful, your system prompt is too big. Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})"
@@ -67,9 +76,14 @@ class Plugin:
                 f"✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})"
             )
         return prompt_tokens, max_tokens
-
+    
+    @staticmethod
     def create_plugin(
-        name, prompt, model="gpt-3.5-turbo-16k", temperature=0, output_path=None
+        name,
+        prompt,
+        model="gpt-3.5-turbo-16k",
+        temperature=0,
+        output_path=None
     ):
         """
         Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path.
@@ -90,7 +104,7 @@ class Plugin:
         if not output_path:
             output_path = name.lower().replace(" ", "_") + "_plugin.json"
         # Check tokens
-        prompt_tokens, max_tokens = check_tokens(prompt, model)
+        prompt_tokens, max_tokens = Plugin.check_tokens(prompt, model)
 
         # Create json
         plugin = {
