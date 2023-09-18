@@ -1,3 +1,21 @@
+## 0.113.0 (2023-09-18)
+
+### Feat
+
+- add tiktoken as requirements
+- use self instead of static
+- add static method
+- add encoding name as default
+- create first version naas_plugin lint
+- update init
+
+### Fix
+
+- naas_drivers/tools/naas_chat_plugin.py:71:53: W291 trailing whitespace
+- lint black
+- lint
+- lint
+
 ## 0.112.2 (2023-08-31)
 
 ### Fix
