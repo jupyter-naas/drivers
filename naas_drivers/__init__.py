@@ -443,7 +443,7 @@ def linkedin_salesnavigator():
     return LinkedIn()
 
 @load_driver
-def naas_plugin():
-    from naas_drivers.tools.naas_plugin import Plugin
+def naas_chat_plugin():
+    from naas_drivers.tools.naas_chat_plugin import NaasChatPlugin
 
-    return Plugin()
+    return NaasChatPlugin()

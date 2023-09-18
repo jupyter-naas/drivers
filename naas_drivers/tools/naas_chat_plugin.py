@@ -1,6 +1,5 @@
 import tiktoken
 import json
-import naas
 
 MODELS = {
     "gpt-3.5-turbo": 4097,
@@ -9,12 +8,8 @@ MODELS = {
 }
 
 
-class Plugin:
-    @staticmethod
-    def num_tokens_from_string(
-        string: str,
-        encoding_name="cl100k_base"
-    ) -> int:
+class NaasChatPlugin:
+    def num_tokens_from_string(self, string: str, encoding_name="cl100k_base") -> int:
         """
         Returns the number of tokens in a text string.
 
@@ -30,17 +25,14 @@ class Plugin:
         encoding = tiktoken.get_encoding(encoding_name)
         num_tokens = len(encoding.encode(string))
         return num_tokens
-    
-    @staticmethod
-    def check_tokens(
-        prompt,
-        model,
-        limit=0.2
-    ):
+
+    def check_tokens(self, prompt, model, limit=0.2):
         """
         Checks the number of tokens in the prompt and warns if it exceeds the maximum limit or the recommended limit.
 
-        This function calculates the number of tokens in the prompt using the specified model's encoding. It then compares this number with the model's maximum limit and a recommended limit (default is 20% of the maximum). If the number of tokens exceeds either limit, a warning is printed.
+        This function calculates the number of tokens in the prompt using the specified model's encoding.
+        It then compares this number with the model's maximum limit and a recommended limit (default is 20% of the maximum).
+        If the number of tokens exceeds either limit, a warning is printed.
 
         Parameters:
         prompt (str): The input prompt to be checked.
@@ -62,7 +54,7 @@ class Plugin:
         recommended_limit = int(max_tokens * limit)
 
         # Check tokens
-        prompt_tokens = Plugin.num_tokens_from_string(prompt, "cl100k_base")
+        prompt_tokens = self.num_tokens_from_string(prompt, "cl100k_base")
         if prompt_tokens >= max_tokens:
             print(
                 f"⛔ Be careful, your system prompt is too big. Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})"
@@ -76,19 +68,15 @@ class Plugin:
                 f"✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})"
             )
         return prompt_tokens, max_tokens
-    
-    @staticmethod
+
     def create_plugin(
-        name,
-        prompt,
-        model="gpt-3.5-turbo-16k",
-        temperature=0,
-        output_path=None
+        self, name, prompt, model="gpt-3.5-turbo-16k", temperature=0, output_path=None
     ):
         """
         Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path.
 
-        This function checks the number of tokens in the prompt, creates a JSON object with the plugin parameters, and saves it to a JSON file. It then creates an asset with the JSON file and returns the asset link.
+        This function checks the number of tokens in the prompt, creates a JSON object with the plugin parameters, and saves it to a JSON file.
+        It then creates an asset with the JSON file and returns the asset link.
 
         Parameters:
         name (str): The name of the plugin.
@@ -98,13 +86,13 @@ class Plugin:
         output_path (str): The path where the JSON file should be saved. If not provided, it will be created from the plugin name.
 
         Returns:
-        str: The link to the created naas asset.
+        str: The output path of the naas chat plugin.
         """
         # Create output path
         if not output_path:
             output_path = name.lower().replace(" ", "_") + "_plugin.json"
         # Check tokens
-        prompt_tokens, max_tokens = Plugin.check_tokens(prompt, model)
+        prompt_tokens, max_tokens = self.check_tokens(prompt, model)
 
         # Create json
         plugin = {
@@ -118,10 +106,7 @@ class Plugin:
         # Save dict to JSON file
         with open(output_path, "w") as f:
             json.dump(plugin, f)
-        # Create asset
-        asset_link = naas.asset.add(output_path, params={"inline": True})
         print(
-            f"💾 Plugin successfully saved. You can use it in your Naas Chat with: {asset_link}"
+            f"💾 Plugin successfully saved. You can use it in your Naas Chat with: {output_path}"
         )
-
-        return asset_link
+        return output_path
