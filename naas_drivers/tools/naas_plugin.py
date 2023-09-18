@@ -10,14 +10,14 @@ MODELS = {
 
 
 class Plugin:
-    def num_tokens_from_string(string: str, encoding_name: str) -> int:
+    def num_tokens_from_string(string: str, encoding_name="cl100k_base") -> int:
         """
         Returns the number of tokens in a text string.
 
         This function uses the specified encoding to tokenize the input string, and then returns the number of tokens.
 
         Parameters:
-        string (str): The input string to be tokenized.
+        string (str): The input string to be tokenized. By default, "cl100k_base"
         encoding_name (str): The name of the encoding to be used for tokenization.
 
         Returns:
