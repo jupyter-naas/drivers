@@ -77,7 +77,8 @@ class NaasChatPlugin:
             )
         else:
             print(
-                f"""✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})"""
+                f"""✅ System prompt tokens count OK: {prompt_tokens} 
+                (limit: {int(limit*100)}% -> {recommended_limit})"""
             )
         return prompt_tokens, max_tokens
 
@@ -92,7 +93,7 @@ class NaasChatPlugin:
         """
         Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path.
 
-        This function checks the number of tokens in the prompt, creates a JSON object with the plugin parameters, and saves it to a JSON file.
+        This function checks the number of tokens in the prompt, creates a JSON object, and saves it to a JSON file.
         It then creates an asset with the JSON file and returns the asset link.
 
         Parameters:
