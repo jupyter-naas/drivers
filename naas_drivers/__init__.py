@@ -441,3 +441,9 @@ def linkedin_salesnavigator():
     from naas_drivers.tools.linkedin_salesnavigator import LinkedIn
 
     return LinkedIn()
+
+@load_driver
+def naas_plugin():
+    from naas_drivers.tools.naas_plugin import Plugin
+
+    return Plugin()
