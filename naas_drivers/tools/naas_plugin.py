@@ -5,12 +5,11 @@ import naas
 MODELS = {
     "gpt-3.5-turbo": 4097,
     "gpt-3.5-turbo-16k": 16385,
-    "gpt-4":  8192,
+    "gpt-4": 8192,
 }
 
 
-class Plugin():
-        
+class Plugin:
     def num_tokens_from_string(string: str, encoding_name: str) -> int:
         """
         Returns the number of tokens in a text string.
@@ -28,7 +27,6 @@ class Plugin():
         num_tokens = len(encoding.encode(string))
         return num_tokens
 
-    
     def check_tokens(prompt, model, limit=0.2):
         """
         Checks the number of tokens in the prompt and warns if it exceeds the maximum limit or the recommended limit.
@@ -48,7 +46,6 @@ class Plugin():
         if model not in list(MODELS.keys()):
             print(f"⛔ Model {model} not found. Must be one of {list(MODELS.keys())}")
             return None, None
-
         # Get max tokens
         max_tokens = MODELS.get(model)
 
@@ -58,19 +55,24 @@ class Plugin():
         # Check tokens
         prompt_tokens = num_tokens_from_string(prompt, "cl100k_base")
         if prompt_tokens >= max_tokens:
-            print(f"⛔ Be careful, your system prompt is too big. Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})")
+            print(
+                f"⛔ Be careful, your system prompt is too big. Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})"
+            )
         elif prompt_tokens > recommended_limit:
-            print(f"⚠️ Be careful, your system prompt looks too big. Tokens: {prompt_tokens} (limit recommended: {int(limit*100)}% -> {recommended_limit})")
+            print(
+                f"⚠️ Be careful, your system prompt looks too big. Tokens: {prompt_tokens} (limit recommended: {int(limit*100)}% -> {recommended_limit})"
+            )
         else:
-            print(f"✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})")
-
+            print(
+                f"✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})"
+            )
         return prompt_tokens, max_tokens
 
-
-
-    def create_plugin(name, prompt, model="gpt-3.5-turbo-16k", temperature=0, output_path=None):
+    def create_plugin(
+        name, prompt, model="gpt-3.5-turbo-16k", temperature=0, output_path=None
+    ):
         """
-        Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path. 
+        Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path.
 
         This function checks the number of tokens in the prompt, creates a JSON object with the plugin parameters, and saves it to a JSON file. It then creates an asset with the JSON file and returns the asset link.
 
@@ -87,7 +89,6 @@ class Plugin():
         # Create output path
         if not output_path:
             output_path = name.lower().replace(" ", "_") + "_plugin.json"
-
         # Check tokens
         prompt_tokens, max_tokens = check_tokens(prompt, model)
 
@@ -103,10 +104,10 @@ class Plugin():
         # Save dict to JSON file
         with open(output_path, "w") as f:
             json.dump(plugin, f)
-
         # Create asset
         asset_link = naas.asset.add(output_path, params={"inline": True})
-        print(f"💾 Plugin successfully saved. You can use it in your Naas Chat with: {asset_link}")
+        print(
+            f"💾 Plugin successfully saved. You can use it in your Naas Chat with: {asset_link}"
+        )
 
         return asset_link
-
