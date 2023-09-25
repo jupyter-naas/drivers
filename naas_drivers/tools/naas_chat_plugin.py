@@ -68,8 +68,9 @@ class NaasChatPlugin:
             )
         else:
             print(
-                f"""✅ System prompt tokens count OK: {prompt_tokens}
-                (limit: {int(limit*100)}% -> {recommended_limit})"""
+                f"""
+                ✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})
+                """
             )
         return prompt_tokens, max_tokens
 
