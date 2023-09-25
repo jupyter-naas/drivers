@@ -1,3 +1,9 @@
+## 0.113.1 (2023-09-25)
+
+### Fix
+
+- diplay token OK naas chat plugin
+
 ## 0.113.0 (2023-09-18)
 
 ### Feat
