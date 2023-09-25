@@ -1,3 +1,9 @@
+## 0.114.1 (2023-09-25)
+
+### Fix
+
+- msg with companies endpoint
+
 ## 0.114.0 (2023-09-25)
 
 ### Feat
