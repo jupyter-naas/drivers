@@ -447,6 +447,7 @@ class HubSpot(InDriver, OutDriver):
             f"{self.obj_url}/contacts", self.req_headers, self.params
         )
         self.company = HSCRUD(f"{self.obj_url}/company", self.req_headers, self.params)
+        self.companies = HSCRUD(f"{self.obj_url}/companies", self.req_headers, self.params)
         self.deals = Deal(f"{self.obj_url}/deals", self.req_headers, self.params)
         self.pipelines = Pipeline(
             f"{self.pip_url}/deals", self.req_headers, self.params
