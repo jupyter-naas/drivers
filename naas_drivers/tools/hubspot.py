@@ -19,7 +19,12 @@ class HSCRUD:
         self.model_name = self.base_url.split("/")[-1]
 
         # Manage message
-        message_dict = {"contacts": "Contact", "company": "Company", "deals": "Deal"}
+        message_dict = {
+            "contacts": "Contact",
+            "company": "Company",
+            "companies": "Company",
+            "deals": "Deal"
+        }
         self.msg = message_dict[self.model_name]
 
     def __values_format(self, data):
