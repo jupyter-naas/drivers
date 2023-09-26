@@ -75,7 +75,13 @@ class NaasChatPlugin:
         return prompt_tokens, max_tokens
 
     def create_plugin(
-        self, name, prompt, model="gpt-3.5-turbo-16k", temperature=0, output_path=None
+        self,
+        name,
+        prompt,
+        model="gpt-3.5-turbo-16k",
+        temperature=0,
+        output_path=None,
+        commands=[]
     ):
         """
         Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path.
@@ -89,6 +95,7 @@ class NaasChatPlugin:
         - model (str): The name of the model to be used for tokenization. Default is "gpt-3.5-turbo-16k".
         - temperature (int): The temperature parameter for the model. Default is 0.
         - output_path (str): The path where the JSON file should be saved. If not provided, it will be created from the plugin name.
+        - commandd (list): Webhook command to be executed to be executed to get insert data into your Naas Chat.
 
         Returns:
         str: The output path of the naas chat plugin.
@@ -106,6 +113,7 @@ class NaasChatPlugin:
             "temperature": temperature,
             "max_tokens": max_tokens,
             "prompt": prompt,
+            "commands": commands,
         }
 
         # Save dict to JSON file
