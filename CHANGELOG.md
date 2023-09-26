@@ -1,3 +1,9 @@
+## 0.115.0 (2023-09-26)
+
+### Feat
+
+- add commands in dict and function params
+
 ## 0.114.1 (2023-09-25)
 
 ### Fix
