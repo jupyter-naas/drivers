@@ -67,11 +67,7 @@ class NaasChatPlugin:
                 Tokens: {prompt_tokens} (limit recommended: {int(limit*100)}% -> {recommended_limit})"""
             )
         else:
-            print(
-                f"""
-                ✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})
-                """
-            )
+            print(f"✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})")
         return prompt_tokens, max_tokens
 
     def create_plugin(
