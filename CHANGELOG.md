@@ -1,3 +1,9 @@
+## 0.116.0 (2023-09-27)
+
+### Feat
+
+- add avatar and description to naas chat plugin
+
 ## 0.115.1 (2023-09-27)
 
 ### Fix
