@@ -46,8 +46,9 @@ class NaasChatPlugin:
         """
         # Check if the model is in the MODELS dictionary
         if model not in list(MODELS.keys()):
-            print(f"⛔ Model {model} not found. Must be one of {list(MODELS.keys())}")
-            return None, None
+            print(f"⛔ Model {model} not found. Default model: 'gpt-3.5-turbo'")
+            model = 'gpt-3.5-turbo'
+            
         # Get max tokens
         max_tokens = MODELS.get(model)
 
