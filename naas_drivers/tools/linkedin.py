@@ -1623,7 +1623,7 @@ class Company(LinkedIn):
             df["VIEWS"] = df.apply(
                 lambda row: self.__get_posts_views(row.ACTIVITY_ID), axis=1
             )
-            df["ENGAGEMENT_SCORE"] = 0
+            df["ENGAGEMENT_SCORE"] = 0.
             df.loc[df["VIEWS"] != 0, "ENGAGEMENT_SCORE"] = (
                 df["COMMENTS"] + df["LIKES"]
             ) / df["VIEWS"]
