@@ -109,7 +109,7 @@ TW_LINK = "https://twitter.com/JupyterNaas"
 GIT_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Programming-Github-icon.png"
 YT_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Youtube-icon.png"
 LK_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Linkedin-icon.png"
-TW_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Twitter-icon.png"
+TW_IMG_BLACK = "https://github.com/jupyter-naas/awesome-notebooks/blob/master/.github/assets/logos/Twitter.jpeg"
 
 
 class Align(attributes.HtmlTagAttribute):
@@ -205,13 +205,13 @@ class EmailBuilder(InDriver):
 
     def __default_company(self):
         return [
-            "Naas: All-in-one data platform",
+            "Naas - Universal Data & AI Platform",
             "<a target='_blank' href='https://www.naas.ai/'>www.naas.ai</a>",
         ]
 
     def __default_legal(self):
         return [
-            "Powered by CASHSTORY SAS © 2022"
+            "Powered by NaasAI, Inc. © 2023"
         ]
 
     def __text_style(
