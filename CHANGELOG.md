@@ -1,3 +1,9 @@
+## 0.118.0 (2023-11-29)
+
+### Feat
+
+- update footer emailbuilder.py
+
 ## 0.117.1 (2023-11-13)
 
 ### Fix
