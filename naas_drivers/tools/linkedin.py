@@ -423,6 +423,52 @@ class Profile(LinkedIn):
         df = pd.DataFrame(res_json)
         return df.reset_index(drop=True)
 
+    def get_top_card(self, profile_url=None):
+        """
+        Return an dataframe object with 18 columns:
+        - PROFILE_ID
+        - PROFILE_URL
+        - FIRSTNAME
+        - LASTNAME
+        - LASTNAME
+        - OCCUPATION
+        - CONNECTIONS
+        - HASHTAGS
+        - LOCATION
+        - COMPANY_NAME
+        - COMPANY_URL
+        - DATE_START
+        - DATE_END
+        - SCHOOL_NAME
+        - SCHOOL_URL
+        - FOLLOWER_COUNT
+        - DATE_EXTRACT
+
+        Parameters
+        ----------
+        profile_url: str:
+            Profile URL from LinkedIn.
+            Example : "https://www.linkedin.com/in/florent-ravenel/"
+        """
+        res_json = {}
+        if profile_url is None:
+            print("❌ No profile URL. Please enter a profile URL from LinkedIn")
+            return res_json
+        profile_id = LinkedIn.get_profile_id(self, profile_url)
+        if profile_id is None:
+            return "Please enter a valid profile_url. It must follow this pattern: 'https://*.linkedin.com/in/*' "
+        req_url = f"{LINKEDIN_API}/profile/getTopCard?profile_id={profile_id}"
+        res = requests.post(req_url, json=self.cookies, headers=HEADERS)
+        res.raise_for_status()
+
+        # Manage LinkedIn API errors
+        LinkedIn.manage_api_error(res)
+
+        # Get json result
+        res_json = res.json()
+        df = pd.DataFrame(res_json)
+        return df.reset_index(drop=True)
+
     def get_posts_feed(
         self,
         profile_url,
@@ -1623,7 +1669,7 @@ class Company(LinkedIn):
             df["VIEWS"] = df.apply(
                 lambda row: self.__get_posts_views(row.ACTIVITY_ID), axis=1
             )
-            df["ENGAGEMENT_SCORE"] = 0.
+            df["ENGAGEMENT_SCORE"] = 0
             df.loc[df["VIEWS"] != 0, "ENGAGEMENT_SCORE"] = (
                 df["COMMENTS"] + df["LIKES"]
             ) / df["VIEWS"]
