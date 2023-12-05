@@ -1,3 +1,9 @@
+## 0.119.1 (2023-12-05)
+
+### Fix
+
+- add linkedin get profile id as static method
+
 ## 0.119.0 (2023-12-04)
 
 ### Feat
