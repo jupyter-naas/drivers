@@ -83,16 +83,17 @@ class LinkedIn:
             return url.split("-activity-")[-1].split("-")[0]
         if ":activity:" in url:
             return url.split(":activity:")[-1].split("/")[0]
+            
+    @staticmethod
+    def get_profile_id(url):
+        return url.rsplit("/in/")[-1].rsplit("/")[0]
 
     def print_deprecated(self, new_funct):
         if self.deprected:
             print(f"This function is deprecated, please use {new_funct}")
 
-    def get_profile_id(self, url):
-        return url.rsplit("/in/")[-1].rsplit("/")[0]
-
     def get_profile_urn(self, url):
-        lk_id = self.get_profile_id(url)
+        lk_id = LinkedIn.get_profile_id(url)
         res = requests.get(
             f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}",
             cookies=self.cookies,
@@ -195,7 +196,7 @@ class Profile(LinkedIn):
             print("❌ No profile URL. Please enter a profile URL from LinkedIn")
             return res_json
         result = {}
-        lk_public_id = self.get_profile_id(profile_url)
+        lk_public_id = LinkedIn.get_profile_id(profile_url)
         req_url = (
             f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_public_id}"
         )
@@ -282,7 +283,7 @@ class Profile(LinkedIn):
             print("❌ No profile URL. Please enter a profile URL from LinkedIn")
             return res_json
         result = {}
-        lk_id = self.get_profile_id(profile_url)
+        lk_id = LinkedIn.get_profile_id(profile_url)
         req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/networkinfo"
         res = requests.get(req_url, cookies=self.cookies, headers=self.headers)
         # Raise error
@@ -330,7 +331,7 @@ class Profile(LinkedIn):
             print("❌ No profile URL. Please enter a profile URL from LinkedIn")
             return res_json
         result = {}
-        lk_id = self.get_profile_id(profile_url)
+        lk_id = LinkedIn.get_profile_id(profile_url)
         req_url = f"https://www.linkedin.com/voyager/api/identity/profiles/{lk_id}/profileContactInfo"
         res = requests.get(req_url, cookies=self.cookies, headers=self.headers)
         res.raise_for_status()
@@ -454,7 +455,7 @@ class Profile(LinkedIn):
         if profile_url is None:
             print("❌ No profile URL. Please enter a profile URL from LinkedIn")
             return res_json
-        profile_id = LinkedIn.get_profile_id(self, profile_url)
+        profile_id = LinkedIn.get_profile_id(profile_url)
         if profile_id is None:
             return "Please enter a valid profile_url. It must follow this pattern: 'https://*.linkedin.com/in/*' "
         req_url = f"{LINKEDIN_API}/profile/getTopCard?profile_id={profile_id}"
