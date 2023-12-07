@@ -81,6 +81,7 @@ class NaasChatPlugin:
         commands=[],
         description="",
         avatar="",
+        prompt_type="",
     ):
         """
         Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path.
@@ -97,6 +98,7 @@ class NaasChatPlugin:
         - commands (list): Webhook command to be executed to be executed to get insert data into your Naas Chat.
         - description (str): Plugin description.
         - avatar (str): Link to PNG to be displayed as avatar in your Chat.
+        - prompt_type (str): By default "system" but could be "assistant" or "human"
 
         Returns:
         str: The output path of the naas chat plugin.
@@ -117,6 +119,7 @@ class NaasChatPlugin:
             "commands": commands,
             "description": description,
             "avatar": avatar,
+            "prompt_type": prompt_type,
         }
 
         # Save dict to JSON file
