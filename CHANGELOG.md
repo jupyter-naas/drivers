@@ -1,3 +1,9 @@
+## 0.120.1 (2023-12-11)
+
+### Fix
+
+- add system as naas_chat_plugin default prompt type
+
 ## 0.120.0 (2023-12-11)
 
 ### Feat
