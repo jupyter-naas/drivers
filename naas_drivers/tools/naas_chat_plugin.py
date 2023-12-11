@@ -81,7 +81,7 @@ class NaasChatPlugin:
         commands=[],
         description="",
         avatar="",
-        prompt_type="",
+        prompt_type="system",
     ):
         """
         Creates a JSON file for a chat plugin with specified parameters and saves it to the specified output path.
