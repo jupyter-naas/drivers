@@ -1,3 +1,9 @@
+## 0.120.0 (2023-12-11)
+
+### Feat
+
+- add prompt_type to naas_chat_plugin params
+
 ## 0.119.3 (2023-12-05)
 
 ### Fix
