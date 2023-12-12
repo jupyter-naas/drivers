@@ -109,7 +109,7 @@ TW_LINK = "https://twitter.com/JupyterNaas"
 GIT_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Programming-Github-icon.png"
 YT_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Youtube-icon.png"
 LK_IMG_BLACK = "https://icons.iconarchive.com/icons/icons8/windows-8/512/Social-Networks-Linkedin-icon.png"
-TW_IMG_BLACK = "https://github.com/jupyter-naas/awesome-notebooks/blob/master/.github/assets/logos/Twitter.jpeg"
+TW_IMG_BLACK = "https://raw.githubusercontent.com/jupyter-naas/awesome-notebooks/master/.github/assets/logos/Twitter.jpeg"
 
 
 class Align(attributes.HtmlTagAttribute):
