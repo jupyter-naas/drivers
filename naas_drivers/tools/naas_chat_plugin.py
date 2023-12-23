@@ -59,13 +59,11 @@ class NaasChatPlugin:
         prompt_tokens = self.num_tokens_from_string(prompt, "cl100k_base")
         if prompt_tokens >= max_tokens:
             print(
-                f"""⛔ Be careful, your system prompt is too big.
-                Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})"""
+                f"⛔ Be careful, your system prompt is too big. Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})"
             )
         elif prompt_tokens > recommended_limit:
             print(
-                f"""⚠️ Be careful, your system prompt looks too big.
-                Tokens: {prompt_tokens} (limit recommended: {int(limit*100)}% -> {recommended_limit})"""
+                f"⚠️ Be careful, your system prompt looks too big. Tokens: {prompt_tokens} (limit recommended: {int(limit*100)}% -> {recommended_limit})"
             )
         else:
             print(f"✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})")
