@@ -5,6 +5,7 @@ MODELS = {
     "gpt-3.5-turbo": 4097,
     "gpt-3.5-turbo-16k": 16385,
     "gpt-4": 8192,
+    "gpt-4-1106-preview": 128000,
 }
 
 
@@ -37,7 +38,7 @@ class NaasChatPlugin:
         Parameters:
         - prompt (str): The input prompt to be checked.
         - model (str): The name of the model to be used for tokenization.
-        Must be one of 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4'
+        Must be one of 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-1106-preview'
         - limit (float): The recommended limit as a fraction of the maximum limit. Default is 0.2 (20%).
 
         Returns:
@@ -58,15 +59,11 @@ class NaasChatPlugin:
         # Check tokens
         prompt_tokens = self.num_tokens_from_string(prompt, "cl100k_base")
         if prompt_tokens >= max_tokens:
-            print(
-                f"""⛔ Be careful, your system prompt is too big.
-                Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})"""
-            )
+            message = f"Exceeded max tokens allowed by models (max_tokens={max_tokens}, system_tokens={prompt_tokens})"
+            print(f"⛔ Be careful, your system prompt is too big. {message}")
         elif prompt_tokens > recommended_limit:
-            print(
-                f"""⚠️ Be careful, your system prompt looks too big.
-                Tokens: {prompt_tokens} (limit recommended: {int(limit*100)}% -> {recommended_limit})"""
-            )
+            message = f"Tokens: {prompt_tokens} (limit recommended: {int(limit*100)}% -> {recommended_limit})"
+            print(f"⚠️ Be careful, your system prompt looks too big. {message}")
         else:
             print(f"✅ System prompt tokens count OK: {prompt_tokens} (limit: {int(limit*100)}% -> {recommended_limit})")
         return prompt_tokens, max_tokens
