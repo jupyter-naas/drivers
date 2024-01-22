@@ -1,11 +1,9 @@
 from naas_drivers.driver import InDriver, OutDriver
 from dateutil.parser import parse
-import pandas as pd
 import requests
 import os
 
 current_token = os.environ.get("JUPYTERHUB_API_TOKEN", None)
-
 
 class Jupyter(InDriver, OutDriver):
     base_url = os.environ.get("JUPYTERHUB_URL", "https://app.naas.ai")
@@ -31,24 +29,6 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
-    def get_authorize_user(self, username):
-        signup_url = f"{self.base_url}/hub/authorize/{username}"
-        headers = {
-            "Authorization": f"token {self.token}",
-            "Content-type": "application/json",
-        }
-        r = requests.get(signup_url, headers=headers)
-        r.raise_for_status()
-        return r.json()
-
-    def change_authorize_user(self, username, is_authorized):
-        signup_url = f"{self.base_url}/hub/authorize/{username}"
-        headers = {"Authorization": f"token {self.token}"}
-        data = {"is_authorized": is_authorized}
-        r = requests.post(signup_url, data=data, headers=headers)
-        r.raise_for_status()
-        return r.json()
-
     def change_password_user(self, username, password):
         signup_url = f"{self.base_url}/hub/change-password"
         login = {
@@ -60,14 +40,6 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
-    def list_users(self):
-        signup_url = f"{self.base_url}/hub/signup"
-        headers = {"Authorization": f"token {self.token}"}
-        r = requests.get(signup_url, headers=headers)
-        r.raise_for_status()
-        df = pd.DataFrame.from_records(r.json().get("data"))
-        return df
-
     def delete_user(self, username):
         signup_url = f"{self.base_url}/hub/signup"
         login = {
@@ -75,6 +47,28 @@ class Jupyter(InDriver, OutDriver):
         }
         headers = {"Authorization": f"token {self.token}"}
         r = requests.delete(signup_url, data=login, headers=headers)
+        r.raise_for_status()
+        return r.json()
+
+    def list_users(self):
+        signup_url = f"{self.base_url}/hub/signup"
+        headers = {"Authorization": f"token {self.token}"}
+        r = requests.get(signup_url, headers=headers)
+        r.raise_for_status()
+        return r.json().get("data")
+
+    def get_authorize_user(self, username):
+        signup_url = f"{self.base_url}/hub/authorize/{username}"
+        headers = {"Authorization": f"token {self.token}"}
+        r = requests.get(signup_url, json={}, headers=headers)
+        r.raise_for_status()
+        return r.text
+
+    def change_authorize_user(self, username, is_authorized):
+        signup_url = f"{self.base_url}/hub/authorize/{username}"
+        headers = {"Authorization": f"token {self.token}"}
+        data = {"is_authorized": is_authorized}
+        r = requests.put(signup_url, json=data, headers=headers)
         r.raise_for_status()
         return r.json()
 
@@ -116,15 +110,46 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r.json()
 
-    def delete_user_terminal(self, username, termId):
+    def get_jobs(self, username):
         self.check_connect()
-        r = requests.delete(
-            f"{self.base_url}/user/{username}/api/terminals/{termId}",
+        try:
+            headers = {"Authorization": f"token {self.token}"}
+            url = f'https://app.naas.ai/user/{username}/proxy/5000/job'
+            res = requests.get(url, headers=headers)
+            return res.json()
+        except ValueError:
+            return []
+
+    def get_user_token(self, username):
+        self.check_connect()
+        r = requests.get(
+            f"{self.base_url}/hub/api/user/{username}/tokens",
             headers={
                 "Authorization": f"token {self.token}",
             },
         )
+        r.raise_for_status()
+        return r.json()
 
+    def delete_user_token(self, username, uid):
+        self.check_connect()
+        r = requests.delete(
+            f"{self.base_url}/user/{username}/tokens/{uid}",
+            headers={
+                "Authorization": f"token {self.token}",
+            },
+        )
+        r.raise_for_status()
+        return print(f"{username} : token '{uid}' deleted.")
+
+    def get_user_session(self, username):
+        self.check_connect()
+        r = requests.get(
+            f"{self.base_url}/user/{username}/api/sessions",
+            headers={
+                "Authorization": f"token {self.token}",
+            },
+        )
         r.raise_for_status()
         return r.json()
 
@@ -136,33 +161,41 @@ class Jupyter(InDriver, OutDriver):
                 "Authorization": f"token {self.token}",
             },
         )
-
         r.raise_for_status()
         return r.json()
 
-    def delete_user_session(self, username, sessionId):
+    def delete_user_terminal(self, username, uid):
         self.check_connect()
         r = requests.delete(
-            f"{self.base_url}/user/{username}/api/sessions/{sessionId}",
+            f"{self.base_url}/user/{username}/api/terminals/{uid}",
             headers={
                 "Authorization": f"token {self.token}",
             },
         )
-
         r.raise_for_status()
-        return r.json()
+        return print(f"{username} : terminal '{uid}' deleted.")
 
-    def get_user_session(self, username):
+    def get_user_kernel(self, username):
         self.check_connect()
         r = requests.get(
-            f"{self.base_url}/user/{username}/api/sessions",
+            f"{self.base_url}/user/{username}/api/kernels",
             headers={
                 "Authorization": f"token {self.token}",
             },
         )
-
         r.raise_for_status()
         return r.json()
+
+    def delete_user_kernel(self, username, kernel_id):
+        self.check_connect()
+        r = requests.delete(
+            f"{self.base_url}/user/{username}/api/kernels/{kernel_id}",
+            headers={
+                "Authorization": f"token {self.token}",
+            },
+        )
+        r.raise_for_status()
+        return print(f"{username} : kernel '{kernel_id}' deleted.")
 
     def is_user_active(self, username):
         self.check_connect()
@@ -202,14 +235,13 @@ class Jupyter(InDriver, OutDriver):
         r.raise_for_status()
         return r
 
-    def start_user(self, username, user_options={}):
+    def start_user(self, username):
         self.check_connect()
         r = requests.post(
             f"{self.api_url}/users/{username}/server",
             headers={
                 "Authorization": f"token {self.token}",
             },
-            json=user_options,
         )
         r.raise_for_status()
         return r
@@ -217,17 +249,5 @@ class Jupyter(InDriver, OutDriver):
     def restart_user(self, username):
         self.check_connect()
         if self.is_user_active(username):
-            user = self.get_user(username)
-            user_options = user.get("servers").get("").get("user_options")
             self.stop_user(username)
-            self.start_user(username, user_options)
-            
-    def get_jobs(self, username):
-        self.check_connect()
-        try:
-            headers = {"Authorization": f"token {self.token}"}
-            url = f'https://app.naas.ai/user/{username}/proxy/5000/job'
-            res = requests.get(url, headers=headers)
-            return res.json()
-        except ValueError:
-            return []
+            self.start_user(username)
