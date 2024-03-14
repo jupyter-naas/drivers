@@ -1,3 +1,9 @@
+## 0.121.1 (2024-03-14)
+
+### Fix
+
+- get conversations not working for more than 20
+
 ## 0.121.0 (2024-01-15)
 
 ### Feat
