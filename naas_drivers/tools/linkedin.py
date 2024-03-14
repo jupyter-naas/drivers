@@ -1016,8 +1016,9 @@ class Message(LinkedIn):
             count = limit
         if limit > limit_max:
             limit = limit_max
+            
+        params = {"count": count}
         while True:
-            params = {"count": count}
             req_url = f"{LINKEDIN_API}/message/getConversations?{urllib.parse.urlencode(params, safe='(),')}"
             res = requests.post(req_url, json=self.cookies, headers=HEADERS)
             res.raise_for_status()
@@ -1036,8 +1037,8 @@ class Message(LinkedIn):
             if len(df) >= limit:
                 break
             # Set created before params
-            last_message_sent_at = tmp_df["LAST_MESSAGE_SENT_AT"].iloc[0]
-            created_before = datetime.strptime(last_message_sent_at, DATETIME_FORMAT)
+            last_message_sent_at = tmp_df["LAST_MESSAGE_SENT_AT"].iloc[-1]
+            created_before = int(datetime.strptime(last_message_sent_at, DATETIME_FORMAT).strftime("%s") + "000")
             params["created_before"] = created_before
             if sleep:
                 time.sleep(TIME_SLEEP)
