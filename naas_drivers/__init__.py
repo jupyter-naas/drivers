@@ -408,11 +408,11 @@ def sharepoint():
     return Sharepoint()
 
 
-@load_driver(extra_requires="ml")
-def huggingface():
-    from naas_drivers.tools.huggingface import Huggingface
+# @load_driver(extra_requires="ml")
+# def huggingface():
+#     from naas_drivers.tools.huggingface import Huggingface
 
-    return Huggingface()
+#     return Huggingface()
 
 
 @load_driver(extra_requires="twitter")
