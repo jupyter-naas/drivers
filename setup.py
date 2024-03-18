@@ -18,7 +18,7 @@ extras_require = {
         "airtable-python-wrapper==0.15.2",
     ],
     "bigquery": [
-        "google-cloud-bigquery==3.3.0",
+        "google-cloud-bigquery==3.19.0",
         "pandas-gbq==0.17.7"
     ],
     "email": ["imap_tools==0.39.0"],
