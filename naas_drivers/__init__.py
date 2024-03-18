@@ -254,11 +254,11 @@ def zapier():
     return Zapier()
 
 
-@load_driver(extra_requires="streamlit")
-def streamlit():
-    from naas_drivers.tools.streamlit import Streamlit
+# @load_driver(extra_requires="streamlit")
+# def streamlit():
+#     from naas_drivers.tools.streamlit import Streamlit
 
-    return Streamlit()
+#     return Streamlit()
 
 
 @load_driver

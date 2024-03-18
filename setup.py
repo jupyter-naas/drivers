@@ -73,10 +73,10 @@ extras_require = {
     "slack": [
         "slackclient==2.9.3",
     ],
-    "streamlit": [
-        "pyngrok==5.0.5",
-        "streamlit>=1.8.1",
-    ],
+    # "streamlit": [
+    #     "pyngrok==5.0.5",
+    #     "streamlit>=1.8.1",
+    # ],
     "teams": [
         "pymsteams==0.1.14",
     ],
