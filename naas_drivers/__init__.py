@@ -4,7 +4,7 @@ from mprop import mproperty
 from subprocess import Popen, PIPE
 import sys
 
-__version__ = "0.121.3"
+__version__ = "0.121.2"
 
 __github_repo = "jupyter-naas/drivers"
 
@@ -405,7 +405,7 @@ def bazimo():
 def sharepoint():
     from naas_drivers.tools.sharepoint import Sharepoint
 
-    return Sharepoint()
+    return Sharepoint() 
 
 
 # @load_driver(extra_requires="ml")
@@ -429,11 +429,11 @@ def snowflake():
     return Snowflake()
 
 
-@load_driver(extra_requires="google-cloud-bigquery,pandas-gbq")
-def bigquery():
-    from naas_drivers.tools.bigquery import BigQuery
+# @load_driver(extra_requires="google-cloud-bigquery,pandas-gbq")
+# def bigquery():
+#     from naas_drivers.tools.bigquery import BigQuery
 
-    return BigQuery()
+#     return BigQuery()
 
 
 @load_driver
