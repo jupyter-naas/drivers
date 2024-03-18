@@ -1,3 +1,9 @@
+## 0.121.3 (2024-03-18)
+
+### Fix
+
+- Disable HuggingFace driver
+
 ## 0.121.2 (2024-03-18)
 
 ### Fix
