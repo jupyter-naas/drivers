@@ -380,11 +380,11 @@ def youtube():
     return Youtube()
 
 
-@load_driver(extra_requires="google")
-def googleanalytics():
-    from naas_drivers.tools.googleanalytics import GoogleAnalytics
+# @load_driver(extra_requires="google")
+# def googleanalytics():
+#     from naas_drivers.tools.googleanalytics import GoogleAnalytics
 
-    return GoogleAnalytics()
+#     return GoogleAnalytics()
 
 
 @load_driver(extra_requires="pydash")

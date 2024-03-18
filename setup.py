@@ -37,12 +37,12 @@ extras_require = {
     "git": [
         "GitPython==3.1.14",
     ],
-    "google": [
-        "google==3.0.0",
-        "google-api-python-client==2.3.0",
-        "google-auth-httplib2==0.1.0",
-        "google-auth-oauthlib==0.4.4",
-    ],
+    # "google": [
+    #     "google==3.0.0",
+    #     "google-api-python-client==2.3.0",
+    #     "google-auth-httplib2==0.1.0",
+    #     "google-auth-oauthlib==0.4.4",
+    # ],
     "markdown": [
         "markdown2==2.4.0",
     ],
