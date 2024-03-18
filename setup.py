@@ -89,7 +89,7 @@ extras_require = {
     ],
     "youtube": ["youtube_transcript_api==0.4.3"],
     "pydash": [
-        "pydash==5.1.0",
+        "pydash==7.0.7",
     ],
     "ml": ["transformers==4.12.5", "tensorflow==2.6.0", "torch==1.8.1", "keras==2.6.0"],
     "sharepoint": ["SharePlum==0.5.1"],
