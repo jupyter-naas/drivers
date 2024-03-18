@@ -4,7 +4,7 @@ from mprop import mproperty
 from subprocess import Popen, PIPE
 import sys
 
-__version__ = "0.121.2"
+__version__ = "0.121.4"
 
 __github_repo = "jupyter-naas/drivers"
 
