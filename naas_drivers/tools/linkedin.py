@@ -131,7 +131,7 @@ class LinkedIn:
     ):
         # Init lk attribute
         self.li_at = li_at
-        self.jessionid = jessionid
+        self.jessionid = jessionid.replace('"', '')
 
         # Init cookies
         self.cookies = {"li_at": self.li_at, "JSESSIONID": f'"{self.jessionid}"'}
@@ -141,7 +141,7 @@ class LinkedIn:
             "X-Li-Lang": "en_US",
             "Accept": "application/vnd.linkedin.normalized+json+2.1",
             "Cache-Control": "no-cache",
-            "csrf-Token": self.jessionid.replace('"', ""),
+            "csrf-Token": self.jessionid,
             "X-Requested-With": "XMLHttpRequest",
             "X-Restli-Protocol-Version": "2.0.0",
         }
