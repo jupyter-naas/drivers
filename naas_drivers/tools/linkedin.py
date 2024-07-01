@@ -5,7 +5,7 @@ import urllib
 from datetime import datetime
 import secrets
 import pydash as _pd
-import naas
+# import naas
 from naas_drivers.tools.emailbuilder import EmailBuilder
 from naas_drivers.tools.naas_auth import NaasAuth
 import json
@@ -64,9 +64,9 @@ class LinkedIn:
     def send_email_renewed_cookies():
         email = LinkedIn.get_user_email()
         email_content = LinkedIn.email_linkedin_limit(email)
-        naas.notification.send(
-            email_to=email, subject=EMAIL_COOKIES, html=email_content
-        )
+        # naas.notification.send(
+        #     email_to=email, subject=EMAIL_COOKIES, html=email_content
+        # )
 
     @staticmethod
     def manage_api_error(res):
