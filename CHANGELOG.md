@@ -1,3 +1,10 @@
+## 0.121.9 (2024-07-02)
+
+### Fix
+
+- comment send_email_renewed_cookies()
+- remove naas from naas_drivers
+
 ## 0.121.8 (2024-04-30)
 
 ### Fix
