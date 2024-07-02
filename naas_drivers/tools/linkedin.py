@@ -60,19 +60,19 @@ class LinkedIn:
         email_content = emailbuilder.generate(display="iframe", **content)
         return email_content
 
-    @staticmethod
-    def send_email_renewed_cookies():
-        email = LinkedIn.get_user_email()
-        email_content = LinkedIn.email_linkedin_limit(email)
-        # naas.notification.send(
-        #     email_to=email, subject=EMAIL_COOKIES, html=email_content
-        # )
+    # @staticmethod
+    # def send_email_renewed_cookies():
+    #     email = LinkedIn.get_user_email()
+    #     email_content = LinkedIn.email_linkedin_limit(email)
+    #     naas.notification.send(
+    #         email_to=email, subject=EMAIL_COOKIES, html=email_content
+    #     )
 
     @staticmethod
     def manage_api_error(res):
         if res.status_code != 200:
             if int(res.status_code) == 302:
-                LinkedIn.send_email_renewed_cookies()
+                # LinkedIn.send_email_renewed_cookies()
                 raise requests.TooManyRedirects(res.status_code, res.text)
             else:
                 raise BaseException(res.status_code, res.text)
