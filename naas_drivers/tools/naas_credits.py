@@ -1,4 +1,3 @@
-from naas_drivers.driver import InDriver, OutDriver
 from naas_drivers.tools.naas_auth import NaasAuth
 from datetime import datetime
 import requests as r
@@ -7,7 +6,7 @@ CREDITS_API_FQDN = "credits.naas.ai"
 AUTH_API_PROTOCOL = "https"
 
 
-class NaasCredits(InDriver, OutDriver):
+class NaasCredits:
     __access_token = None
     __headers = None
 
@@ -76,6 +75,60 @@ class NaasCredits(InDriver, OutDriver):
 
             res = r.get(
                 f"{AUTH_API_PROTOCOL}://{CREDITS_API_FQDN}/transactions",
+                headers=self.headers,
+                params=params,
+            )
+            res.raise_for_status()
+            return res.json()
+
+        def get_user(
+            self,
+            username: str,
+            page_size: int = None,
+            page_number: int = None,
+            start_date: datetime = None,
+            end_date: datetime = None,
+            order_by: str = None,
+        ):
+            params = {
+                "username": username,
+                "page_size": page_size,
+                "page_number": page_number,
+                "start_date": start_date,
+                "end_date": end_date,
+                "order_by": order_by,
+            }
+            params = {k: params[k] for k in params.keys() if params[k] is not None}
+
+            res = r.get(
+                f"{AUTH_API_PROTOCOL}://{CREDITS_API_FQDN}/admin/transactions",
+                headers=self.headers,
+                params=params,
+            )
+            res.raise_for_status()
+            return res.json()
+
+        def get_user_currents(
+            self,
+            username: str,
+            page_size: int = None,
+            page_number: int = None,
+            start_date: datetime = None,
+            end_date: datetime = None,
+            order_by: str = None,
+        ):
+            params = {
+                "username": username,
+                "page_size": page_size,
+                "page_number": page_number,
+                "start_date": start_date,
+                "end_date": end_date,
+                "order_by": order_by,
+            }
+            params = {k: params[k] for k in params.keys() if params[k] is not None}
+
+            res = r.get(
+                f"{AUTH_API_PROTOCOL}://{CREDITS_API_FQDN}/admin/transactions/current",
                 headers=self.headers,
                 params=params,
             )
